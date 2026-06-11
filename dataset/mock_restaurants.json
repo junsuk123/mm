@@ -1,0 +1,272 @@
+[
+  {
+    "restaurant_id": "R001",
+    "name": "돼지의 꿈",
+    "food": "삼겹살",
+    "category": "한식",
+    "location": "서울",
+    "rating": 4.5,
+    "distance_m": 350
+  },
+  {
+    "restaurant_id": "R002",
+    "name": "요시카와",
+    "food": "초밥",
+    "category": "일식",
+    "location": "서울",
+    "rating": 4.3,
+    "distance_m": 520
+  },
+  {
+    "restaurant_id": "R003",
+    "name": "홍콩반점",
+    "food": "짜장면",
+    "category": "중식",
+    "location": "서울",
+    "rating": 4.2,
+    "distance_m": 410
+  },
+  {
+    "restaurant_id": "R004",
+    "name": "라페스타",
+    "food": "파스타",
+    "category": "양식",
+    "location": "서울",
+    "rating": 4.6,
+    "distance_m": 780
+  },
+  {
+    "restaurant_id": "R005",
+    "name": "떡볶이천국",
+    "food": "떡볶이",
+    "category": "분식",
+    "location": "서울",
+    "rating": 4.4,
+    "distance_m": 290
+  },
+  {
+    "restaurant_id": "R006",
+    "name": "진미식당",
+    "food": "김치찌개",
+    "category": "한식",
+    "location": "서울",
+    "rating": 4.7,
+    "distance_m": 240
+  },
+  {
+    "restaurant_id": "R007",
+    "name": "마루토모",
+    "food": "우동",
+    "category": "일식",
+    "location": "서울",
+    "rating": 4.1,
+    "distance_m": 610
+  },
+  {
+    "restaurant_id": "R008",
+    "name": "강남반점",
+    "food": "짬뽕",
+    "category": "중식",
+    "location": "서울",
+    "rating": 4.0,
+    "distance_m": 460
+  },
+  {
+    "restaurant_id": "R009",
+    "name": "스테이크하우스 서울",
+    "food": "스테이크",
+    "category": "양식",
+    "location": "서울",
+    "rating": 4.8,
+    "distance_m": 920
+  },
+  {
+    "restaurant_id": "R010",
+    "name": "라면천국",
+    "food": "라면",
+    "category": "분식",
+    "location": "서울",
+    "rating": 4.2,
+    "distance_m": 180
+  },
+  {
+    "restaurant_id": "R011",
+    "name": "한우의 품격",
+    "food": "비빔밥",
+    "category": "한식",
+    "location": "서울",
+    "rating": 4.6,
+    "distance_m": 260
+  },
+  {
+    "restaurant_id": "R012",
+    "name": "문화반점",
+    "food": "된장찌개",
+    "category": "한식",
+    "location": "서울",
+    "rating": 4.4,
+    "distance_m": 310
+  },
+  {
+    "restaurant_id": "R013",
+    "name": "야마토",
+    "food": "라멘",
+    "category": "일식",
+    "location": "서울",
+    "rating": 4.5,
+    "distance_m": 430
+  },
+  {
+    "restaurant_id": "R014",
+    "name": "스시장인",
+    "food": "돈가스",
+    "category": "일식",
+    "location": "서울",
+    "rating": 4.2,
+    "distance_m": 510
+  },
+  {
+    "restaurant_id": "R015",
+    "name": "동명반점",
+    "food": "짬뽕",
+    "category": "중식",
+    "location": "서울",
+    "rating": 4.1,
+    "distance_m": 390
+  },
+  {
+    "restaurant_id": "R016",
+    "name": "로또기",
+    "food": "스테이크",
+    "category": "양식",
+    "location": "서울",
+    "rating": 4.9,
+    "distance_m": 880
+  },
+  {
+    "restaurant_id": "R017",
+    "name": "타이거든",
+    "food": "쌀국수",
+    "category": "세계음식",
+    "location": "서울",
+    "rating": 4.3,
+    "distance_m": 640
+  },
+  {
+    "restaurant_id": "R018",
+    "name": "오메기 정식",
+    "food": "정식",
+    "category": "일식",
+    "location": "서울",
+    "rating": 4.4,
+    "distance_m": 320
+  },
+  {
+    "restaurant_id": "R019",
+    "name": "고기예술",
+    "food": "불고기",
+    "category": "한식",
+    "location": "서울",
+    "rating": 4.6,
+    "distance_m": 280
+  },
+  {
+    "restaurant_id": "R020",
+    "name": "만두의 집",
+    "food": "만두",
+    "category": "중식",
+    "location": "서울",
+    "rating": 4.3,
+    "distance_m": 370
+  },
+  {
+    "restaurant_id": "R021",
+    "name": "키친 클래식",
+    "food": "버거",
+    "category": "양식",
+    "location": "서울",
+    "rating": 4.5,
+    "distance_m": 650
+  },
+  {
+    "restaurant_id": "R022",
+    "name": "어니언킹",
+    "food": "돈까스",
+    "category": "분식",
+    "location": "서울",
+    "rating": 4.2,
+    "distance_m": 210
+  },
+  {
+    "restaurant_id": "R023",
+    "name": "한식마당",
+    "food": "갈비탕",
+    "category": "한식",
+    "location": "서울",
+    "rating": 4.5,
+    "distance_m": 330
+  },
+  {
+    "restaurant_id": "R024",
+    "name": "카마쿠라",
+    "food": "가츠",
+    "category": "일식",
+    "location": "서울",
+    "rating": 4.4,
+    "distance_m": 480
+  },
+  {
+    "restaurant_id": "R025",
+    "name": "미경반점",
+    "food": "마라탕",
+    "category": "중식",
+    "location": "서울",
+    "rating": 4.2,
+    "distance_m": 420
+  },
+  {
+    "restaurant_id": "R026",
+    "name": "디노스",
+    "food": "피자",
+    "category": "양식",
+    "location": "서울",
+    "rating": 4.7,
+    "distance_m": 750
+  },
+  {
+    "restaurant_id": "R027",
+    "name": "고추장사리",
+    "food": "군만두",
+    "category": "분식",
+    "location": "서울",
+    "rating": 4.3,
+    "distance_m": 200
+  },
+  {
+    "restaurant_id": "R028",
+    "name": "집밥",
+    "food": "된장국",
+    "category": "한식",
+    "location": "서울",
+    "rating": 4.4,
+    "distance_m": 270
+  },
+  {
+    "restaurant_id": "R029",
+    "name": "아이젠",
+    "food": "톤카츠",
+    "category": "일식",
+    "location": "서울",
+    "rating": 4.6,
+    "distance_m": 550
+  },
+  {
+    "restaurant_id": "R030",
+    "name": "나담",
+    "food": "양꼬치",
+    "category": "세계음식",
+    "location": "서울",
+    "rating": 4.4,
+    "distance_m": 700
+  }
+]

@@ -1,0 +1,204 @@
+{
+  "users": [
+    {
+      "user_id": "U01",
+      "preferences": {
+        "like": {
+          "high": ["한식"],
+          "mid": ["찌개"],
+          "low": ["김치찌개", "삼겹살"]
+        },
+        "dislike": {
+          "high": [],
+          "mid": [],
+          "low": []
+        },
+        "recent": {
+          "high": [],
+          "mid": [],
+          "low": []
+        }
+      }
+    },
+    {
+      "user_id": "U02",
+      "preferences": {
+        "like": {
+          "high": ["한식"],
+          "mid": ["찌개"],
+          "low": ["된장찌개", "갈비"]
+        },
+        "dislike": {
+          "high": [],
+          "mid": [],
+          "low": []
+        },
+        "recent": {
+          "high": [],
+          "mid": [],
+          "low": []
+        }
+      }
+    },
+    {
+      "user_id": "U03",
+      "preferences": {
+        "like": {
+          "high": ["일식"],
+          "mid": ["면"],
+          "low": ["라멘", "초밥"]
+        },
+        "dislike": {
+          "high": [],
+          "mid": [],
+          "low": []
+        },
+        "recent": {
+          "high": [],
+          "mid": [],
+          "low": []
+        }
+      }
+    },
+    {
+      "user_id": "U04",
+      "preferences": {
+        "like": {
+          "high": ["일식"],
+          "mid": ["면"],
+          "low": ["우동", "덮밥"]
+        },
+        "dislike": {
+          "high": [],
+          "mid": [],
+          "low": []
+        },
+        "recent": {
+          "high": [],
+          "mid": [],
+          "low": []
+        }
+      }
+    },
+    {
+      "user_id": "U05",
+      "preferences": {
+        "like": {
+          "high": ["중식"],
+          "mid": ["면"],
+          "low": ["짜장면", "탕수육"]
+        },
+        "dislike": {
+          "high": [],
+          "mid": [],
+          "low": []
+        },
+        "recent": {
+          "high": [],
+          "mid": [],
+          "low": []
+        }
+      }
+    },
+    {
+      "user_id": "U06",
+      "preferences": {
+        "like": {
+          "high": ["중식"],
+          "mid": ["면"],
+          "low": ["짬뽕", "볶음밥"]
+        },
+        "dislike": {
+          "high": [],
+          "mid": [],
+          "low": []
+        },
+        "recent": {
+          "high": [],
+          "mid": [],
+          "low": []
+        }
+      }
+    },
+    {
+      "user_id": "U07",
+      "preferences": {
+        "like": {
+          "high": ["양식"],
+          "mid": ["면"],
+          "low": ["파스타", "스테이크"]
+        },
+        "dislike": {
+          "high": [],
+          "mid": [],
+          "low": []
+        },
+        "recent": {
+          "high": [],
+          "mid": [],
+          "low": []
+        }
+      }
+    },
+    {
+      "user_id": "U08",
+      "preferences": {
+        "like": {
+          "high": ["양식"],
+          "mid": ["빵"],
+          "low": ["피자", "스테이크"]
+        },
+        "dislike": {
+          "high": [],
+          "mid": [],
+          "low": []
+        },
+        "recent": {
+          "high": [],
+          "mid": [],
+          "low": []
+        }
+      }
+    },
+    {
+      "user_id": "U09",
+      "preferences": {
+        "like": {
+          "high": ["분식"],
+          "mid": ["면"],
+          "low": ["라면", "떡볶이"]
+        },
+        "dislike": {
+          "high": [],
+          "mid": [],
+          "low": []
+        },
+        "recent": {
+          "high": [],
+          "mid": [],
+          "low": []
+        }
+      }
+    },
+    {
+      "user_id": "U10",
+      "preferences": {
+        "like": {
+          "high": ["분식"],
+          "mid": ["김밥"],
+          "low": ["참치김밥", "떡볶이"]
+        },
+        "dislike": {
+          "high": [],
+          "mid": [],
+          "low": []
+        },
+        "recent": {
+          "high": [],
+          "mid": [],
+          "low": []
+        }
+      }
+    }
+  ]
+}

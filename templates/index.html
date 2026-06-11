@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>식당 추천 시스템 - 실시간 GUI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .card h2 {
+      margin-bottom: 15px;
+      color: #333;
+      font-size: 1.4em;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1em;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+    }
+
+    button {
+      background: #667eea;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      transition: background 0.3s;
+      width: 100%;
+    }
+
+    button:hover {
+      background: #5568d3;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .button-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .secondary-btn {
+      background: #6c757d;
+    }
+
+    .secondary-btn:hover {
+      background: #5a6268;
+    }
+
+    .participants-list {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 10px;
+      background: #f9f9f9;
+    }
+
+    .participant-item {
+      background: white;
+      border: 1px solid #e0e0e0;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .participant-item strong {
+      color: #667eea;
+    }
+
+    .remove-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+
+    .remove-btn:hover {
+      background: #c82333;
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 15px;
+    }
+
+    .group-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .group-card h3 {
+      margin-bottom: 15px;
+      font-size: 1.3em;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 10px;
+    }
+
+    .members {
+      font-size: 0.95em;
+      margin-bottom: 15px;
+      opacity: 0.9;
+    }
+
+    .restaurant {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border-left: 3px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .restaurant-name {
+      font-weight: 600;
+      font-size: 1.05em;
+      margin-bottom: 5px;
+    }
+
+    .restaurant-info {
+      font-size: 0.9em;
+      opacity: 0.85;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .status {
+      padding: 10px 15px;
+      border-radius: 5px;
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    .status.loading {
+      background: #ffc107;
+      color: #333;
+    }
+
+    .status.success {
+      background: #28a745;
+      color: white;
+    }
+
+    .status.error {
+      background: #dc3545;
+      color: white;
+    }
+
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 10px;
+    }
+
+    .step {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: white;
+    }
+
+    .step.active {
+      background: #667eea;
+    }
+
+    .step.completed {
+      background: #28a745;
+    }
+
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .score {
+      font-weight: 700;
+      font-size: 1.1em;
+      margin-top: 5px;
+    }
+
+    @media (max-width: 768px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+
+      header h1 {
+        font-size: 1.8em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🍽️ 식당 추천 시스템</h1>
+      <p>실시간 데이터 처리 및 시각화 GUI</p>
+    </header>
+
+    <div class="main-grid">
+      <!-- 세션 설정 및 참가자 수집 -->
+      <div class="card">
+        <h2>📋 새 추천 세션</h2>
+        
+        <div class="form-group">
+          <label>그룹 수</label>
+          <input type="number" id="groupCount" value="2" min="1" max="5">
+        </div>
+
+        <div class="form-group">
+          <label>위치</label>
+          <input type="text" id="location" value="세종대학교" placeholder="예: 세종대학교">
+        </div>
+
+        <button onclick="createSession()">✨ 새 세션 시작</button>
+
+        <div id="sessionStatus" style="margin-top: 10px; display: none;" class="status"></div>
+        <div id="sessionId" style="margin-top: 10px; color: #666; font-size: 0.9em; display: none;"></div>
+
+        <hr style="margin: 20px 0;">
+
+        <h2 style="font-size: 1.2em; margin-top: 20px; margin-bottom: 15px;">👤 참가자 추가</h2>
+
+        <div class="form-group">
+          <label>사용자 ID (선택)</label>
+          <input type="text" id="userId" placeholder="예: U01">
+        </div>
+
+        <!-- LIKE 선호도 -->
+        <div style="background: #f0f8ff; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+          <h3 style="color: #667eea; margin-bottom: 10px;">좋아하는 음식</h3>
+          
+          <div class="form-group">
+            <label>대분류</label>
+            <select id="likeHigh" onchange="updateLikeMid()">
+              <option value="">선택...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>소분류</label>
+            <select id="likeLow">
+              <option value="">선택...</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- DISLIKE 선호도 -->
+        <div style="background: #fff5f5; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+          <h3 style="color: #dc3545; margin-bottom: 10px;">싫어하는 음식</h3>
+          
+          <div class="form-group">
+            <label>대분류</label>
+            <select id="dislikeHigh" onchange="updateDislikeMid()">
+              <option value="">선택...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>소분류</label>
+            <select id="dislikeLow">
+              <option value="">선택...</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- RECENT 선호도 -->
+        <div style="background: #f0fff4; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+          <h3 style="color: #28a745; margin-bottom: 10px;">최근에 먹은 음식</h3>
+          
+          <div class="form-group">
+            <label>대분류</label>
+            <select id="recentHigh" onchange="updateRecentMid()">
+              <option value="">선택...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>소분류</label>
+            <select id="recentLow">
+              <option value="">선택...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button onclick="addParticipant()">➕ 참가자 추가</button>
+          <button class="secondary-btn" onclick="generateRecommendations()">🚀 추천 생성</button>
+        </div>
+      </div>
+
+      <!-- 참가자 목록 및 결과 -->
+      <div class="card">
+        <h2>📊 참가자 및 결과</h2>
+
+        <div id="participantsContainer" style="display: none;">
+          <h3 style="margin-top: 15px; margin-bottom: 10px;">참가자 목록</h3>
+          <div class="participants-list" id="participantsList"></div>
+        </div>
+
+        <div id="resultsContainer" style="display: none; margin-top: 20px;">
+          <h3 style="margin-bottom: 15px;">🎯 추천 결과</h3>
+          <div class="results" id="results"></div>
+        </div>
+
+        <div id="noData" style="color: #999; text-align: center; padding: 40px 20px;">
+          아직 세션이 시작되지 않았습니다
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentSessionId = null;
+    let participants = [];
+
+    // 카테고리 데이터 로드
+    async function loadCategories() {
+      try {
+        const response = await fetch('/api/categories');
+        const categories = await response.json();
+        
+        const selectors = ['likeHigh', 'dislikeHigh', 'recentHigh'];
+        selectors.forEach(id => {
+          const select = document.getElementById(id);
+          categories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat;
+            select.appendChild(option);
+          });
+        });
+      } catch (e) {
+        console.error('카테고리 로드 실패:', e);
+      }
+    }
+
+    async function updateLikeMid() {
+      const high = document.getElementById('likeHigh').value;
+      const low = document.getElementById('likeLow');
+      low.innerHTML = '<option value="">선택...</option>';
+      if (high) {
+        const response = await fetch(`/api/subcategories/${high}`);
+        const subs = await response.json();
+        subs.forEach(sub => {
+          const option = document.createElement('option');
+          option.value = `${high}|${sub}`;
+          option.textContent = sub;
+          low.appendChild(option);
+        });
+      }
+    }
+
+    async function updateDislikeMid() {
+      const high = document.getElementById('dislikeHigh').value;
+      const low = document.getElementById('dislikeLow');
+      low.innerHTML = '<option value="">선택...</option>';
+      if (high) {
+        const response = await fetch(`/api/subcategories/${high}`);
+        const subs = await response.json();
+        subs.forEach(sub => {
+          const option = document.createElement('option');
+          option.value = `${high}|${sub}`;
+          option.textContent = sub;
+          low.appendChild(option);
+        });
+      }
+    }
+
+    async function updateRecentMid() {
+      const high = document.getElementById('recentHigh').value;
+      const low = document.getElementById('recentLow');
+      low.innerHTML = '<option value="">선택...</option>';
+      if (high) {
+        const response = await fetch(`/api/subcategories/${high}`);
+        const subs = await response.json();
+        subs.forEach(sub => {
+          const option = document.createElement('option');
+          option.value = `${high}|${sub}`;
+          option.textContent = sub;
+          low.appendChild(option);
+        });
+      }
+    }
+
+    async function createSession() {
+      const groupCount = parseInt(document.getElementById('groupCount').value);
+      const location = document.getElementById('location').value;
+
+      try {
+        const response = await fetch('/api/session/create', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({groups: groupCount, location})
+        });
+        const data = await response.json();
+        currentSessionId = data.session_id;
+        participants = [];
+
+        document.getElementById('sessionStatus').style.display = 'block';
+        document.getElementById('sessionStatus').textContent = `✅ 세션 생성됨: ${currentSessionId}`;
+        document.getElementById('sessionStatus').className = 'status success';
+        document.getElementById('sessionId').style.display = 'block';
+        document.getElementById('sessionId').textContent = `세션 ID: ${currentSessionId}`;
+        document.getElementById('noData').style.display = 'none';
+        document.getElementById('participantsContainer').style.display = 'block';
+      } catch (e) {
+        alert('세션 생성 실패: ' + e.message);
+      }
+    }
+
+    async function addParticipant() {
+      if (!currentSessionId) {
+        alert('먼저 세션을 생성해주세요');
+        return;
+      }
+
+      const data = {
+        user_id: document.getElementById('userId').value || `U${participants.length + 1}`,
+        like_high: [document.getElementById('likeHigh').value].filter(x => x),
+        like_low: [document.getElementById('likeLow').value].filter(x => x),
+        dislike_high: [document.getElementById('dislikeHigh').value].filter(x => x),
+        dislike_low: [document.getElementById('dislikeLow').value].filter(x => x),
+        recent_high: [document.getElementById('recentHigh').value].filter(x => x),
+        recent_low: [document.getElementById('recentLow').value].filter(x => x)
+      };
+
+      try {
+        const response = await fetch(`/api/session/${currentSessionId}/add-participant`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+          participants.push(data);
+          updateParticipantsList();
+          
+          // 폼 초기화
+          document.getElementById('userId').value = '';
+          document.getElementById('likeHigh').value = '';
+          document.getElementById('likeLow').innerHTML = '<option value="">선택...</option>';
+          document.getElementById('dislikeHigh').value = '';
+          document.getElementById('dislikeLow').innerHTML = '<option value="">선택...</option>';
+          document.getElementById('recentHigh').value = '';
+          document.getElementById('recentLow').innerHTML = '<option value="">선택...</option>';
+        }
+      } catch (e) {
+        alert('참가자 추가 실패: ' + e.message);
+      }
+    }
+
+    function updateParticipantsList() {
+      const list = document.getElementById('participantsList');
+      list.innerHTML = participants.map((p, i) => `
+        <div class="participant-item">
+          <strong>${p.user_id || `U${i + 1}`}</strong>
+          <button class="remove-btn" onclick="removeParticipant(${i})">제거</button>
+        </div>
+      `).join('');
+    }
+
+    function removeParticipant(index) {
+      participants.splice(index, 1);
+      updateParticipantsList();
+    }
+
+    async function generateRecommendations() {
+      if (!currentSessionId || participants.length === 0) {
+        alert('세션을 생성하고 참가자를 추가해주세요');
+        return;
+      }
+
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<div style="grid-column: 1/-1;"><div class="spinner"></div> 추천 생성 중...</div>';
+      document.getElementById('resultsContainer').style.display = 'block';
+
+      try {
+        const response = await fetch(`/api/session/${currentSessionId}/generate-recommendations`, {
+          method: 'POST'
+        });
+        const data = await response.json();
+
+        const groups = data.result ? data.result.groups : data.groups;
+        if (groups) {
+          resultsDiv.innerHTML = groups.map(group => `
+            <div class="group-card">
+              <h3>그룹 ${group.group_id}</h3>
+              <div class="members">👥 ${group.members.join(', ')}</div>
+              ${group.recommendations.map((r, i) => `
+                <div class="restaurant">
+                  <div class="restaurant-name">🏆 ${i + 1}. ${r.name}</div>
+                  <div class="restaurant-info">
+                    <div>🍽️ ${r.food}</div>
+                    <div>⭐ ${r.rating || '-'}</div>
+                  </div>
+                  <div class="score">점수: ${r.score}</div>
+                  <div style="font-size: 0.88em; opacity: 0.9; margin-top: 6px;">${r.reason || ''}</div>
+                </div>
+              `).join('')}
+            </div>
+          `).join('');
+        } else {
+          resultsDiv.innerHTML = '<div style="grid-column: 1/-1; color: #dc3545;">추천 생성 실패</div>';
+        }
+      } catch (e) {
+        resultsDiv.innerHTML = '<div style="grid-column: 1/-1; color: #dc3545;">오류: ' + e.message + '</div>';
+      }
+    }
+
+    // 페이지 로드 시 카테고리 로드
+    document.addEventListener('DOMContentLoaded', loadCategories);
+  </script>
+</body>
+</html>
