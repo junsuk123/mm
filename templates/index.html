@@ -114,6 +114,61 @@
       gap: 10px;
     }
 
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 12px 0;
+      color: #444;
+      font-weight: 600;
+    }
+
+    .toggle-row input {
+      width: auto;
+    }
+
+    .qr-panel {
+      display: none;
+      margin-top: 15px;
+      padding: 15px;
+      border: 1px solid #d8def8;
+      border-radius: 8px;
+      background: #f7f9ff;
+    }
+
+    .qr-grid {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 15px;
+      align-items: center;
+    }
+
+    #qrCode {
+      width: 180px;
+      height: 180px;
+      display: grid;
+      place-items: center;
+      background: white;
+      border: 1px solid #e5e7ef;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .join-link {
+      word-break: break-all;
+      color: #3346b6;
+      font-size: 0.92em;
+      line-height: 1.45;
+    }
+
+    .danger-btn {
+      background: #dc3545;
+    }
+
+    .danger-btn:hover {
+      background: #c82333;
+    }
+
     .secondary-btn {
       background: #6c757d;
     }
@@ -289,8 +344,13 @@
       header h1 {
         font-size: 1.8em;
       }
+
+      .qr-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -314,10 +374,31 @@
           <input type="text" id="location" value="세종대학교" placeholder="예: 세종대학교">
         </div>
 
+        <label class="toggle-row">
+          <input type="checkbox" id="mobileEnabled">
+          모바일 QR 수집 사용
+        </label>
+
+        <div id="mobileBaseUrlGroup" class="form-group" style="display: none;">
+          <label>모바일 접속 주소</label>
+          <input type="text" id="mobileBaseUrl" placeholder="예: http://192.168.0.10:5000">
+          <button type="button" class="secondary-btn" style="margin-top: 8px;" onclick="loadNetworkInfo()">접속 주소 자동 감지</button>
+        </div>
+
         <button onclick="createSession()">✨ 새 세션 시작</button>
 
         <div id="sessionStatus" style="margin-top: 10px; display: none;" class="status"></div>
         <div id="sessionId" style="margin-top: 10px; color: #666; font-size: 0.9em; display: none;"></div>
+        <div id="qrPanel" class="qr-panel">
+          <div class="qr-grid">
+            <div id="qrCode"></div>
+            <div>
+              <h3 style="margin-bottom: 8px; color: #333;">모바일 접수 QR</h3>
+              <div id="joinLink" class="join-link"></div>
+              <div id="mobileCount" style="margin-top: 10px; color: #555; font-weight: 600;">참가자 0명 접수</div>
+            </div>
+          </div>
+        </div>
 
         <hr style="margin: 20px 0;">
 
@@ -389,6 +470,9 @@
           <button onclick="addParticipant()">➕ 참가자 추가</button>
           <button class="secondary-btn" onclick="generateRecommendations()">🚀 추천 생성</button>
         </div>
+        <div style="margin-top: 10px;">
+          <button class="danger-btn" onclick="closeAndGenerate()">마감 및 실행</button>
+        </div>
       </div>
 
       <!-- 참가자 목록 및 결과 -->
@@ -415,6 +499,7 @@
   <script>
     let currentSessionId = null;
     let participants = [];
+    let participantPoll = null;
 
     // 카테고리 데이터 로드
     async function loadCategories() {
@@ -434,6 +519,25 @@
         });
       } catch (e) {
         console.error('카테고리 로드 실패:', e);
+      }
+    }
+
+    async function loadNetworkInfo() {
+      try {
+        const response = await fetch('/api/network-info');
+        const data = await response.json();
+        const input = document.getElementById('mobileBaseUrl');
+        input.value = data.recommended || data.base_urls?.[0] || window.location.origin;
+      } catch (e) {
+        document.getElementById('mobileBaseUrl').value = window.location.origin;
+      }
+    }
+
+    function toggleMobileBaseUrl() {
+      const enabled = document.getElementById('mobileEnabled').checked;
+      document.getElementById('mobileBaseUrlGroup').style.display = enabled ? 'block' : 'none';
+      if (enabled && !document.getElementById('mobileBaseUrl').value) {
+        loadNetworkInfo();
       }
     }
 
@@ -488,12 +592,19 @@
     async function createSession() {
       const groupCount = parseInt(document.getElementById('groupCount').value);
       const location = document.getElementById('location').value;
+      const mobileEnabled = document.getElementById('mobileEnabled').checked;
+      const publicBaseUrl = document.getElementById('mobileBaseUrl').value.trim();
 
       try {
         const response = await fetch('/api/session/create', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({groups: groupCount, location})
+          body: JSON.stringify({
+            groups: groupCount,
+            location,
+            mobile_enabled: mobileEnabled,
+            public_base_url: publicBaseUrl
+          })
         });
         const data = await response.json();
         currentSessionId = data.session_id;
@@ -506,8 +617,57 @@
         document.getElementById('sessionId').textContent = `세션 ID: ${currentSessionId}`;
         document.getElementById('noData').style.display = 'none';
         document.getElementById('participantsContainer').style.display = 'block';
+        document.getElementById('resultsContainer').style.display = 'none';
+        renderQrPanel(data.join_url || '');
+        updateParticipantsList();
+        startParticipantPolling();
       } catch (e) {
         alert('세션 생성 실패: ' + e.message);
+      }
+    }
+
+    function renderQrPanel(joinUrl) {
+      const panel = document.getElementById('qrPanel');
+      const qrCode = document.getElementById('qrCode');
+      const joinLink = document.getElementById('joinLink');
+      qrCode.innerHTML = '';
+
+      if (!joinUrl) {
+        panel.style.display = 'none';
+        return;
+      }
+
+      panel.style.display = 'block';
+      joinLink.innerHTML = `<a href="${joinUrl}" target="_blank" rel="noopener">${joinUrl}</a>`;
+      if (window.QRCode) {
+        new QRCode(qrCode, {text: joinUrl, width: 180, height: 180});
+      } else {
+        qrCode.textContent = 'QR 라이브러리를 불러오지 못했습니다';
+      }
+    }
+
+    function startParticipantPolling() {
+      if (participantPoll) {
+        clearInterval(participantPoll);
+      }
+      refreshSession();
+      participantPoll = setInterval(refreshSession, 2500);
+    }
+
+    async function refreshSession() {
+      if (!currentSessionId) {
+        return;
+      }
+      try {
+        const response = await fetch(`/api/session/${currentSessionId}`);
+        if (!response.ok) {
+          return;
+        }
+        const data = await response.json();
+        participants = data.participants || [];
+        updateParticipantsList();
+      } catch (e) {
+        console.error('세션 갱신 실패:', e);
       }
     }
 
@@ -535,7 +695,8 @@
         });
         
         if (response.ok) {
-          participants.push(data);
+          const result = await response.json();
+          participants.push(result.participant || data);
           updateParticipantsList();
           
           // 폼 초기화
@@ -554,10 +715,11 @@
 
     function updateParticipantsList() {
       const list = document.getElementById('participantsList');
+      document.getElementById('mobileCount').textContent = `참가자 ${participants.length}명 접수`;
       list.innerHTML = participants.map((p, i) => `
         <div class="participant-item">
           <strong>${p.user_id || `U${i + 1}`}</strong>
-          <button class="remove-btn" onclick="removeParticipant(${i})">제거</button>
+          <span style="color: #666; font-size: 0.9em;">${p.source === 'mobile' ? '모바일' : '관리자'}</span>
         </div>
       `).join('');
     }
@@ -568,6 +730,7 @@
     }
 
     async function generateRecommendations() {
+      await refreshSession();
       if (!currentSessionId || participants.length === 0) {
         alert('세션을 생성하고 참가자를 추가해주세요');
         return;
@@ -585,6 +748,10 @@
 
         const groups = data.result ? data.result.groups : data.groups;
         if (groups) {
+          if (participantPoll) {
+            clearInterval(participantPoll);
+            participantPoll = null;
+          }
           resultsDiv.innerHTML = groups.map(group => `
             <div class="group-card">
               <h3>그룹 ${group.group_id}</h3>
@@ -610,8 +777,25 @@
       }
     }
 
+    async function closeAndGenerate() {
+      if (!currentSessionId) {
+        alert('먼저 세션을 생성해주세요');
+        return;
+      }
+      try {
+        await fetch(`/api/session/${currentSessionId}/close`, {method: 'POST'});
+        await generateRecommendations();
+      } catch (e) {
+        alert('마감 실패: ' + e.message);
+      }
+    }
+
     // 페이지 로드 시 카테고리 로드
-    document.addEventListener('DOMContentLoaded', loadCategories);
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCategories();
+      loadNetworkInfo();
+      document.getElementById('mobileEnabled').addEventListener('change', toggleMobileBaseUrl);
+    });
   </script>
 </body>
 </html>

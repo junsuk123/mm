@@ -15,7 +15,11 @@ def normalize_levels(preferences: dict[str, list[str]]) -> dict[str, list[str]]:
     low = list(preferences.get("low", []))
     if not low:
         low = list(preferences.get("mid", []))
-    return {"high": high, "low": low}
+    return {"high": [leaf_value(item) for item in high], "low": [leaf_value(item) for item in low]}
+
+
+def leaf_value(value: str) -> str:
+    return value.split("|")[-1] if isinstance(value, str) else value
 
 
 def participant_terms(participant: dict[str, Any]) -> list[str]:

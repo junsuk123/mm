@@ -1,0 +1,171 @@
+{
+  "latest_session_id": "4ee09615",
+  "sessions": {
+    "7815e554": {
+      "id": "7815e554",
+      "created": "2026-06-15T16:50:36.083213",
+      "updated": "2026-06-15T16:50:36.083248",
+      "groups": 2,
+      "location": "세종대학교",
+      "status": "collecting",
+      "mobile_enabled": true,
+      "join_url": "http://127.0.0.1:5000/join/7815e554",
+      "participants": []
+    },
+    "e424d08a": {
+      "id": "e424d08a",
+      "created": "2026-06-15T16:53:14.630504",
+      "updated": "2026-06-15T16:53:14.630606",
+      "groups": 2,
+      "location": "세종대학교",
+      "status": "collecting",
+      "mobile_enabled": true,
+      "join_url": "http://172.16.52.147:5000/join/e424d08a",
+      "participants": []
+    },
+    "d3616d67": {
+      "id": "d3616d67",
+      "created": "2026-06-15T16:53:17.878421",
+      "updated": "2026-06-15T16:53:17.878523",
+      "groups": 2,
+      "location": "세종대학교",
+      "status": "collecting",
+      "mobile_enabled": true,
+      "join_url": "http://172.16.52.147:5000/join/d3616d67",
+      "participants": []
+    },
+    "540d1e4e": {
+      "id": "540d1e4e",
+      "created": "2026-06-15T17:00:20.900445",
+      "updated": "2026-06-15T17:00:20.900490",
+      "groups": 2,
+      "location": "세종대학교",
+      "status": "collecting",
+      "mobile_enabled": true,
+      "join_url": "https://public.example.test/join/540d1e4e",
+      "participants": []
+    },
+    "a4ef2b99": {
+      "id": "a4ef2b99",
+      "created": "2026-06-15T17:01:26.563955",
+      "updated": "2026-06-15T17:01:50.173630",
+      "groups": 2,
+      "location": "세종대학교",
+      "status": "collecting",
+      "mobile_enabled": true,
+      "join_url": "https://around-performance-posts-prisoners.trycloudflare.com/join/a4ef2b99",
+      "participants": [
+        {
+          "user_id": "김준석",
+          "source": "mobile",
+          "submitted_at": "2026-06-15T17:01:50.173188",
+          "preferences": {
+            "like": {
+              "high": [
+                "한식"
+              ],
+              "low": []
+            },
+            "dislike": {
+              "high": [
+                "양식"
+              ],
+              "low": []
+            },
+            "recent": {
+              "high": [
+                "세계음식"
+              ],
+              "low": []
+            }
+          }
+        }
+      ]
+    },
+    "8f86eb06": {
+      "id": "8f86eb06",
+      "created": "2026-06-15T17:01:50.001354",
+      "updated": "2026-06-15T17:01:50.001478",
+      "groups": 2,
+      "location": "세종대학교",
+      "status": "collecting",
+      "mobile_enabled": true,
+      "join_url": "https://around-performance-posts-prisoners.trycloudflare.com/join/8f86eb06",
+      "participants": []
+    },
+    "4ee09615": {
+      "id": "4ee09615",
+      "created": "2026-06-15T17:06:04.499822",
+      "updated": "2026-06-15T17:07:00.429094",
+      "groups": 2,
+      "location": "세종대학교",
+      "status": "completed",
+      "mobile_enabled": true,
+      "join_url": "https://around-performance-posts-prisoners.trycloudflare.com/join/4ee09615",
+      "participants": [
+        {
+          "user_id": "김준석",
+          "source": "mobile",
+          "submitted_at": "2026-06-15T17:06:23.955084",
+          "preferences": {
+            "like": {
+              "high": [
+                "중식"
+              ],
+              "low": [
+                "중식|면류|짬뽕"
+              ]
+            },
+            "dislike": {
+              "high": [
+                "중식"
+              ],
+              "low": [
+                "중식|메인요리|깐풍기"
+              ]
+            },
+            "recent": {
+              "high": [
+                "중식"
+              ],
+              "low": [
+                "중식|밥류|볶음밥"
+              ]
+            }
+          }
+        },
+        {
+          "user_id": "황가연",
+          "source": "mobile",
+          "submitted_at": "2026-06-15T17:06:40.210550",
+          "preferences": {
+            "like": {
+              "high": [
+                "중식"
+              ],
+              "low": [
+                "중식|면류|짬뽕"
+              ]
+            },
+            "dislike": {
+              "high": [
+                "중식"
+              ],
+              "low": [
+                "중식|메인요리|깐풍기"
+              ]
+            },
+            "recent": {
+              "high": [
+                "중식"
+              ],
+              "low": [
+                "중식|밥류|볶음밥"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -4,22 +4,132 @@
 Flask 기반 대시보드로 사용자 입력 수집 및 실시간 시각화
 """
 
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify
 import json
 import subprocess
 import os
 import tempfile
+import threading
+import webbrowser
+import socket
 from datetime import datetime
 import uuid
 
 from grouping_utils import build_groups
 from naver_restaurant_api import search_restaurants
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATASET_DIR = os.path.join(BASE_DIR, 'dataset')
+MOBILE_SESSIONS_FILE = os.path.join(DATASET_DIR, 'mobile_sessions.json')
+
 app = Flask(__name__)
 app.secret_key = 'restaurant-recommendation-secret-key'
 
 # 임시 세션 데이터 저장소
 sessions_store = {}
+
+def load_mobile_sessions():
+    """Persisted QR/mobile collection data."""
+    if not os.path.exists(MOBILE_SESSIONS_FILE):
+        return {'latest_session_id': None, 'sessions': {}}
+    try:
+        with open(MOBILE_SESSIONS_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        data.setdefault('latest_session_id', None)
+        data.setdefault('sessions', {})
+        return data
+    except (OSError, json.JSONDecodeError):
+        return {'latest_session_id': None, 'sessions': {}}
+
+def save_mobile_sessions(data):
+    os.makedirs(DATASET_DIR, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(prefix='mobile_sessions.', suffix='.json', dir=DATASET_DIR)
+    try:
+        with os.fdopen(fd, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+            f.write('\n')
+        os.replace(temp_path, MOBILE_SESSIONS_FILE)
+    finally:
+        if os.path.exists(temp_path):
+            os.unlink(temp_path)
+
+def persist_mobile_session(session_data):
+    if not session_data.get('mobile_enabled'):
+        return
+    data = load_mobile_sessions()
+    session_id = session_data['id']
+    data['latest_session_id'] = session_id
+    data['sessions'][session_id] = {
+        'id': session_id,
+        'created': session_data.get('created'),
+        'updated': datetime.now().isoformat(),
+        'groups': session_data.get('groups', 2),
+        'location': session_data.get('location', '세종대학교'),
+        'status': session_data.get('status', 'collecting'),
+        'mobile_enabled': bool(session_data.get('mobile_enabled')),
+        'join_url': session_data.get('join_url', ''),
+        'participants': session_data.get('participants', [])
+    }
+    save_mobile_sessions(data)
+
+def ensure_session_loaded(session_id):
+    if session_id in sessions_store:
+        return True
+    data = load_mobile_sessions()
+    persisted = data.get('sessions', {}).get(session_id)
+    if not persisted:
+        return False
+    sessions_store[session_id] = {
+        'id': persisted.get('id', session_id),
+        'created': persisted.get('created', datetime.now().isoformat()),
+        'participants': persisted.get('participants', []),
+        'groups': int(persisted.get('groups', 2)),
+        'location': persisted.get('location', '세종대학교'),
+        'status': persisted.get('status', 'collecting'),
+        'mobile_enabled': bool(persisted.get('mobile_enabled')),
+        'join_url': persisted.get('join_url', '')
+    }
+    return True
+
+def normalize_list(value):
+    if isinstance(value, list):
+        return [item for item in value if item]
+    if value:
+        return [value]
+    return []
+
+def leaf_value(value):
+    if isinstance(value, str):
+        return value.split('|')[-1]
+    return value
+
+def leaf_values(values):
+    return [leaf_value(value) for value in values if value]
+
+def next_user_id(session_data, prefix='U'):
+    return f'{prefix}{len(session_data["participants"]) + 1:02d}'
+
+def build_participant(data, session_data, source='manual'):
+    user_id = data.get('user_id') or next_user_id(session_data, 'M' if source == 'mobile' else 'U')
+    return {
+        'user_id': user_id,
+        'source': source,
+        'submitted_at': datetime.now().isoformat(),
+        'preferences': {
+            'like': {
+                'high': normalize_list(data.get('like_high', [])),
+                'low': normalize_list(data.get('like_low', data.get('like_mid', [])))
+            },
+            'dislike': {
+                'high': normalize_list(data.get('dislike_high', [])),
+                'low': normalize_list(data.get('dislike_low', data.get('dislike_mid', [])))
+            },
+            'recent': {
+                'high': normalize_list(data.get('recent_high', [])),
+                'low': normalize_list(data.get('recent_low', data.get('recent_mid', [])))
+            }
+        }
+    }
 
 def run_shell_command(cmd):
     """셸 명령어 실행"""
@@ -32,7 +142,7 @@ def run_shell_command(cmd):
 def get_menu_categories():
     """메뉴 카테고리 로드"""
     try:
-        with open('dataset/menu_categories.json', 'r', encoding='utf-8') as f:
+        with open(os.path.join(DATASET_DIR, 'menu_categories.json'), 'r', encoding='utf-8') as f:
             data = json.load(f)
             return data
     except:
@@ -57,10 +167,43 @@ def get_foods(category, subcategory):
         return categories[category][subcategory]
     return []
 
+def get_reachable_base_urls(port=5000):
+    urls = [f'http://127.0.0.1:{port}']
+    seen_hosts = {'127.0.0.1', 'localhost'}
+
+    def add_host(host):
+        if not host or host in seen_hosts:
+            return
+        if host.startswith('127.') or host == '0.0.0.0':
+            return
+        seen_hosts.add(host)
+        urls.append(f'http://{host}:{port}')
+
+    try:
+        hostname = socket.gethostname()
+        for info in socket.getaddrinfo(hostname, None, socket.AF_INET, socket.SOCK_DGRAM):
+            add_host(info[4][0])
+    except socket.gaierror:
+        pass
+
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.connect(('8.8.8.8', 80))
+            add_host(sock.getsockname()[0])
+    except OSError:
+        pass
+
+    return urls
+
 @app.route('/')
 def index():
     """메인 대시보드"""
     return render_template('index.html')
+
+@app.route('/join/<session_id>')
+def mobile_join(session_id):
+    """QR로 접속하는 모바일 설문 화면"""
+    return render_template('mobile.html', session_id=session_id)
 
 @app.route('/api/categories')
 def api_categories():
@@ -77,11 +220,26 @@ def api_foods(category, subcategory):
     """음식 API"""
     return jsonify(get_foods(category, subcategory))
 
+@app.route('/api/network-info')
+def api_network_info():
+    """QR에 넣을 수 있는 접속 주소 후보."""
+    port = int(os.environ.get('PORT', 5000))
+    env_base_url = os.environ.get('MM_PUBLIC_BASE_URL', '').rstrip('/')
+    urls = get_reachable_base_urls(port)
+    if env_base_url:
+        urls.insert(0, env_base_url)
+    unique_urls = list(dict.fromkeys(urls))
+    recommended = env_base_url or (unique_urls[1] if len(unique_urls) > 1 else unique_urls[0])
+    return jsonify({'base_urls': unique_urls, 'recommended': recommended})
+
 @app.route('/api/session/create', methods=['POST'])
 def create_session():
     """새 추천 세션 생성"""
-    data = request.json
+    data = request.json or {}
     session_id = str(uuid.uuid4())[:8]
+    mobile_enabled = bool(data.get('mobile_enabled', False))
+    public_base_url = (data.get('public_base_url') or os.environ.get('MM_PUBLIC_BASE_URL') or request.host_url).rstrip('/')
+    join_url = f'{public_base_url}/join/{session_id}'
     
     session_data = {
         'id': session_id,
@@ -89,49 +247,54 @@ def create_session():
         'participants': [],
         'groups': int(data.get('groups', 2)),
         'location': data.get('location', '세종대학교'),
-        'status': 'collecting'
+        'status': 'collecting',
+        'mobile_enabled': mobile_enabled,
+        'join_url': join_url if mobile_enabled else ''
     }
     
     sessions_store[session_id] = session_data
-    return jsonify({'session_id': session_id})
+    persist_mobile_session(session_data)
+    return jsonify({'session_id': session_id, 'join_url': session_data['join_url'], 'mobile_enabled': mobile_enabled})
 
 @app.route('/api/session/<session_id>/add-participant', methods=['POST'])
 def add_participant(session_id):
     """참가자 추가"""
-    if session_id not in sessions_store:
+    if not ensure_session_loaded(session_id):
         return jsonify({'error': 'Session not found'}), 404
     
-    data = request.json
-    user_id = data.get('user_id', f'U{len(sessions_store[session_id]["participants"]) + 1:02d}')
+    session_data = sessions_store[session_id]
+    data = request.json or {}
+    source = data.get('source', 'manual')
+    if session_data.get('status') != 'collecting':
+        return jsonify({'error': 'Session is closed'}), 409
+    if source == 'mobile' and not session_data.get('mobile_enabled'):
+        return jsonify({'error': 'Mobile collection is disabled'}), 403
+
+    participant = build_participant(data, session_data, source)
     
-    participant = {
-        'user_id': user_id,
-        'preferences': {
-            'like': {
-                'high': data.get('like_high', []),
-                'low': data.get('like_low', data.get('like_mid', []))
-            },
-            'dislike': {
-                'high': data.get('dislike_high', []),
-                'low': data.get('dislike_low', data.get('dislike_mid', []))
-            },
-            'recent': {
-                'high': data.get('recent_high', []),
-                'low': data.get('recent_low', data.get('recent_mid', []))
-            }
-        }
-    }
-    
-    sessions_store[session_id]['participants'].append(participant)
-    return jsonify({'success': True, 'participant_count': len(sessions_store[session_id]['participants'])})
+    session_data['participants'].append(participant)
+    persist_mobile_session(session_data)
+    return jsonify({'success': True, 'participant': participant, 'participant_count': len(session_data['participants'])})
+
+@app.route('/api/session/<session_id>/close', methods=['POST'])
+def close_session(session_id):
+    """QR/mobile collection close button."""
+    if not ensure_session_loaded(session_id):
+        return jsonify({'error': 'Session not found'}), 404
+    session_data = sessions_store[session_id]
+    session_data['status'] = 'closed'
+    persist_mobile_session(session_data)
+    return jsonify({'success': True, 'participant_count': len(session_data['participants'])})
 
 @app.route('/api/session/<session_id>/generate-recommendations', methods=['POST'])
 def generate_recommendations(session_id):
     """추천 생성"""
-    if session_id not in sessions_store:
+    if not ensure_session_loaded(session_id):
         return jsonify({'error': 'Session not found'}), 404
     
     session_data = sessions_store[session_id]
+    if not session_data['participants']:
+        return jsonify({'error': 'No participants'}), 400
 
     try:
         recommendations = generate_group_recommendations(session_data)
@@ -154,6 +317,7 @@ def generate_recommendations(session_id):
         
         session_data['status'] = 'completed'
         session_data['result_file'] = output_file
+        persist_mobile_session(session_data)
         
         return jsonify({'success': True, 'result': output})
     except Exception as e:
@@ -198,11 +362,11 @@ def aggregate_preferences(members):
     
     for p in members:
         prefs = p['preferences']
-        like_high.extend(prefs['like'].get('high', []))
-        like_low.extend(prefs['like'].get('low', []))
-        dislike_high.extend(prefs.get('dislike', {}).get('high', []))
-        dislike_low.extend(prefs.get('dislike', {}).get('low', []))
-        recent.extend(prefs['recent']['high'] + prefs['recent'].get('low', []))
+        like_high.extend(leaf_values(prefs['like'].get('high', [])))
+        like_low.extend(leaf_values(prefs['like'].get('low', [])))
+        dislike_high.extend(leaf_values(prefs.get('dislike', {}).get('high', [])))
+        dislike_low.extend(leaf_values(prefs.get('dislike', {}).get('low', [])))
+        recent.extend(leaf_values(prefs['recent'].get('high', []) + prefs['recent'].get('low', [])))
     
     return {
         'positive': list(dict.fromkeys(like_high + like_low)),
@@ -271,10 +435,25 @@ def get_restaurant_recommendations(profile, location):
 @app.route('/api/session/<session_id>')
 def get_session(session_id):
     """세션 조회"""
-    if session_id not in sessions_store:
+    if not ensure_session_loaded(session_id):
         return jsonify({'error': 'Session not found'}), 404
     
     return jsonify(sessions_store[session_id])
 
+def open_browser_once(host, port):
+    """Open the admin UI once after the dev server starts."""
+    if os.environ.get('MM_AUTO_OPEN', '1') in ('0', 'false', 'False', 'no'):
+        return
+    if app.debug and os.environ.get('WERKZEUG_RUN_MAIN') != 'true':
+        return
+
+    url = f'http://127.0.0.1:{port}'
+    timer = threading.Timer(1.0, lambda: webbrowser.open_new_tab(url))
+    timer.daemon = True
+    timer.start()
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5000, host='127.0.0.1')
+    host = '0.0.0.0'
+    port = int(os.environ.get('PORT', 5000))
+    open_browser_once(host, port)
+    app.run(debug=True, port=port, host=host)

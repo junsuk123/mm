@@ -6,6 +6,7 @@ SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 DATASET_DIR="$SCRIPT_DIR/dataset"
 USERS_FILE="$DATASET_DIR/users.json"
 MENU_TREE_FILE="$DATASET_DIR/menu_categories.json"
+MOBILE_SESSIONS_FILE="$DATASET_DIR/mobile_sessions.json"
 
 . "$SCRIPT_DIR/restaurant_provider.sh"
 . "$SCRIPT_DIR/naver_restaurant_provider.sh"
@@ -28,12 +29,16 @@ usage() {
   cat <<'EOF'
 Usage:
   sh recommend.sh --collect-session [--provider naver] [--location 세종대학교]
-  sh recommend.sh --demo [--provider naver] [--location 세종대학교]
+  sh recommend.sh --demo [--with-mobile-responses] [--mobile-session-id ID] [--provider naver] [--location 세종대학교]
   sh recommend.sh --user-id U01 [--provider naver] [--location 세종대학교]
 
 Options:
   --collect-session   Interactively collect participant count, group count, and personal preferences
   --demo              Replay example data from dataset/demo_session.json with visible input trace
+  --with-mobile-responses
+                      Append QR/mobile survey responses saved by the Flask web app to demo data
+  --mobile-session-id ID
+                      Use a specific persisted mobile session instead of the latest one
   --user-id ID        Recommend for a user in dataset/users.json
   --provider NAME     naver (default: naver)
   --location NAME     Search location (default: 세종대학교)
@@ -260,6 +265,41 @@ load_demo_session_file() {
   printf '%s' "$DATASET_DIR/demo_session.json"
 }
 
+merge_mobile_responses_into_session() {
+  base_session_file=$1
+  output_session_file=$2
+  mobile_session_id=$3
+
+  if [ ! -f "$MOBILE_SESSIONS_FILE" ]; then
+    cp "$base_session_file" "$output_session_file"
+    printf '%s' 0
+    return 0
+  fi
+
+  jq \
+    --slurpfile mobile_store "$MOBILE_SESSIONS_FILE" \
+    --arg mobile_session_id "$mobile_session_id" '
+      def mobile_id($n): if $n < 10 then "M0\($n)" else "M\($n)" end;
+      ($mobile_store[0] // {latest_session_id: null, sessions: {}}) as $store
+      | (if ($mobile_session_id | length) > 0 then $mobile_session_id else ($store.latest_session_id // "") end) as $target_id
+      | (($store.sessions[$target_id].participants // []) | map(select(.source == "mobile"))) as $mobile_participants
+      | . as $base
+      | reduce ($mobile_participants | to_entries[]) as $entry (
+          $base;
+          .participants += [
+            ($entry.value
+             | .original_user_id = (.user_id // "")
+             | .user_id = mobile_id($entry.key + 1))
+          ]
+        )
+      | .participant_count = (.participants | length)
+      | .mobile_session_id = $target_id
+      | .mobile_participant_count = ($mobile_participants | length)
+    ' "$base_session_file" > "$output_session_file"
+
+  jq -r '.mobile_participant_count // 0' "$output_session_file"
+}
+
 resolve_choice_numbers_from_options_file() {
   options_file=$1
   selected_json=$2
@@ -378,14 +418,27 @@ emit_demo_category_group_trace() {
 
 run_demo_session() {
   demo_session_file=$(load_demo_session_file)
-  participant_count=$(jq -r '.participant_count' "$demo_session_file")
-  group_count=$(jq -r '.group_count' "$demo_session_file")
+  SESSION_JSON_FILE=$(mktemp "${TMPDIR:-/tmp}/recommend-demo-session.XXXXXX")
+  add_tmp_file "$SESSION_JSON_FILE"
+
+  if [ "$with_mobile_responses" = true ]; then
+    mobile_count=$(merge_mobile_responses_into_session "$demo_session_file" "$SESSION_JSON_FILE" "$mobile_session_id")
+  else
+    cp "$demo_session_file" "$SESSION_JSON_FILE"
+    mobile_count=0
+  fi
+
+  participant_count=$(jq -r '.participant_count' "$SESSION_JSON_FILE")
+  group_count=$(jq -r '.group_count' "$SESSION_JSON_FILE")
 
   printf '%s\n' "Example data mode: loading $participant_count participants into $group_count groups" >&2
+  if [ "$with_mobile_responses" = true ]; then
+    printf '%s\n' "Mobile QR responses appended: $mobile_count" >&2
+  fi
   printf '%s\n' "Number of participants: $participant_count" >&2
   printf '%s\n' "Number of groups: $group_count" >&2
 
-  jq -c '.participants[]' "$demo_session_file" | while IFS= read -r participant_json; do
+  jq -c '.participants[]' "$SESSION_JSON_FILE" | while IFS= read -r participant_json; do
     user_id=$(printf '%s' "$participant_json" | jq -r '.user_id')
     emit_demo_prompt_line "User ID (blank for auto-generated):" "$user_id"
     printf '%s\n' "Collecting preferences for $user_id" >&2
@@ -396,9 +449,6 @@ run_demo_session() {
     sleep 0.65
   done
 
-  SESSION_JSON_FILE=$(mktemp "${TMPDIR:-/tmp}/recommend-demo-session.XXXXXX")
-  add_tmp_file "$SESSION_JSON_FILE"
-  cp "$demo_session_file" "$SESSION_JSON_FILE"
   PARTICIPANT_COUNT=$participant_count
   GROUP_COUNT=$group_count
 
@@ -679,6 +729,8 @@ main() {
   location=세종대학교
   mode=
   user_id=
+  with_mobile_responses=false
+  mobile_session_id=
 
   while [ "$#" -gt 0 ]; do
     case $1 in
@@ -687,6 +739,14 @@ main() {
         ;;
       --demo)
         mode=demo
+        ;;
+      --with-mobile-responses)
+        with_mobile_responses=true
+        ;;
+      --mobile-session-id)
+        shift
+        [ "$#" -gt 0 ] || { usage >&2; exit 1; }
+        mobile_session_id=$1
         ;;
       --user-id)
         shift
