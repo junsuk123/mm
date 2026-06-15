@@ -19,7 +19,7 @@
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1440px;
       margin: 0 auto;
     }
 
@@ -41,7 +41,7 @@
 
     .main-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 20px;
       margin-bottom: 20px;
     }
@@ -221,6 +221,70 @@
       gap: 15px;
     }
 
+    .terminal-log {
+      min-height: 420px;
+      background: #111827;
+      color: #d1fae5;
+      border-radius: 8px;
+      padding: 14px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.82em;
+      line-height: 1.45;
+      overflow-x: auto;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .terminal-screen {
+      min-height: 330px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .terminal-line {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .terminal-prompt {
+      color: #93c5fd;
+      font-weight: 800;
+    }
+
+    .terminal-command {
+      color: #f8fafc;
+      font-weight: 800;
+    }
+
+    .terminal-output {
+      color: #a7f3d0;
+    }
+
+    .terminal-status {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 5px 8px;
+      border: 1px solid rgba(167, 243, 208, 0.25);
+      border-radius: 999px;
+      color: #bbf7d0;
+      font-size: 0.86em;
+    }
+
+    .terminal-cursor::after {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 1em;
+      margin-left: 3px;
+      background: #d1fae5;
+      vertical-align: -0.15em;
+      animation: blink 0.9s steps(2, start) infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
     .group-card {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
@@ -374,6 +438,14 @@
           <input type="text" id="location" value="세종대학교" placeholder="예: 세종대학교">
         </div>
 
+        <div class="form-group">
+          <label>식당 검색 provider</label>
+          <select id="provider">
+            <option value="mock" selected>mock (API 키 없이 인근 식당 추천)</option>
+            <option value="naver">naver (네이버 지역 검색)</option>
+          </select>
+        </div>
+
         <label class="toggle-row">
           <input type="checkbox" id="includeDemoParticipants" checked>
           기본 참가자 데이터 포함
@@ -498,6 +570,15 @@
           아직 세션이 시작되지 않았습니다
         </div>
       </div>
+
+      <div class="card">
+        <h2>⌨️ 리눅스 명령어 처리 과정</h2>
+        <div class="terminal-log" id="cliLog">
+          <div class="terminal-screen">
+            <div class="terminal-line terminal-output">마감 및 실행을 누르면 내부 명령어 흐름이 표시됩니다.</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -505,6 +586,8 @@
     let currentSessionId = null;
     let participants = [];
     let participantPoll = null;
+    let terminalPoll = null;
+    let renderedEventCount = 0;
 
     // 카테고리 데이터 로드
     async function loadCategories() {
@@ -597,6 +680,7 @@
     async function createSession() {
       const groupCount = parseInt(document.getElementById('groupCount').value);
       const location = document.getElementById('location').value;
+      const provider = document.getElementById('provider').value;
       const mobileEnabled = document.getElementById('mobileEnabled').checked;
       const includeDemoParticipants = document.getElementById('includeDemoParticipants').checked;
       const publicBaseUrl = document.getElementById('mobileBaseUrl').value.trim();
@@ -608,6 +692,7 @@
           body: JSON.stringify({
             groups: groupCount,
             location,
+            provider,
             mobile_enabled: mobileEnabled,
             include_demo_participants: includeDemoParticipants,
             public_base_url: publicBaseUrl
@@ -744,7 +829,9 @@
       }
 
       const resultsDiv = document.getElementById('results');
+      const cliLog = document.getElementById('cliLog');
       resultsDiv.innerHTML = '<div style="grid-column: 1/-1;"><div class="spinner"></div> 추천 생성 중...</div>';
+      resetTerminal('내부 명령어 실행을 시작합니다...');
       document.getElementById('resultsContainer').style.display = 'block';
 
       try {
@@ -752,36 +839,105 @@
           method: 'POST'
         });
         const data = await response.json();
-
-        const groups = data.result ? data.result.groups : data.groups;
-        if (groups) {
-          if (participantPoll) {
-            clearInterval(participantPoll);
-            participantPoll = null;
-          }
-          resultsDiv.innerHTML = groups.map(group => `
-            <div class="group-card">
-              <h3>그룹 ${group.group_id}</h3>
-              <div class="members">👥 ${group.members.join(', ')}</div>
-              ${group.recommendations.map((r, i) => `
-                <div class="restaurant">
-                  <div class="restaurant-name">🏆 ${i + 1}. ${r.name}</div>
-                  <div class="restaurant-info">
-                    <div>🍽️ ${r.food}</div>
-                    <div>⭐ ${r.rating || '-'}</div>
-                  </div>
-                  <div class="score">점수: ${r.score}</div>
-                  <div style="font-size: 0.88em; opacity: 0.9; margin-top: 6px;">${r.reason || ''}</div>
-                </div>
-              `).join('')}
-            </div>
-          `).join('');
+        if (data.job_id) {
+          pollRecommendationJob(data.job_id);
         } else {
-          resultsDiv.innerHTML = '<div style="grid-column: 1/-1; color: #dc3545;">추천 생성 실패</div>';
+          throw new Error(data.error || '추천 job 생성 실패');
         }
       } catch (e) {
         resultsDiv.innerHTML = '<div style="grid-column: 1/-1; color: #dc3545;">오류: ' + e.message + '</div>';
+        appendTerminalEvent({type: 'output', text: '내부 명령 실행 중 오류: ' + e.message});
       }
+    }
+
+    function resetTerminal(message) {
+      if (terminalPoll) {
+        clearInterval(terminalPoll);
+        terminalPoll = null;
+      }
+      renderedEventCount = 0;
+      document.getElementById('cliLog').innerHTML = terminalFrame(`
+        <div class="terminal-line terminal-output">${escapeHtml(message)}</div>
+      `);
+    }
+
+    function terminalFrame(innerHtml) {
+      return `<div class="terminal-screen">${innerHtml}</div>`;
+    }
+
+    function appendTerminalEvent(event) {
+      const cliLog = document.getElementById('cliLog');
+      const screen = cliLog.querySelector('.terminal-screen');
+      const line = document.createElement('div');
+      line.className = event.type === 'command'
+        ? 'terminal-line terminal-command'
+        : 'terminal-line terminal-output';
+      line.innerHTML = event.type === 'command'
+        ? `<span class="terminal-prompt">$ </span>${escapeHtml(event.text)}`
+        : escapeHtml(event.text);
+      screen.appendChild(line);
+      cliLog.scrollTop = cliLog.scrollHeight;
+    }
+
+    function renderRecommendationGroups(groups) {
+      const resultsDiv = document.getElementById('results');
+      if (participantPoll) {
+        clearInterval(participantPoll);
+        participantPoll = null;
+      }
+      resultsDiv.innerHTML = groups.map(group => `
+        <div class="group-card">
+          <h3>그룹 ${group.group_id}</h3>
+          <div class="members">👥 ${group.members.join(', ')}</div>
+          ${group.recommendations.map((r, i) => `
+            <div class="restaurant">
+              <div class="restaurant-name">🏆 ${i + 1}. ${r.name}</div>
+              <div class="restaurant-info">
+                <div>🍽️ ${r.food}</div>
+                <div>⭐ ${r.rating || '-'}</div>
+              </div>
+              <div style="font-size: 0.9em; opacity: 0.88; margin-top: 5px;">📍 ${r.distance_m ? `${r.distance_m}m` : (r.address || r.location || '-')}</div>
+              <div class="score">점수: ${r.score}</div>
+              <div style="font-size: 0.88em; opacity: 0.9; margin-top: 6px;">${r.reason || ''}</div>
+            </div>
+          `).join('')}
+        </div>
+      `).join('');
+    }
+
+    async function pollRecommendationJob(jobId) {
+      const resultsDiv = document.getElementById('results');
+      const poll = async () => {
+        const response = await fetch(`/api/job/${jobId}`);
+        const job = await response.json();
+        const events = job.events || [];
+        events.slice(renderedEventCount).forEach(appendTerminalEvent);
+        renderedEventCount = events.length;
+
+        if (job.status === 'completed') {
+          clearInterval(terminalPoll);
+          terminalPoll = null;
+          appendTerminalEvent({type: 'output', text: '완료: 추천 결과를 화면에 표시합니다.'});
+          renderRecommendationGroups(job.result.groups || []);
+        } else if (job.status === 'failed') {
+          clearInterval(terminalPoll);
+          terminalPoll = null;
+          resultsDiv.innerHTML = '<div style="grid-column: 1/-1; color: #dc3545;">추천 생성 실패</div>';
+          appendTerminalEvent({type: 'output', text: job.error || '추천 생성 실패'});
+        }
+      };
+
+      await poll();
+      terminalPoll = setInterval(poll, 500);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     }
 
     async function closeAndGenerate() {

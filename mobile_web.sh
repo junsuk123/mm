@@ -8,6 +8,28 @@ TUNNEL_LOG=$(mktemp "${TMPDIR:-/tmp}/mm-tunnel.XXXXXX")
 APP_PID=
 TUNNEL_PID=
 
+if [ -n "${PYTHON:-}" ]; then
+  PYTHON_CMD=$PYTHON
+elif [ -x "$SCRIPT_DIR/.venv/bin/python" ]; then
+  PYTHON_CMD="$SCRIPT_DIR/.venv/bin/python"
+else
+  PYTHON_CMD=python3
+fi
+
+ensure_python_deps() {
+  if "$PYTHON_CMD" - <<'PY' >/dev/null 2>&1
+import flask
+PY
+  then
+    return 0
+  fi
+
+  printf '%s\n' "Missing Python dependency: Flask" >&2
+  printf '%s\n' "Install dependencies with:" >&2
+  printf '  %s\n' "$PYTHON_CMD -m pip install -r $SCRIPT_DIR/requirements.txt" >&2
+  return 1
+}
+
 cleanup() {
   if [ -n "$APP_PID" ]; then
     kill "$APP_PID" >/dev/null 2>&1 || true
@@ -75,10 +97,11 @@ fi
 
 printf '%s\n' "Mobile public URL: $PUBLIC_URL" >&2
 printf '%s\n' "Admin UI: http://127.0.0.1:$PORT" >&2
+ensure_python_deps
 
 (
   cd "$SCRIPT_DIR"
-  MM_PUBLIC_BASE_URL="$PUBLIC_URL" PORT="$PORT" python3 app.py
+  MM_PUBLIC_BASE_URL="$PUBLIC_URL" PORT="$PORT" "$PYTHON_CMD" app.py
 ) &
 APP_PID=$!
 

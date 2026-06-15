@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import json
-from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -29,87 +28,96 @@ def participant_terms(participant: dict[str, Any]) -> list[str]:
     return list(dict.fromkeys(terms))
 
 
-def build_similarity_groups(participants: list[dict[str, Any]], group_count: int) -> list[dict[str, Any]] | None:
+def participant_similarity(first_terms: list[str], second_terms: list[str]) -> float:
+    first = set(first_terms)
+    second = set(second_terms)
+    if not first and not second:
+        return 0.0
+    union = first | second
+    if not union:
+        return 0.0
+    return len(first & second) / len(union)
+
+
+def cluster_similarity(
+    first_members: list[str],
+    second_members: list[str],
+    participant_terms_map: dict[str, list[str]],
+) -> float:
+    scores = [
+        participant_similarity(participant_terms_map[first], participant_terms_map[second])
+        for first in first_members
+        for second in second_members
+    ]
+    return sum(scores) / len(scores) if scores else 0.0
+
+
+def build_similarity_groups(participants: list[dict[str, Any]], group_count: int) -> list[dict[str, Any]]:
     if group_count <= 0:
-        return None
+        return []
+    if not participants:
+        return []
 
     participant_terms_map = {
         participant["user_id"]: participant_terms(participant)
         for participant in participants
     }
-    term_frequency = Counter(term for terms in participant_terms_map.values() for term in terms)
-    seed_terms = [term for term, _ in term_frequency.most_common(group_count)]
+    clusters = [
+        {"members": [participant["user_id"]], "first_index": index}
+        for index, participant in enumerate(participants)
+    ]
+    target_count = min(group_count, len(clusters))
 
-    if len(seed_terms) < group_count:
-        return None
+    while len(clusters) > target_count:
+        best_pair: tuple[int, int] | None = None
+        best_key: tuple[float, int, int, int, int] | None = None
 
-    groups = {index: [] for index in range(1, group_count + 1)}
-    ordered_participants = sorted(
-        participants,
-        key=lambda item: (-len(participant_terms_map[item["user_id"]]), item["user_id"]),
-    )
+        for first_index in range(len(clusters)):
+            for second_index in range(first_index + 1, len(clusters)):
+                first_cluster = clusters[first_index]
+                second_cluster = clusters[second_index]
+                similarity = cluster_similarity(
+                    first_cluster["members"],
+                    second_cluster["members"],
+                    participant_terms_map,
+                )
+                combined_size = len(first_cluster["members"]) + len(second_cluster["members"])
+                earliest_index = min(first_cluster["first_index"], second_cluster["first_index"])
+                latest_index = max(first_cluster["first_index"], second_cluster["first_index"])
+                key = (similarity, -combined_size, -earliest_index, -latest_index, -first_index)
 
-    for participant in ordered_participants:
-        user_id = participant["user_id"]
-        terms = set(participant_terms_map[user_id])
-        best_group = None
-        best_score = -1
+                if best_key is None or key > best_key:
+                    best_key = key
+                    best_pair = (first_index, second_index)
 
-        for group_index, seed_term in enumerate(seed_terms, start=1):
-            score = 1 if seed_term in terms else 0
-            if score > best_score:
-                best_group = group_index
-                best_score = score
-            elif score == best_score and best_group is not None and len(groups[group_index]) < len(groups[best_group]):
-                best_group = group_index
+        if best_pair is None:
+            break
 
-        if best_group is None or best_score <= 0:
-            return None
+        first_index, second_index = best_pair
+        merged = {
+            "members": clusters[first_index]["members"] + clusters[second_index]["members"],
+            "first_index": min(clusters[first_index]["first_index"], clusters[second_index]["first_index"]),
+        }
+        clusters = [
+            cluster
+            for index, cluster in enumerate(clusters)
+            if index not in (first_index, second_index)
+        ]
+        clusters.append(merged)
+        clusters.sort(key=lambda cluster: cluster["first_index"])
 
-        groups[best_group].append(user_id)
-
-    if any(not members for members in groups.values()):
-        return None
-
-    return [{"group_id": index, "members": members} for index, members in groups.items()]
-
-
-def build_common_term_groups(participants: list[dict[str, Any]], group_count: int) -> list[dict[str, Any]]:
-    if group_count <= 0:
-        return []
-
-    participant_entries = []
-    term_frequency = Counter()
-    for participant in participants:
-        terms = participant_terms(participant)
-        term_frequency.update(terms)
-        participant_entries.append((participant["user_id"], terms))
-
-    dominant_term = term_frequency.most_common(1)[0][0] if term_frequency else None
-
-    def sort_key(item: tuple[str, list[str]]) -> tuple[int, int, str]:
-        user_id, terms = item
-        return (
-            0 if dominant_term and dominant_term in terms else 1,
-            -len(terms),
-            user_id,
-        )
-
-    ordered_participants = sorted(participant_entries, key=sort_key)
-    groups = {index: [] for index in range(1, group_count + 1)}
-
-    for index, (user_id, _) in enumerate(ordered_participants):
-        group_index = (index % group_count) + 1
-        groups[group_index].append(user_id)
-
-    return [{"group_id": index, "members": members} for index, members in groups.items()]
+    clusters.sort(key=lambda cluster: cluster["first_index"])
+    groups = [
+        {"group_id": index + 1, "members": cluster["members"]}
+        for index, cluster in enumerate(clusters[:group_count])
+    ]
+    for index in range(len(groups) + 1, group_count + 1):
+        groups.append({"group_id": index, "members": []})
+    return groups
 
 
 def build_groups(participants: list[dict[str, Any]], group_count: int) -> list[dict[str, Any]]:
-    groups = build_similarity_groups(participants, group_count)
-    if groups is not None:
-        return groups
-    return build_common_term_groups(participants, group_count)
+    return build_similarity_groups(participants, group_count)
 
 
 def load_json(path: Path) -> Any:

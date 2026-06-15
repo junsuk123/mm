@@ -25,11 +25,23 @@ add_tmp_file() {
   TMP_FILES="$TMP_FILES $1"
 }
 
+web_step() {
+  command_text=$1
+  output_text=$2
+  if [ -n "${MM_STEP_DELAY_SEC:-}" ]; then
+    printf '[cmd] %s\n' "$command_text" >&2
+    sleep "$MM_STEP_DELAY_SEC"
+    printf '[out] %s\n' "$output_text" >&2
+    sleep "$MM_STEP_DELAY_SEC"
+  fi
+}
+
 usage() {
   cat <<'EOF'
 Usage:
   sh recommend.sh --collect-session [--provider naver] [--location 세종대학교]
   sh recommend.sh --demo [--without-mobile-responses] [--mobile-session-id ID] [--provider naver] [--location 세종대학교]
+  sh recommend.sh --session-file session.json [--json-output] [--provider naver] [--location 세종대학교]
   sh recommend.sh --user-id U01 [--provider naver] [--location 세종대학교]
 
 Options:
@@ -41,6 +53,9 @@ Options:
                       Use only dataset/demo_session.json in demo mode
   --mobile-session-id ID
                       Use a specific persisted mobile session instead of the latest one
+  --session-file PATH
+                      Recommend for an existing session JSON file using the shell pipeline
+  --json-output       Print the full recommendation JSON to stdout
   --user-id ID        Recommend for a user in dataset/users.json
   --provider NAME     naver (default: naver)
   --location NAME     Search location (default: 세종대학교)
@@ -733,6 +748,8 @@ main() {
   user_id=
   with_mobile_responses=true
   mobile_session_id=
+  session_file_input=
+  json_output=false
 
   while [ "$#" -gt 0 ]; do
     case $1 in
@@ -757,6 +774,15 @@ main() {
         shift
         [ "$#" -gt 0 ] || { usage >&2; exit 1; }
         user_id=$1
+        ;;
+      --session-file)
+        shift
+        [ "$#" -gt 0 ] || { usage >&2; exit 1; }
+        session_file_input=$1
+        mode=session-file
+        ;;
+      --json-output)
+        json_output=true
         ;;
       --provider)
         shift
@@ -793,6 +819,32 @@ main() {
 
   if [ "$mode" = demo ]; then
     run_demo_session
+    return 0
+  fi
+
+  if [ "$mode" = session-file ]; then
+    [ -f "$session_file_input" ] || { printf '%s\n' "Session file not found: $session_file_input" >&2; exit 1; }
+    SESSION_JSON_FILE=$session_file_input
+    PARTICIPANT_COUNT=$(jq -r '.participant_count // (.participants | length)' "$SESSION_JSON_FILE")
+    GROUP_COUNT=$(jq -r '.group_count' "$SESSION_JSON_FILE")
+    printf '%s\n' "CLI pipeline mode: session_file=$SESSION_JSON_FILE" >&2
+    printf '%s\n' "Linux commands: sh + jq + mktemp + python3 grouping_utils.py + provider shell dispatch" >&2
+    printf '%s\n' "Participants: $PARTICIPANT_COUNT | Groups: $GROUP_COUNT | Provider: $provider_name | Location: $location" >&2
+    web_step "mktemp ${TMPDIR:-/tmp}/recommend-session-file-final.XXXXXX" "최종 추천 JSON을 담을 임시 파일을 준비합니다."
+    web_step "jq -r '.participant_count // (.participants | length)' $SESSION_JSON_FILE" "참가자 수와 그룹 수를 세션 JSON에서 읽었습니다."
+    web_step "python3 grouping_utils.py --session-file $SESSION_JSON_FILE --group-count $GROUP_COUNT" "참가자 선호 유사도 기준으로 그룹을 생성합니다."
+    web_step "restaurant_provider.sh $provider_name <food> $location" "그룹 선호 메뉴별 인근 식당 후보를 provider에서 조회합니다."
+    web_step "jq 'score restaurants | sort_by(-.score) | .[:3]'" "점수와 거리 기준으로 그룹별 Top 3 식당을 선정합니다."
+
+    output_file=$(mktemp "${TMPDIR:-/tmp}/recommend-session-file-final.XXXXXX")
+    add_tmp_file "$output_file"
+    recommend_for_groups "$provider_name" "$location" "$SESSION_JSON_FILE" "$GROUP_COUNT" > "$output_file"
+    if [ "$json_output" = true ]; then
+      cat "$output_file"
+    else
+      print_group_summary "$output_file"
+      open_visualization_report "$output_file"
+    fi
     return 0
   fi
 
