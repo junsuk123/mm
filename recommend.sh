@@ -29,14 +29,16 @@ usage() {
   cat <<'EOF'
 Usage:
   sh recommend.sh --collect-session [--provider naver] [--location 세종대학교]
-  sh recommend.sh --demo [--with-mobile-responses] [--mobile-session-id ID] [--provider naver] [--location 세종대학교]
+  sh recommend.sh --demo [--without-mobile-responses] [--mobile-session-id ID] [--provider naver] [--location 세종대학교]
   sh recommend.sh --user-id U01 [--provider naver] [--location 세종대학교]
 
 Options:
   --collect-session   Interactively collect participant count, group count, and personal preferences
   --demo              Replay example data from dataset/demo_session.json with visible input trace
   --with-mobile-responses
-                      Append QR/mobile survey responses saved by the Flask web app to demo data
+                      Append QR/mobile survey responses saved by the Flask web app to demo data (default for --demo)
+  --without-mobile-responses
+                      Use only dataset/demo_session.json in demo mode
   --mobile-session-id ID
                       Use a specific persisted mobile session instead of the latest one
   --user-id ID        Recommend for a user in dataset/users.json
@@ -729,7 +731,7 @@ main() {
   location=세종대학교
   mode=
   user_id=
-  with_mobile_responses=false
+  with_mobile_responses=true
   mobile_session_id=
 
   while [ "$#" -gt 0 ]; do
@@ -742,6 +744,9 @@ main() {
         ;;
       --with-mobile-responses)
         with_mobile_responses=true
+        ;;
+      --without-mobile-responses)
+        with_mobile_responses=false
         ;;
       --mobile-session-id)
         shift

@@ -375,6 +375,11 @@
         </div>
 
         <label class="toggle-row">
+          <input type="checkbox" id="includeDemoParticipants" checked>
+          기본 참가자 데이터 포함
+        </label>
+
+        <label class="toggle-row">
           <input type="checkbox" id="mobileEnabled">
           모바일 QR 수집 사용
         </label>
@@ -593,6 +598,7 @@
       const groupCount = parseInt(document.getElementById('groupCount').value);
       const location = document.getElementById('location').value;
       const mobileEnabled = document.getElementById('mobileEnabled').checked;
+      const includeDemoParticipants = document.getElementById('includeDemoParticipants').checked;
       const publicBaseUrl = document.getElementById('mobileBaseUrl').value.trim();
 
       try {
@@ -603,12 +609,13 @@
             groups: groupCount,
             location,
             mobile_enabled: mobileEnabled,
+            include_demo_participants: includeDemoParticipants,
             public_base_url: publicBaseUrl
           })
         });
         const data = await response.json();
         currentSessionId = data.session_id;
-        participants = [];
+        participants = data.participants || [];
 
         document.getElementById('sessionStatus').style.display = 'block';
         document.getElementById('sessionStatus').textContent = `✅ 세션 생성됨: ${currentSessionId}`;

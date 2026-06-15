@@ -21,6 +21,7 @@ from naver_restaurant_api import search_restaurants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATASET_DIR = os.path.join(BASE_DIR, 'dataset')
 MOBILE_SESSIONS_FILE = os.path.join(DATASET_DIR, 'mobile_sessions.json')
+DEMO_SESSION_FILE = os.path.join(DATASET_DIR, 'demo_session.json')
 
 app = Flask(__name__)
 app.secret_key = 'restaurant-recommendation-secret-key'
@@ -105,6 +106,20 @@ def leaf_value(value):
 
 def leaf_values(values):
     return [leaf_value(value) for value in values if value]
+
+def load_demo_participants():
+    try:
+        with open(DEMO_SESSION_FILE, 'r', encoding='utf-8') as f:
+            demo_session = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return []
+
+    participants = []
+    for participant in demo_session.get('participants', []):
+        cloned = json.loads(json.dumps(participant, ensure_ascii=False))
+        cloned.setdefault('source', 'demo')
+        participants.append(cloned)
+    return participants
 
 def next_user_id(session_data, prefix='U'):
     return f'{prefix}{len(session_data["participants"]) + 1:02d}'
@@ -238,13 +253,15 @@ def create_session():
     data = request.json or {}
     session_id = str(uuid.uuid4())[:8]
     mobile_enabled = bool(data.get('mobile_enabled', False))
+    include_demo_participants = bool(data.get('include_demo_participants', True))
     public_base_url = (data.get('public_base_url') or os.environ.get('MM_PUBLIC_BASE_URL') or request.host_url).rstrip('/')
     join_url = f'{public_base_url}/join/{session_id}'
+    participants = load_demo_participants() if include_demo_participants else []
     
     session_data = {
         'id': session_id,
         'created': datetime.now().isoformat(),
-        'participants': [],
+        'participants': participants,
         'groups': int(data.get('groups', 2)),
         'location': data.get('location', '세종대학교'),
         'status': 'collecting',
@@ -254,7 +271,13 @@ def create_session():
     
     sessions_store[session_id] = session_data
     persist_mobile_session(session_data)
-    return jsonify({'session_id': session_id, 'join_url': session_data['join_url'], 'mobile_enabled': mobile_enabled})
+    return jsonify({
+        'session_id': session_id,
+        'join_url': session_data['join_url'],
+        'mobile_enabled': mobile_enabled,
+        'participant_count': len(participants),
+        'participants': participants
+    })
 
 @app.route('/api/session/<session_id>/add-participant', methods=['POST'])
 def add_participant(session_id):
