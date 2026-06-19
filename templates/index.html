@@ -486,60 +486,55 @@
           <input type="text" id="userId" placeholder="예: U01">
         </div>
 
-        <!-- LIKE 선호도 -->
-        <div style="background: #f0f8ff; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
-          <h3 style="color: #667eea; margin-bottom: 10px;">좋아하는 음식</h3>
-          
-          <div class="form-group">
-            <label>대분류</label>
-            <select id="likeHigh" onchange="updateLikeMid()">
-              <option value="">선택...</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>소분류</label>
-            <select id="likeLow">
-              <option value="">선택...</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- DISLIKE 선호도 -->
-        <div style="background: #fff5f5; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
-          <h3 style="color: #dc3545; margin-bottom: 10px;">싫어하는 음식</h3>
-          
-          <div class="form-group">
-            <label>대분류</label>
-            <select id="dislikeHigh" onchange="updateDislikeMid()">
-              <option value="">선택...</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>소분류</label>
-            <select id="dislikeLow">
-              <option value="">선택...</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- RECENT 선호도 -->
         <div style="background: #f0fff4; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
-          <h3 style="color: #28a745; margin-bottom: 10px;">최근에 먹은 음식</h3>
-          
+          <h3 style="color: #198754; margin-bottom: 10px;">1. 최근 먹은 음식</h3>
           <div class="form-group">
             <label>대분류</label>
-            <select id="recentHigh" onchange="updateRecentMid()">
+            <select id="recentMain" onchange="updateSubcategorySelects('recent')">
               <option value="">선택...</option>
             </select>
           </div>
-
           <div class="form-group">
             <label>소분류</label>
-            <select id="recentLow">
+            <select id="recentSubcategory">
               <option value="">선택...</option>
             </select>
+          </div>
+        </div>
+
+        <div style="background: #f0f8ff; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+          <h3 style="color: #667eea; margin-bottom: 10px;">2. 선호 음식 1</h3>
+          <div class="form-group">
+            <label>선호 대분류</label>
+            <select id="preferredMain1" onchange="updateSubcategorySelects(1)">
+              <option value="">선택...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>선호 소분류 1</label>
+            <select id="preferredSub1A"><option value="">선택...</option></select>
+          </div>
+          <div class="form-group">
+            <label>선호 소분류 2</label>
+            <select id="preferredSub1B"><option value="">선택...</option></select>
+          </div>
+        </div>
+
+        <div style="background: #f0f8ff; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+          <h3 style="color: #667eea; margin-bottom: 10px;">3. 선호 음식 2</h3>
+          <div class="form-group">
+            <label>선호 대분류</label>
+            <select id="preferredMain2" onchange="updateSubcategorySelects(2)">
+              <option value="">선택...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>선호 소분류 1</label>
+            <select id="preferredSub2A"><option value="">선택...</option></select>
+          </div>
+          <div class="form-group">
+            <label>선호 소분류 2</label>
+            <select id="preferredSub2B"><option value="">선택...</option></select>
           </div>
         </div>
 
@@ -586,8 +581,8 @@
     let currentSessionId = null;
     let participants = [];
     let participantPoll = null;
-    let terminalPoll = null;
-    let renderedEventCount = 0;
+    let terminalStream = null;
+    const MAX_TERMINAL_LINES = 240;
 
     // 카테고리 데이터 로드
     async function loadCategories() {
@@ -595,7 +590,7 @@
         const response = await fetch('/api/categories');
         const categories = await response.json();
         
-        const selectors = ['likeHigh', 'dislikeHigh', 'recentHigh'];
+        const selectors = ['recentMain', 'preferredMain1', 'preferredMain2'];
         selectors.forEach(id => {
           const select = document.getElementById(id);
           categories.forEach(cat => {
@@ -629,52 +624,16 @@
       }
     }
 
-    async function updateLikeMid() {
-      const high = document.getElementById('likeHigh').value;
-      const low = document.getElementById('likeLow');
-      low.innerHTML = '<option value="">선택...</option>';
-      if (high) {
-        const response = await fetch(`/api/subcategories/${high}`);
-        const subs = await response.json();
-        subs.forEach(sub => {
-          const option = document.createElement('option');
-          option.value = `${high}|${sub}`;
-          option.textContent = sub;
-          low.appendChild(option);
-        });
-      }
-    }
-
-    async function updateDislikeMid() {
-      const high = document.getElementById('dislikeHigh').value;
-      const low = document.getElementById('dislikeLow');
-      low.innerHTML = '<option value="">선택...</option>';
-      if (high) {
-        const response = await fetch(`/api/subcategories/${high}`);
-        const subs = await response.json();
-        subs.forEach(sub => {
-          const option = document.createElement('option');
-          option.value = `${high}|${sub}`;
-          option.textContent = sub;
-          low.appendChild(option);
-        });
-      }
-    }
-
-    async function updateRecentMid() {
-      const high = document.getElementById('recentHigh').value;
-      const low = document.getElementById('recentLow');
-      low.innerHTML = '<option value="">선택...</option>';
-      if (high) {
-        const response = await fetch(`/api/subcategories/${high}`);
-        const subs = await response.json();
-        subs.forEach(sub => {
-          const option = document.createElement('option');
-          option.value = `${high}|${sub}`;
-          option.textContent = sub;
-          low.appendChild(option);
-        });
-      }
+    async function updateSubcategorySelects(slot) {
+      const recent = slot === 'recent';
+      const main = document.getElementById(recent ? 'recentMain' : `preferredMain${slot}`).value;
+      const ids = recent ? ['recentSubcategory'] : [`preferredSub${slot}A`, `preferredSub${slot}B`];
+      ids.forEach(id => document.getElementById(id).innerHTML = '<option value="">선택...</option>');
+      if (!main) return;
+      const subs = await (await fetch(`/api/subcategories/${encodeURIComponent(main)}`)).json();
+      ids.forEach(id => {
+        subs.forEach(sub => document.getElementById(id).add(new Option(sub, sub)));
+      });
     }
 
     async function createSession() {
@@ -771,13 +730,24 @@
 
       const data = {
         user_id: document.getElementById('userId').value || `U${participants.length + 1}`,
-        like_high: [document.getElementById('likeHigh').value].filter(x => x),
-        like_low: [document.getElementById('likeLow').value].filter(x => x),
-        dislike_high: [document.getElementById('dislikeHigh').value].filter(x => x),
-        dislike_low: [document.getElementById('dislikeLow').value].filter(x => x),
-        recent_high: [document.getElementById('recentHigh').value].filter(x => x),
-        recent_low: [document.getElementById('recentLow').value].filter(x => x)
+        recent_main: document.getElementById('recentMain').value,
+        recent_subcategory: document.getElementById('recentSubcategory').value,
+        preferred: [1, 2].map(slot => ({
+          main: document.getElementById(`preferredMain${slot}`).value,
+          subcategories: [
+            document.getElementById(`preferredSub${slot}A`).value,
+            document.getElementById(`preferredSub${slot}B`).value
+          ]
+        }))
       };
+      const mains = data.preferred.map(item => item.main);
+      if (!data.recent_main || !data.recent_subcategory
+          || mains.some(value => !value) || new Set(mains).size !== 2
+          || data.preferred.some(item => item.subcategories.some(value => !value)
+            || new Set(item.subcategories).size !== 2)) {
+        alert('최근 음식과 서로 다른 선호 대분류 2개, 각 대분류의 서로 다른 소분류 2개를 모두 선택해주세요.');
+        return;
+      }
 
       try {
         const response = await fetch(`/api/session/${currentSessionId}/add-participant`, {
@@ -793,12 +763,10 @@
           
           // 폼 초기화
           document.getElementById('userId').value = '';
-          document.getElementById('likeHigh').value = '';
-          document.getElementById('likeLow').innerHTML = '<option value="">선택...</option>';
-          document.getElementById('dislikeHigh').value = '';
-          document.getElementById('dislikeLow').innerHTML = '<option value="">선택...</option>';
-          document.getElementById('recentHigh').value = '';
-          document.getElementById('recentLow').innerHTML = '<option value="">선택...</option>';
+          ['recentMain', 'preferredMain1', 'preferredMain2'].forEach(id => document.getElementById(id).value = '');
+          ['recentSubcategory', 'preferredSub1A', 'preferredSub1B', 'preferredSub2A', 'preferredSub2B'].forEach(id => {
+            document.getElementById(id).innerHTML = '<option value="">선택...</option>';
+          });
         }
       } catch (e) {
         alert('참가자 추가 실패: ' + e.message);
@@ -808,12 +776,57 @@
     function updateParticipantsList() {
       const list = document.getElementById('participantsList');
       document.getElementById('mobileCount').textContent = `참가자 ${participants.length}명 접수`;
-      list.innerHTML = participants.map((p, i) => `
-        <div class="participant-item">
-          <strong>${p.user_id || `U${i + 1}`}</strong>
-          <span style="color: #666; font-size: 0.9em;">${p.source === 'mobile' ? '모바일' : '관리자'}</span>
-        </div>
-      `).join('');
+
+      const activeKeys = new Set();
+      participants.forEach((participant, index) => {
+        const key = participantDomKey(participant, index);
+        activeKeys.add(key);
+
+        let item = list.querySelector(`[data-participant-key="${cssEscape(key)}"]`);
+        if (!item) {
+          item = document.createElement('div');
+          item.className = 'participant-item';
+          item.dataset.participantKey = key;
+        }
+
+        const signature = participantSignature(participant, index);
+        if (item.dataset.signature !== signature) {
+          item.dataset.signature = signature;
+          item.innerHTML = `
+            <strong>${escapeHtml(participant.user_id || `U${index + 1}`)}</strong>
+            <span style="color: #666; font-size: 0.9em;">${participant.source === 'mobile' ? '모바일' : '관리자'}</span>
+          `;
+        }
+
+        const currentAtIndex = list.children[index];
+        if (currentAtIndex !== item) {
+          list.insertBefore(item, currentAtIndex || null);
+        }
+      });
+
+      Array.from(list.children).forEach(item => {
+        if (!activeKeys.has(item.dataset.participantKey)) {
+          item.remove();
+        }
+      });
+    }
+
+    function participantDomKey(participant, index) {
+      return String(participant.user_id || participant.id || `participant-${index}`);
+    }
+
+    function participantSignature(participant, index) {
+      return JSON.stringify({
+        user_id: participant.user_id || `U${index + 1}`,
+        source: participant.source || 'admin'
+      });
+    }
+
+    function cssEscape(value) {
+      if (window.CSS && CSS.escape) {
+        return CSS.escape(value);
+      }
+      return String(value).replace(/["\\]/g, '\\$&');
     }
 
     function removeParticipant(index) {
@@ -851,11 +864,10 @@
     }
 
     function resetTerminal(message) {
-      if (terminalPoll) {
-        clearInterval(terminalPoll);
-        terminalPoll = null;
+      if (terminalStream) {
+        terminalStream.close();
+        terminalStream = null;
       }
-      renderedEventCount = 0;
       document.getElementById('cliLog').innerHTML = terminalFrame(`
         <div class="terminal-line terminal-output">${escapeHtml(message)}</div>
       `);
@@ -876,6 +888,9 @@
         ? `<span class="terminal-prompt">$ </span>${escapeHtml(event.text)}`
         : escapeHtml(event.text);
       screen.appendChild(line);
+      while (screen.children.length > MAX_TERMINAL_LINES) {
+        screen.firstElementChild.remove();
+      }
       cliLog.scrollTop = cliLog.scrollHeight;
     }
 
@@ -905,30 +920,36 @@
       `).join('');
     }
 
-    async function pollRecommendationJob(jobId) {
+    function pollRecommendationJob(jobId) {
       const resultsDiv = document.getElementById('results');
-      const poll = async () => {
-        const response = await fetch(`/api/job/${jobId}`);
-        const job = await response.json();
-        const events = job.events || [];
-        events.slice(renderedEventCount).forEach(appendTerminalEvent);
-        renderedEventCount = events.length;
+      terminalStream = new EventSource(`/api/job/${jobId}/events`);
 
-        if (job.status === 'completed') {
-          clearInterval(terminalPoll);
-          terminalPoll = null;
-          appendTerminalEvent({type: 'output', text: '완료: 추천 결과를 화면에 표시합니다.'});
-          renderRecommendationGroups(job.result.groups || []);
-        } else if (job.status === 'failed') {
-          clearInterval(terminalPoll);
-          terminalPoll = null;
-          resultsDiv.innerHTML = '<div style="grid-column: 1/-1; color: #dc3545;">추천 생성 실패</div>';
-          appendTerminalEvent({type: 'output', text: job.error || '추천 생성 실패'});
+      terminalStream.addEventListener('cli', event => {
+        appendTerminalEvent(JSON.parse(event.data));
+      });
+
+      terminalStream.addEventListener('completed', event => {
+        const payload = JSON.parse(event.data);
+        terminalStream.close();
+        terminalStream = null;
+        appendTerminalEvent({type: 'output', text: '완료: 추천 결과를 화면에 표시합니다.'});
+        renderRecommendationGroups(payload.result?.groups || []);
+      });
+
+      terminalStream.addEventListener('failed', event => {
+        const payload = JSON.parse(event.data);
+        terminalStream.close();
+        terminalStream = null;
+        resultsDiv.innerHTML = '<div style="grid-column: 1/-1; color: #dc3545;">추천 생성 실패</div>';
+        appendTerminalEvent({type: 'output', text: payload.error || '추천 생성 실패'});
+      });
+
+      terminalStream.onerror = () => {
+        if (!terminalStream) {
+          return;
         }
+        appendTerminalEvent({type: 'output', text: '실시간 연결을 다시 시도하고 있습니다...'});
       };
-
-      await poll();
-      terminalPoll = setInterval(poll, 500);
     }
 
     function escapeHtml(value) {

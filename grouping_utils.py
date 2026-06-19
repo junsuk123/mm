@@ -8,23 +8,15 @@ import json
 from pathlib import Path
 from typing import Any
 
-
-def normalize_levels(preferences: dict[str, list[str]]) -> dict[str, list[str]]:
-    high = list(preferences.get("high", []))
-    low = list(preferences.get("low", []))
-    if not low:
-        low = list(preferences.get("mid", []))
-    return {"high": [leaf_value(item) for item in high], "low": [leaf_value(item) for item in low]}
-
-
-def leaf_value(value: str) -> str:
-    return value.split("|")[-1] if isinstance(value, str) else value
+from preference_utils import normalize_preferences
 
 
 def participant_terms(participant: dict[str, Any]) -> list[str]:
-    preferences = participant.get("preferences", {})
-    positive = normalize_levels(preferences.get("like", {}))
-    terms = positive["high"] + positive["low"]
+    preferences = normalize_preferences(participant.get("preferences", {}))
+    terms = []
+    for choice in preferences["preferred"]:
+        terms.append(choice["main"])
+        terms.extend(f'{choice["main"]}|{subcategory}' for subcategory in choice["subcategories"])
     return list(dict.fromkeys(terms))
 
 

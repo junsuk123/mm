@@ -4,7 +4,7 @@
 Flask 기반 대시보드로 사용자 입력 수집 및 실시간 시각화
 """
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, Response, render_template, request, jsonify, stream_with_context
 import json
 import subprocess
 import os
@@ -15,15 +15,15 @@ import socket
 from datetime import datetime
 import uuid
 
-from grouping_utils import build_groups
-from naver_restaurant_api import search_restaurants
+from preference_utils import (
+    normalize_participant,
+    validate_preferences,
+)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATASET_DIR = os.path.join(BASE_DIR, 'dataset')
 MOBILE_SESSIONS_FILE = os.path.join(DATASET_DIR, 'mobile_sessions.json')
 DEMO_SESSION_FILE = os.path.join(DATASET_DIR, 'demo_session.json')
-MOCK_RESTAURANTS_FILE = os.path.join(DATASET_DIR, 'mock_restaurants.json')
-
 app = Flask(__name__)
 app.secret_key = 'restaurant-recommendation-secret-key'
 
@@ -31,6 +31,7 @@ app.secret_key = 'restaurant-recommendation-secret-key'
 sessions_store = {}
 cli_jobs = {}
 cli_jobs_lock = threading.Lock()
+cli_jobs_changed = threading.Condition(cli_jobs_lock)
 
 def load_mobile_sessions():
     """Persisted QR/mobile collection data."""
@@ -87,7 +88,10 @@ def ensure_session_loaded(session_id):
     sessions_store[session_id] = {
         'id': persisted.get('id', session_id),
         'created': persisted.get('created', datetime.now().isoformat()),
-        'participants': persisted.get('participants', []),
+        'participants': [
+            normalize_participant(participant)
+            for participant in persisted.get('participants', [])
+        ],
         'groups': int(persisted.get('groups', 2)),
         'location': persisted.get('location', '세종대학교'),
         'provider': persisted.get('provider', 'mock'),
@@ -96,21 +100,6 @@ def ensure_session_loaded(session_id):
         'join_url': persisted.get('join_url', '')
     }
     return True
-
-def normalize_list(value):
-    if isinstance(value, list):
-        return [item for item in value if item]
-    if value:
-        return [value]
-    return []
-
-def leaf_value(value):
-    if isinstance(value, str):
-        return value.split('|')[-1]
-    return value
-
-def leaf_values(values):
-    return [leaf_value(value) for value in values if value]
 
 def load_demo_participants():
     try:
@@ -121,50 +110,32 @@ def load_demo_participants():
 
     participants = []
     for participant in demo_session.get('participants', []):
-        cloned = json.loads(json.dumps(participant, ensure_ascii=False))
+        cloned = normalize_participant(json.loads(json.dumps(participant, ensure_ascii=False)))
         cloned.setdefault('source', 'demo')
         participants.append(cloned)
     return participants
-
-def load_mock_restaurants():
-    try:
-        with open(MOCK_RESTAURANTS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except (OSError, json.JSONDecodeError):
-        return []
 
 def next_user_id(session_data, prefix='U'):
     return f'{prefix}{len(session_data["participants"]) + 1:02d}'
 
 def build_participant(data, session_data, source='manual'):
     user_id = data.get('user_id') or next_user_id(session_data, 'M' if source == 'mobile' else 'U')
+    preferences = {
+        'recent': {
+            'main': data.get('recent_main', ''),
+            'subcategory': data.get('recent_subcategory', '')
+        },
+        'preferred': data.get('preferred', [])
+    }
+    errors = validate_preferences(preferences)
+    if errors:
+        raise ValueError(' '.join(errors))
     return {
         'user_id': user_id,
         'source': source,
         'submitted_at': datetime.now().isoformat(),
-        'preferences': {
-            'like': {
-                'high': normalize_list(data.get('like_high', [])),
-                'low': normalize_list(data.get('like_low', data.get('like_mid', [])))
-            },
-            'dislike': {
-                'high': normalize_list(data.get('dislike_high', [])),
-                'low': normalize_list(data.get('dislike_low', data.get('dislike_mid', [])))
-            },
-            'recent': {
-                'high': normalize_list(data.get('recent_high', [])),
-                'low': normalize_list(data.get('recent_low', data.get('recent_mid', [])))
-            }
-        }
+        'preferences': preferences
     }
-
-def run_shell_command(cmd):
-    """셸 명령어 실행"""
-    try:
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-        return result.stdout, result.returncode
-    except Exception as e:
-        return str(e), 1
 
 def get_menu_categories():
     """메뉴 카테고리 로드"""
@@ -184,14 +155,14 @@ def get_subcategories(category):
     """중분류 카테고리 목록"""
     categories = get_menu_categories()
     if category in categories:
-        return list(categories[category].keys())
+        return list(categories[category])
     return []
 
 def get_foods(category, subcategory):
-    """소분류 음식 목록"""
+    """The supplied classification ends at subcategory level."""
     categories = get_menu_categories()
     if category in categories and subcategory in categories[category]:
-        return categories[category][subcategory]
+        return [subcategory]
     return []
 
 def get_reachable_base_urls(port=5000):
@@ -322,7 +293,10 @@ def add_participant(session_id):
     if source == 'mobile' and not session_data.get('mobile_enabled'):
         return jsonify({'error': 'Mobile collection is disabled'}), 403
 
-    participant = build_participant(data, session_data, source)
+    try:
+        participant = build_participant(data, session_data, source)
+    except ValueError as error:
+        return jsonify({'error': str(error)}), 400
     
     session_data['participants'].append(participant)
     persist_mobile_session(session_data)
@@ -343,7 +317,10 @@ def build_cli_session_file(session_data):
     payload = {
         'participant_count': len(session_data['participants']),
         'group_count': int(session_data['groups']),
-        'participants': session_data['participants']
+        'participants': [
+            normalize_participant(participant)
+            for participant in session_data['participants']
+        ]
     }
     with os.fdopen(fd, 'w', encoding='utf-8') as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
@@ -361,7 +338,7 @@ def make_cli_payload(command, completed_stdout, completed_stderr, returncode):
     return result
 
 def append_cli_job_event(job_id, event):
-    with cli_jobs_lock:
+    with cli_jobs_changed:
         job = cli_jobs.get(job_id)
         if not job:
             return
@@ -369,13 +346,15 @@ def append_cli_job_event(job_id, event):
             'time': datetime.now().isoformat(timespec='seconds'),
             **event
         })
+        cli_jobs_changed.notify_all()
 
 def update_cli_job(job_id, **updates):
-    with cli_jobs_lock:
+    with cli_jobs_changed:
         job = cli_jobs.get(job_id)
         if not job:
             return
         job.update(updates)
+        cli_jobs_changed.notify_all()
 
 def run_cli_recommendations_job(job_id, session_id, session_data):
     provider = session_data.get('provider', 'mock')
@@ -393,7 +372,7 @@ def run_cli_recommendations_job(job_id, session_id, session_data):
         '--json-output'
     ]
     env = os.environ.copy()
-    env['MM_STEP_DELAY_SEC'] = '0.65'
+    env['MM_STEP_DELAY_SEC'] = '0.08'
     try:
         process = subprocess.Popen(
             command,
@@ -486,144 +465,51 @@ def get_cli_job(job_id):
             return jsonify({'error': 'Job not found'}), 404
         return jsonify(job)
 
-def generate_group_recommendations(session_data):
-    """그룹별 추천 생성"""
-    groups = []
-    participants = session_data['participants']
-    group_count = session_data['groups']
-    grouped_members = build_groups(participants, group_count)
-    members_by_id = {participant['user_id']: participant for participant in participants}
-    
-    for group in grouped_members:
-        group_idx = group['group_id']
-        members = group['members']
-        
-        if not members:
-            continue
-        
-        # 그룹 프로필 생성
-        group_profile = aggregate_preferences([members_by_id[user_id] for user_id in members if user_id in members_by_id])
-        
-        # 추천 식당 조회
-        recommendations = get_restaurant_recommendations(
-            group_profile,
-            session_data['location'],
-            session_data.get('provider', 'mock')
-        )
-        
-        groups.append({
-            'group_id': group_idx,
-            'members': members,
-            'recommendations': recommendations[:3]
-        })
-    
-    return groups
+@app.route('/api/job/<job_id>/events')
+def stream_cli_job(job_id):
+    """Stream new CLI events immediately instead of waiting for browser polling."""
+    def event_stream():
+        event_index = 0
+        while True:
+            with cli_jobs_changed:
+                job = cli_jobs.get(job_id)
+                if not job:
+                    yield 'event: failed\ndata: {"error":"Job not found"}\n\n'
+                    return
 
-def aggregate_preferences(members):
-    """그룹 선호도 집계"""
-    like_high = []
-    like_low = []
-    dislike_high = []
-    dislike_low = []
-    recent = []
-    
-    for p in members:
-        prefs = p['preferences']
-        like_high.extend(leaf_values(prefs['like'].get('high', [])))
-        like_low.extend(leaf_values(prefs['like'].get('low', [])))
-        dislike_high.extend(leaf_values(prefs.get('dislike', {}).get('high', [])))
-        dislike_low.extend(leaf_values(prefs.get('dislike', {}).get('low', [])))
-        recent.extend(leaf_values(prefs['recent'].get('high', []) + prefs['recent'].get('low', [])))
-    
-    return {
-        'positive': list(dict.fromkeys(like_high + like_low)),
-        'like_high': list(dict.fromkeys(like_high)),
-        'like_low': list(dict.fromkeys(like_low)),
-        'dislike_high': list(dict.fromkeys(dislike_high)),
-        'dislike_low': list(dict.fromkeys(dislike_low)),
-        'recent': list(dict.fromkeys(recent))
-    }
+                events = list(job.get('events', [])[event_index:])
+                status = job.get('status', 'running')
+                result = job.get('result')
+                error = job.get('error')
 
-def build_recommendation_reason(restaurant, profile):
-    """점수에 사용된 단순 규칙을 사람이 읽는 설명으로 변환"""
-    parts = []
-    if restaurant['category'] in profile['like_high']:
-        parts.append(f"matched preferred category {restaurant['category']}")
-    if restaurant['food'] in profile['like_low']:
-        parts.append(f"matched preferred food {restaurant['food']}")
-    if restaurant['category'] in profile['recent'] or restaurant['food'] in profile['recent']:
-        parts.append("recently eaten category or food was penalized")
-    if restaurant['category'] in profile['dislike_high']:
-        parts.append(f"disliked category {restaurant['category']} was penalized")
-    if restaurant['food'] in profile['dislike_low']:
-        parts.append(f"disliked food {restaurant['food']} was strongly penalized")
-    return "; ".join(parts) if parts else "selected as the best available candidate from the search results"
+                if not events and status == 'running':
+                    cli_jobs_changed.wait(timeout=10)
+                    job = cli_jobs.get(job_id, {})
+                    events = list(job.get('events', [])[event_index:])
+                    status = job.get('status', 'running')
+                    result = job.get('result')
+                    error = job.get('error')
 
-def search_mock_restaurants(search_terms, location):
-    restaurants = []
-    seen_ids = set()
-    for term in search_terms:
-        for restaurant in load_mock_restaurants():
-            if (
-                restaurant.get('food') == term
-                or restaurant.get('category') == term
-                or term in restaurant.get('name', '')
-            ):
-                restaurant_id = restaurant.get('restaurant_id')
-                if restaurant_id in seen_ids:
-                    continue
-                seen_ids.add(restaurant_id)
-                item = dict(restaurant)
-                item['matched_terms'] = [term]
-                item['address'] = item.get('address') or item.get('location') or location
-                item['roadAddress'] = item.get('roadAddress') or item.get('address') or item.get('location') or location
-                item['link'] = item.get('link', '')
-                restaurants.append(item)
-    return restaurants
+            for event in events:
+                yield f"event: cli\ndata: {json.dumps(event, ensure_ascii=False)}\n\n"
+                event_index += 1
 
-def get_restaurant_recommendations(profile, location, provider='mock'):
-    """그룹 프로필로 인근 식당 후보를 가져와 점수화."""
-    try:
-        search_terms = list(dict.fromkeys(profile['positive'] + profile['recent']))
-        if provider == 'naver':
-            restaurants = search_restaurants(search_terms, location)
-        else:
-            restaurants = search_mock_restaurants(search_terms, location)
+            if status == 'completed':
+                payload = {'result': result}
+                yield f"event: completed\ndata: {json.dumps(payload, ensure_ascii=False)}\n\n"
+                return
+            if status == 'failed':
+                payload = {'error': error or '추천 생성 실패'}
+                yield f"event: failed\ndata: {json.dumps(payload, ensure_ascii=False)}\n\n"
+                return
+            if not events:
+                yield ': keep-alive\n\n'
 
-        candidates = []
-        for r in restaurants:
-            matched_terms = r.get('matched_terms', [r.get('food', '')])
-            score = 0.0
-            if r['category'] in profile['like_high']:
-                score += 0.5
-            if r['food'] in profile['like_low']:
-                score += 0.3
-            if any(term in profile['recent'] for term in matched_terms) or r['category'] in profile['recent'] or r['food'] in profile['recent']:
-                score -= 0.5
-            if r['category'] in profile['dislike_high']:
-                score -= 0.8
-            if r['food'] in profile['dislike_low']:
-                score -= 1.0
-            
-            candidates.append({
-                'restaurant_id': r['restaurant_id'],
-                'name': r['name'],
-                'food': r['food'],
-                'category': r['category'],
-                'location': r['location'],
-                'address': r.get('roadAddress') or r.get('address', ''),
-                'link': r.get('link', ''),
-                'distance_m': r.get('distance_m', ''),
-                'score': round(score, 3),
-                'reason': build_recommendation_reason(r, profile),
-                'rating': r.get('rating', '')
-            })
-
-        candidates.sort(key=lambda x: (-x['score'], x['distance_m'] if isinstance(x.get('distance_m'), (int, float)) else 999999))
-        return candidates[:3]
-    except Exception as e:
-        print(f"Error getting recommendations: {e}")
-        return []
+    return Response(
+        stream_with_context(event_stream()),
+        mimetype='text/event-stream',
+        headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'},
+    )
 
 @app.route('/api/session/<session_id>')
 def get_session(session_id):

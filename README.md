@@ -71,7 +71,17 @@ sh mobile_web.sh
 sh recommend.sh --session-file /tmp/mm-web-session.xxxxx.json --provider mock --location 세종대학교 --json-output
 ```
 
-웹 화면에는 이 명령을 사용자가 직접 입력하라고 보여주는 것이 아니라, PC 화면 기준 세 번째 열의 터미널 패널에서 `mktemp`, `sh recommend.sh`, `jq`, `python3 grouping_utils.py`, `restaurant_provider.sh` 같은 내부 리눅스 명령 처리 단계를 실시간으로 보여 줍니다. 백엔드 처리 과정 자체에 짧은 딜레이를 두고, 웹은 job 상태를 polling하면서 새 명령어와 피드백이 생기는 즉시 터미널 패널에 추가합니다.
+웹 화면에는 이 명령을 사용자가 직접 입력하라고 보여주는 것이 아니라, PC 화면 기준 세 번째 열의 터미널 패널에서 `mktemp`, `sh recommend.sh`, `jq`, `while read`, `wc`, `tr`, `python3 grouping_utils.py`, `restaurant_provider.sh` 같은 실제 내부 리눅스 명령 처리 단계를 보여 줍니다. 명령 기록은 지워지지 않고 누적되며, 브라우저는 Server-Sent Events(SSE) 연결로 새 명령과 결과를 polling 지연 없이 받습니다.
+
+PDF 강의 내용 중 이 프로젝트에 적용 가능한 CLI 개념은 다음처럼 구현되어 있습니다.
+
+- 파일·임시 자원: `mktemp`, 리다이렉션(`>`, `<`), `trap`, `rm`
+- JSON/텍스트 필터: `jq`, `wc`, `tr`
+- 파이프라인·반복 처리: `|`, `while IFS= read -r`
+- 프로그램 조합: `sh recommend.sh` → `python3 grouping_utils.py` → provider shell → `jq`
+- 정렬·상위 결과 선택: `jq`의 `sort_by`와 슬라이스로 `sort`/`head` 역할 수행
+
+웹의 추천 생성은 이 CLI 파이프라인만 사용합니다. 별도의 Python 추천 구현을 두지 않아 CLI와 GUI 결과가 달라지는 문제를 방지합니다.
 
 `python3 app.py`만 실행하면 같은 PC 또는 같은 네트워크에서 접속하는 용도에 적합합니다. 완전히 다른 네트워크에서는 `127.0.0.1`, `192.168.x.x`, `172.x.x.x` 같은 내부 주소가 열리지 않으므로 `sh mobile_web.sh`를 사용하세요.
 
@@ -87,21 +97,29 @@ MM_PUBLIC_BASE_URL=https://example-tunnel-url.ngrok-free.app python3 app.py
 MM_AUTO_OPEN=0 python3 app.py
 ```
 
-## 모바일 설문 방식
+## 음식 정보 수집 방식
 
-모바일 페이지는 번호 입력이 아니라 정사각형 타일 선택 방식입니다.
+관리자 화면, 모바일 QR 설문, 대화형 CLI는 모두 같은 필수 입력만 받습니다.
 
-1. 좋아하는 음식
-2. 싫어하는 음식
-3. 최근 먹은 음식
+1. 최근 먹은 음식: 대분류 1개 → 소분류 1개
+2. 선호 음식: 서로 다른 대분류 2개
+3. 각 선호 대분류마다 서로 다른 소분류 2개
 
-각 항목은 다음 순서로 하나씩 선택합니다.
+따라서 참가자 한 명은 선호 대분류 2개와 선호 소분류 4개를 선택합니다. 싫어하는 음식과 기존의 세부 음식명 선택 단계는 제거되었습니다.
 
-```text
-대분류 -> 중분류 -> 소분류 음식
+분류는 `dataset/menu_categories.json`의 2단계 구조를 그대로 사용합니다. 대분류는 한식, 중식, 일식, 태국식, 베트남식, 양식/이탈리안, 미국식, 멕시칸, 인도식, 중동/터키식, 분식, 샐러드, 술집/안주입니다.
+
+저장 구조:
+
+```json
+{
+  "recent": {"main": "한식", "subcategory": "밥/정식류"},
+  "preferred": [
+    {"main": "한식", "subcategories": ["국물/탕류", "구이/고기류"]},
+    {"main": "일식", "subcategories": ["면류", "밥/덮밥류"]}
+  ]
+}
 ```
-
-예를 들어 `한식 -> 국물류 -> 김치찌개`처럼 선택하면 내부 데이터에는 경로가 저장되고, 추천 계산에서는 마지막 음식명인 `김치찌개`가 점수와 검색어에 사용됩니다.
 
 ## 데이터 동작
 
@@ -160,15 +178,18 @@ sh recommend.sh --demo --provider mock --location 건국대학교
 
 ## 추천 알고리즘
 
-참가자의 입력은 `like`, `dislike`, `recent`로 모입니다. 각 항목은 대분류와 소분류 음식명을 사용합니다.
+참가자의 입력은 `recent`와 `preferred` 두 항목으로만 구성됩니다.
 
 점수 계산:
 
 ```text
-score = 0.5 * 선호 대분류 + 0.3 * 선호 소분류 - 0.5 * 최근 음식 - 0.8 * 싫어하는 대분류 - 1.0 * 싫어하는 소분류
+score = 0.5 * 선호 대분류 일치
+      + 0.4 * 선호 소분류 일치
+      - 0.2 * 최근 대분류 일치
+      - 0.7 * 최근 소분류 일치
 ```
 
-그룹 생성은 `grouping_utils.py`에서 처리합니다. 참가자마다 선호 대분류와 소분류 음식명을 term으로 만들고, 참가자 간 term 겹침 비율로 유사도를 계산합니다.
+그룹 생성은 `grouping_utils.py`에서 처리합니다. 참가자마다 선호 대분류 2개와 `대분류|소분류` 조합 4개를 term으로 만들고, 참가자 간 term 겹침 비율로 유사도를 계산합니다. 최근 먹은 음식은 그룹 구성에는 사용하지 않고 추천의 반복 방지 점수에만 사용합니다.
 
 1. 처음에는 참가자 1명을 하나의 작은 묶음으로 둡니다.
 2. 평균 유사도가 가장 높은 두 묶음을 합칩니다.
@@ -187,7 +208,7 @@ score = 0.5 * 선호 대분류 + 0.3 * 선호 소분류 - 0.5 * 최근 음식 - 
 CLI 결과는 사람이 읽는 요약으로 출력됩니다.
 
 ```text
-Group 1 members=U01, U04 -> Top 1: 진미식당 | food=김치찌개 | category=한식 | score=0.8 | reason=matched preferred category 한식; matched preferred food 김치찌개
+Group 1 members=U01, U04 -> Top 1: 진미식당 | category=한식 > 국물류 | score=0.7 | reason=preferred main category: 한식; preferred subcategory: 국물류
 ```
 
 추천 실행 후 `report.html`이 생성됩니다. 리포트에는 참가자 입력, 그룹별 후보, 최종 Top 3, 추천 이유, 참가자 수 요약이 포함됩니다.

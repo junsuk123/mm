@@ -31,8 +31,7 @@ try:
 except Exception:  # 데모/시각화만 볼 때 API 모듈이 없어도 HTML 생성이 가능하도록 처리
     search_restaurants = None
 
-LEVELS = ("high", "low")
-PREFERENCE_GROUPS = ("like", "dislike", "recent")
+from preference_utils import normalize_preferences
 
 
 @dataclass(frozen=True)
@@ -99,49 +98,21 @@ def menu_path_label(value: str, level: str) -> str:
     return " > ".join(parts)
 
 
-def normalize_preference_levels(preferences: dict[str, list[str]]) -> dict[str, list[str]]:
-    high = list(preferences.get("high", []))
-    low = list(preferences.get("low", []))
-    if not low:
-        low = list(preferences.get("mid", []))
-    return {"high": high, "low": low}
-
-
-def flatten_preferences(preferences: dict[str, dict[str, list[str]]]) -> dict[str, list[str]]:
-    normalized = {
-        group: normalize_preference_levels(preferences.get(group, {}))
-        for group in PREFERENCE_GROUPS
-    }
+def flatten_preferences(preferences: dict[str, Any]) -> dict[str, list[str]]:
+    normalized = normalize_preferences(preferences)
+    preferred_main = [choice["main"] for choice in normalized["preferred"]]
+    preferred_subcategory = [
+        subcategory
+        for choice in normalized["preferred"]
+        for subcategory in choice["subcategories"]
+    ]
+    recent = normalized["recent"]
     return {
-        group: [
-            menu_leaf(item)
-            for level in LEVELS
-            for item in normalized[group].get(level, [])
-        ]
-        for group in PREFERENCE_GROUPS
+        "preferred_main": preferred_main,
+        "preferred_subcategory": preferred_subcategory,
+        "positive": unique_preserve(preferred_main + preferred_subcategory),
+        "recent": [recent["main"], recent["subcategory"]],
     }
-
-
-def preference_overlap_report(preferences: dict[str, dict[str, list[str]]]) -> list[dict[str, Any]]:
-    term_locations: dict[str, set[str]] = defaultdict(set)
-    normalized = {
-        group: normalize_preference_levels(preferences.get(group, {}))
-        for group in PREFERENCE_GROUPS
-    }
-
-    for group in PREFERENCE_GROUPS:
-        for level in LEVELS:
-            for value in normalized[group].get(level, []):
-                path_parts = split_menu_path(value)
-                for index, part in enumerate(path_parts):
-                    path_level = "high" if index == 0 else "low"
-                    term_locations[part].add(f"{group}.{level}.{path_level}")
-
-    overlaps: list[dict[str, Any]] = []
-    for term, locations in sorted(term_locations.items()):
-        if len(locations) > 1:
-            overlaps.append({"term": term, "locations": sorted(locations)})
-    return overlaps
 
 
 def build_group_members(report: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -153,30 +124,26 @@ def build_group_members(report: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 
 def build_group_profile(members: list[dict[str, Any]]) -> dict[str, list[str]]:
-    combined = {"positive": [], "dislike": [], "recent": []}
+    combined = {"preferred_main": [], "preferred_subcategory": [], "positive": [], "recent": []}
     for member in members:
         preferences = flatten_preferences(member.get("preferences", {}))
-        combined["positive"].extend(preferences["like"])
-        combined["dislike"].extend(preferences["dislike"])
+        combined["preferred_main"].extend(preferences["preferred_main"])
+        combined["preferred_subcategory"].extend(preferences["preferred_subcategory"])
+        combined["positive"].extend(preferences["positive"])
         combined["recent"].extend(preferences["recent"])
     return {key: unique_preserve(values) for key, values in combined.items()}
 
 
 def score_restaurant(restaurant: dict[str, Any], profile: dict[str, list[str]]) -> float:
-    positive = profile["positive"]
-    recent = profile["recent"]
-
     pref_match = 0.0
-    if restaurant.get("category") in positive:
+    if restaurant.get("category") in profile["preferred_main"]:
         pref_match += 0.5
-    if restaurant.get("food") in positive:
-        pref_match += 0.3
-    if restaurant.get("category") in recent or restaurant.get("food") in recent:
-        pref_match -= 0.5
-    if restaurant.get("category") in profile.get("dislike", []):
-        pref_match -= 0.8
-    if restaurant.get("food") in profile.get("dislike", []):
-        pref_match -= 1.0
+    if restaurant.get("subcategory") in profile["preferred_subcategory"]:
+        pref_match += 0.4
+    if restaurant.get("category") in profile["recent"]:
+        pref_match -= 0.2
+    if restaurant.get("subcategory") in profile["recent"]:
+        pref_match -= 0.7
 
     return pref_match
 
@@ -222,9 +189,8 @@ def group_shared_terms(members: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for member in members:
         user_id = member.get("user_id", "")
         preferences = flatten_preferences(member.get("preferences", {}))
-        for group in PREFERENCE_GROUPS:
-            for value in preferences[group]:
-                term_members[value].add(user_id)
+        for value in preferences["positive"]:
+            term_members[value].add(user_id)
 
     shared_terms: list[dict[str, Any]] = []
     for term, user_ids in sorted(term_members.items()):
@@ -265,33 +231,23 @@ def render_level_card(title: str, items: list[str]) -> str:
 
 
 def render_participant_section(participant: dict[str, Any]) -> str:
-    preferences = participant.get("preferences", {})
-    overlaps = preference_overlap_report(preferences)
-
-    if overlaps:
-        overlap_rows = "".join(
-            f"<li><strong>{html.escape(item['term'])}</strong> "
-            f"<span class='muted'>({html.escape(', '.join(item['locations']))})</span></li>"
-            for item in overlaps
-        )
-        overlap_html = f"""
-        <div class="callout">
-            <div class="callout-title">겹치는 분류명</div>
-            <ul class="tight-list">{overlap_rows}</ul>
-        </div>
+    preferences = normalize_preferences(participant.get("preferences", {}))
+    recent = preferences["recent"]
+    sections = [
+        f"""
+        <section class="group-block">
+          <h4>최근 먹은 음식</h4>
+          {render_tag_list([f'{recent["main"]} > {recent["subcategory"]}'])}
+        </section>
         """
-    else:
-        overlap_html = "<div class='callout muted'>겹치는 항목 없음</div>"
-
-    sections = []
-    for group in PREFERENCE_GROUPS:
-        levels = normalize_preference_levels(preferences.get(group, {}))
+    ]
+    for index, choice in enumerate(preferences["preferred"], start=1):
         sections.append(
             f"""
             <section class="group-block">
-                <h4>{html.escape(group.upper())}</h4>
-                {render_level_card('대분류', levels.get('high', []))}
-                {render_level_card('소분류', levels.get('low', []))}
+              <h4>선호 음식 {index}</h4>
+              {render_level_card('대분류', [choice['main']])}
+              {render_level_card('소분류', choice['subcategories'])}
             </section>
             """
         )
@@ -305,7 +261,6 @@ def render_participant_section(participant: dict[str, Any]) -> str:
         <div class="participant-grid">
             {''.join(sections)}
         </div>
-        {overlap_html}
     </article>
     """
 
@@ -473,14 +428,12 @@ def render_group_section(group: dict[str, Any], report: dict[str, Any], members_
     finals = group.get("recommendations", [])
     preferred_tags = render_tag_list(profile["positive"][:6])
     recent_tags = render_tag_list(profile["recent"][:4])
-    dislike_tags = render_tag_list(profile["dislike"][:4])
     members_text = html.escape(", ".join(group.get("members", [])))
 
     profile_html = f"""
     <div class="profile-summary">
       <div><strong>멤버</strong>: {members_text}</div>
       <div><strong>선호 핵심</strong>: {preferred_tags}</div>
-      <div><strong>피하고 싶은 메뉴</strong>: {dislike_tags}</div>
       <div><strong>최근 먹은 메뉴</strong>: {recent_tags}</div>
     </div>
     """
@@ -510,26 +463,20 @@ def business_insight(report: dict[str, Any]) -> dict[str, list[str] | int]:
     recommended_categories: list[str] = []
     preferred_categories: list[str] = []
     recent_categories: list[str] = []
-    avoided_categories: list[str] = []
 
     for group in report.get("groups", []):
         for item in group.get("recommendations", []):
             recommended_categories.append(str(item.get("category", "")))
 
     for participant in report.get("participants", []):
-        preferences = participant.get("preferences", {})
-        for value in normalize_preference_levels(preferences.get("like", {})).get("high", []):
-            preferred_categories.append(menu_leaf(str(value)))
-        for value in normalize_preference_levels(preferences.get("recent", {})).get("high", []):
-            recent_categories.append(menu_leaf(str(value)))
-        for value in normalize_preference_levels(preferences.get("dislike", {})).get("high", []):
-            avoided_categories.append(menu_leaf(str(value)))
+        preferences = normalize_preferences(participant.get("preferences", {}))
+        preferred_categories.extend(choice["main"] for choice in preferences["preferred"])
+        recent_categories.append(preferences["recent"]["main"])
 
     return {
         "recommended": top_counts(recommended_categories),
         "preferred": top_counts(preferred_categories),
         "recent": top_counts(recent_categories),
-        "avoided": top_counts(avoided_categories),
         "participants": int(report.get("session", {}).get("participant_count") or len(report.get("participants", []))),
     }
 
@@ -543,7 +490,6 @@ def render_business_insight_report(report: dict[str, Any]) -> str:
         <div class="insight-item"><strong>Most recommended categories</strong><div class="tags">{render_tag_list(insight['recommended'])}</div></div>
         <div class="insight-item"><strong>Most preferred categories</strong><div class="tags">{render_tag_list(insight['preferred'])}</div></div>
         <div class="insight-item"><strong>Recently eaten categories</strong><div class="tags">{render_tag_list(insight['recent'])}</div></div>
-        <div class="insight-item"><strong>Avoided categories</strong><div class="tags">{render_tag_list(insight['avoided'])}</div></div>
         <div class="insight-item"><strong>Estimated total participants</strong><div class="big-number">{html.escape(str(insight['participants']))}</div></div>
       </div>
     </section>
