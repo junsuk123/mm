@@ -3,128 +3,636 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>음식 선호 설문</title>
+  <title>모바일 음식 설문</title>
   <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; padding: 16px; background: #f5f7fb; color: #172033; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    main { max-width: 560px; margin: auto; }
-    h1 { margin: 0 0 6px; font-size: 1.55rem; }
-    .intro { color: #64748b; margin: 0 0 16px; line-height: 1.5; }
-    .panel { background: white; border: 1px solid #dbe3ef; border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 8px 24px rgba(15,23,42,.05); }
-    .panel h2 { margin: 0 0 6px; font-size: 1.1rem; color: #334155; }
-    .panel p { color: #64748b; margin: 0 0 14px; font-size: .92rem; }
-    label { display: block; margin: 12px 0 6px; font-weight: 750; color: #334155; }
-    input, select { width: 100%; min-height: 48px; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; font-size: 1rem; }
-    button { width: 100%; min-height: 52px; border: 0; border-radius: 9px; background: #2563eb; color: white; font-size: 1.05rem; font-weight: 800; }
-    button:disabled { background: #94a3b8; }
-    .status { display: none; padding: 12px; border-radius: 8px; margin-bottom: 12px; font-weight: 700; }
-    .status.error { display: block; background: #fee2e2; color: #991b1b; }
-    .status.success { display: block; background: #dcfce7; color: #166534; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #f5f7fb;
+      color: #172033;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      padding: 16px;
+    }
+
+    main {
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: 1.45rem;
+      line-height: 1.25;
+      margin-bottom: 6px;
+    }
+
+    .muted {
+      color: #64748b;
+      line-height: 1.4;
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid #dbe3ef;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      color: #334155;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 1rem;
+    }
+
+    .meal-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .meal-button {
+      min-height: 58px;
+      border: 1px solid #cbd5e1;
+      border-radius: 9px;
+      background: #fff;
+      color: #334155;
+      font-size: 1rem;
+      font-weight: 850;
+    }
+
+    .meal-button.selected {
+      border-color: #2563eb;
+      background: #2563eb;
+      color: #fff;
+      box-shadow: 0 7px 16px rgba(37, 99, 235, 0.2);
+    }
+
+    .step-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 7px;
+      margin-bottom: 12px;
+    }
+
+    .step-tab {
+      min-height: 38px;
+      border: 1px solid #dbe3ef;
+      border-radius: 6px;
+      background: #fff;
+      color: #64748b;
+      font-size: 0.86rem;
+      font-weight: 800;
+    }
+
+    .step-tab.active {
+      background: #2563eb;
+      border-color: #2563eb;
+      color: #fff;
+    }
+
+    .step-tab.done {
+      background: #dcfce7;
+      border-color: #86efac;
+      color: #166534;
+    }
+
+    .chooser-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-size: 1.18rem;
+      line-height: 1.3;
+    }
+
+    .level {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #3730a3;
+      font-size: 0.82rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .path {
+      min-height: 22px;
+      margin-bottom: 10px;
+      color: #475569;
+      font-size: 0.94rem;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .tile-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .tile {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #fff;
+      color: #1e293b;
+      padding: 10px;
+      font-size: clamp(0.9rem, 3.6vw, 1.05rem);
+      font-weight: 850;
+      line-height: 1.25;
+      text-align: center;
+      display: grid;
+      place-items: center;
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+    }
+
+    .tile:active {
+      transform: scale(0.98);
+    }
+
+    .tile.primary {
+      border-color: #bfdbfe;
+      background: #eff6ff;
+    }
+
+    .tile.secondary {
+      border-color: #99f6e4;
+      background: #f0fdfa;
+    }
+
+    .tile.food {
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+    }
+
+    .tile.selected {
+      border-color: #2563eb;
+      background: #dbeafe;
+      color: #1d4ed8;
+      box-shadow: inset 0 0 0 2px #2563eb;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    .action {
+      min-height: 46px;
+      border: 0;
+      border-radius: 7px;
+      background: #64748b;
+      color: #fff;
+      font-size: 0.98rem;
+      font-weight: 800;
+    }
+
+    .action.skip {
+      background: #475569;
+    }
+
+    .submit {
+      position: sticky;
+      bottom: 12px;
+      width: 100%;
+      min-height: 50px;
+      border: 0;
+      border-radius: 7px;
+      background: #16a34a;
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 850;
+      box-shadow: 0 10px 24px rgba(22, 163, 74, 0.25);
+    }
+
+    .submit:disabled {
+      background: #94a3b8;
+      box-shadow: none;
+    }
+
+    .summary {
+      display: grid;
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .summary-row {
+      min-height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 7px 9px;
+      color: #334155;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .summary-row button {
+      border: 0;
+      background: transparent;
+      color: #2563eb;
+      font-weight: 850;
+      font-size: 0.9rem;
+    }
+
+    .status {
+      display: none;
+      margin: 12px 0;
+      padding: 12px;
+      border-radius: 7px;
+      font-weight: 750;
+      line-height: 1.4;
+    }
+
+    .status.success {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status.error {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    @media (min-width: 500px) {
+      .tile-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
   </style>
 </head>
 <body>
   <main>
-    <h1>음식 선호 설문</h1>
-    <p class="intro">최근 음식 1개와 선호 분류만 선택합니다. 싫어하는 음식이나 기타 개인정보는 받지 않습니다.</p>
+    <header>
+      <h1>음식 선호 설문</h1>
+      <p class="muted">최근 음식과 선호 음식을 대분류·소분류로 선택합니다.</p>
+    </header>
+
     <section class="panel">
       <label for="userId">이름 또는 별명</label>
-      <input id="userId" placeholder="비워두면 자동 번호가 붙습니다">
+      <input id="userId" type="text" placeholder="비워두면 자동 번호가 붙습니다">
     </section>
+
     <section class="panel">
-      <h2>1. 최근 먹은 음식</h2>
-      <p>대분류와 소분류를 하나씩 정확하게 선택해주세요.</p>
-      <label>대분류</label><select id="recentMain" onchange="loadSubs('recent')"><option value="">선택...</option></select>
-      <label>소분류</label><select id="recentSubcategory"><option value="">선택...</option></select>
+      <h2 style="margin-bottom: 6px;">추천 받을 끼니</h2>
+      <p class="muted">이번 식당 추천이 점심용인지 저녁용인지 선택해주세요.</p>
+      <div class="meal-buttons">
+        <button id="lunchButton" class="meal-button" type="button" onclick="selectMealType('lunch')">☀️ 점심</button>
+        <button id="dinnerButton" class="meal-button" type="button" onclick="selectMealType('dinner')">🌙 저녁</button>
+      </div>
     </section>
+
     <section class="panel">
-      <h2>2. 선호 음식 1</h2>
-      <p>대분류 하나와 서로 다른 소분류 두 개를 선택합니다.</p>
-      <label>대분류</label><select id="preferredMain1" onchange="loadSubs(1)"><option value="">선택...</option></select>
-      <label>소분류 1</label><select id="preferredSub1A"><option value="">선택...</option></select>
-      <label>소분류 2</label><select id="preferredSub1B"><option value="">선택...</option></select>
+      <div class="step-tabs" id="stepTabs"></div>
+      <div class="chooser-head">
+        <div>
+          <h2 id="groupTitle">최근 먹은 음식</h2>
+          <p id="groupHint" class="muted">대분류 1개와 소분류 음식 1개를 선택하세요.</p>
+        </div>
+        <span id="levelLabel" class="level">대분류</span>
+      </div>
+      <div id="selectedPath" class="path"></div>
+      <div id="tileGrid" class="tile-grid"></div>
+      <div class="actions">
+        <button id="backButton" class="action" type="button" onclick="goBack()">이전</button>
+        <button id="nextButton" class="action skip" type="button" onclick="goNext()">다음</button>
+      </div>
+      <div class="summary" id="summary"></div>
     </section>
-    <section class="panel">
-      <h2>3. 선호 음식 2</h2>
-      <p>첫 번째와 다른 대분류를 선택해주세요.</p>
-      <label>대분류</label><select id="preferredMain2" onchange="loadSubs(2)"><option value="">선택...</option></select>
-      <label>소분류 1</label><select id="preferredSub2A"><option value="">선택...</option></select>
-      <label>소분류 2</label><select id="preferredSub2B"><option value="">선택...</option></select>
-    </section>
+
     <div id="status" class="status"></div>
-    <button id="submitButton" onclick="submitSurvey()">제출하기</button>
+    <button id="submitButton" class="submit" type="button" onclick="submitSurvey()">제출하기</button>
   </main>
+
   <script>
     const sessionId = '{{ session_id }}';
-    async function initialize() {
-      const response = await fetch(`/api/session/${sessionId}`);
-      if (!response.ok) return disable('세션을 찾을 수 없습니다.');
-      const session = await response.json();
-      if (!session.mobile_enabled || session.status !== 'collecting') return disable('현재 모바일 접수가 열려 있지 않습니다.');
-      const categories = await (await fetch('/api/categories')).json();
-      ['recentMain', 'preferredMain1', 'preferredMain2'].forEach(id => {
-        categories.forEach(value => document.getElementById(id).add(new Option(value, value)));
-      });
+    const deviceId = getOrCreateDeviceId();
+    const state = {
+      recent: {high: '', food: ''},
+      likeHigh: [],
+      likeFoods: {}
+    };
+    let categories = [];
+    let currentStep = 0;
+    let selectedMealType = '';
+    const steps = [
+      {title: '최근 먹은 음식', level: '대분류', hint: '대분류 1개를 선택하세요.'},
+      {title: '최근 먹은 음식', level: '소분류', hint: '최근 먹은 음식 1개를 선택하세요.'},
+      {title: '선호 음식', level: '대분류', hint: '서로 다른 대분류 2개를 선택하세요.'},
+      {title: '선호 음식', level: '소분류', hint: '각 대분류에서 음식 2개씩 선택하세요.'}
+    ];
+
+    async function loadSurvey() {
+      const sessionResponse = await fetch(`/api/session/${sessionId}`);
+      if (!sessionResponse.ok) {
+        showStatus('세션을 찾을 수 없습니다.', 'error');
+        document.getElementById('submitButton').disabled = true;
+        return;
+      }
+      const session = await sessionResponse.json();
+      if (!session.mobile_enabled || session.status !== 'collecting') {
+        showStatus('현재 모바일 접수가 열려 있지 않습니다.', 'error');
+        document.getElementById('submitButton').disabled = true;
+        return;
+      }
+
+      const response = await fetch('/api/categories');
+      categories = await response.json();
+      await loadSavedProfile();
+      render();
     }
-    async function loadSubs(slot) {
-      const recent = slot === 'recent';
-      const main = document.getElementById(recent ? 'recentMain' : `preferredMain${slot}`).value;
-      const ids = recent ? ['recentSubcategory'] : [`preferredSub${slot}A`, `preferredSub${slot}B`];
-      ids.forEach(id => document.getElementById(id).innerHTML = '<option value="">선택...</option>');
-      if (!main) return;
-      const values = await (await fetch(`/api/subcategories/${encodeURIComponent(main)}`)).json();
-      ids.forEach(id => values.forEach(value => document.getElementById(id).add(new Option(value, value))));
+
+    function getOrCreateDeviceId() {
+      const storageKey = 'mm_device_id';
+      let saved = localStorage.getItem(storageKey);
+      if (saved) {
+        return saved;
+      }
+      saved = window.crypto?.randomUUID
+        ? window.crypto.randomUUID()
+        : `device-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+      localStorage.setItem(storageKey, saved);
+      return saved;
     }
-    function formData() {
-      return {
-        source: 'mobile',
-        user_id: document.getElementById('userId').value.trim(),
-        recent_main: document.getElementById('recentMain').value,
-        recent_subcategory: document.getElementById('recentSubcategory').value,
-        preferred: [1, 2].map(slot => ({
-          main: document.getElementById(`preferredMain${slot}`).value,
-          subcategories: [
-            document.getElementById(`preferredSub${slot}A`).value,
-            document.getElementById(`preferredSub${slot}B`).value
-          ]
-        }))
+
+    async function loadSavedProfile() {
+      try {
+        const response = await fetch(`/api/participant/${encodeURIComponent(deviceId)}`);
+        const data = await response.json();
+        const profile = data.profile;
+        if (!profile) {
+          return;
+        }
+        document.getElementById('userId').value = profile.user_id || '';
+        const preferences = profile.preferences || {};
+        state.recent.high = preferences.recent?.high?.[0] || '';
+        state.recent.food = foodName(preferences.recent?.low?.[0] || '');
+        state.likeHigh = (preferences.like?.high || []).slice(0, 2);
+        state.likeFoods = {};
+        for (const category of state.likeHigh) {
+          state.likeFoods[category] = (preferences.like?.low || [])
+            .filter(value => value.startsWith(`${category}|`))
+            .map(foodName)
+            .slice(0, 2);
+        }
+      } catch (e) {
+        console.error('저장된 설문을 불러오지 못했습니다:', e);
+      }
+    }
+
+    function selectMealType(mealType) {
+      selectedMealType = mealType;
+      document.getElementById('lunchButton').classList.toggle('selected', mealType === 'lunch');
+      document.getElementById('dinnerButton').classList.toggle('selected', mealType === 'dinner');
+      updateSubmitButton();
+    }
+
+    function applySavedPreference(groupKey, preference) {
+      const lowValue = preference.low?.[0] || '';
+      const [pathHigh, pathMid, pathFood] = lowValue.split('|');
+      state[groupKey] = {
+        high: pathHigh || preference.high?.[0] || '',
+        mid: pathMid || '',
+        food: pathFood || ''
       };
     }
-    function valid(data) {
-      const mains = data.preferred.map(item => item.main);
-      return data.recent_main && data.recent_subcategory
-        && mains.every(Boolean) && new Set(mains).size === 2
-        && data.preferred.every(item => item.subcategories.every(Boolean) && new Set(item.subcategories).size === 2);
+
+    function render() {
+      renderTabs();
+      renderChooser();
+      renderSummary();
+      updateSubmitButton();
     }
+
+    function renderTabs() {
+      document.getElementById('stepTabs').innerHTML = [
+        {label: '최근 음식', step: 0, done: Boolean(state.recent.high && state.recent.food)},
+        {label: '선호 대분류', step: 2, done: state.likeHigh.length === 2},
+        {label: '선호 음식', step: 3, done: preferredFoodsComplete()}
+      ].map(item => {
+        const active = currentStep === item.step || (item.step === 0 && currentStep === 1);
+        return `<button type="button" class="step-tab ${active ? 'active' : ''} ${item.done ? 'done' : ''}" onclick="setStep(${item.step})">${item.label}</button>`;
+      }).join('');
+    }
+
+    async function renderChooser() {
+      const step = steps[currentStep];
+      document.getElementById('groupTitle').textContent = step.title;
+      document.getElementById('groupHint').textContent = step.hint;
+      document.getElementById('levelLabel').textContent = step.level;
+      document.getElementById('backButton').disabled = currentStep === 0;
+      document.getElementById('nextButton').disabled = !stepComplete(currentStep);
+      document.getElementById('nextButton').style.visibility = currentStep === 3 ? 'hidden' : 'visible';
+      const grid = document.getElementById('tileGrid');
+
+      if (currentStep === 0) {
+        document.getElementById('selectedPath').textContent = state.recent.high || '';
+        grid.innerHTML = categoryTiles(categories, value => value === state.recent.high, 'selectRecentHigh');
+      } else if (currentStep === 1) {
+        document.getElementById('selectedPath').textContent = [state.recent.high, state.recent.food].filter(Boolean).join(' > ');
+        const foods = await fetchFoods(state.recent.high);
+        grid.innerHTML = foodTiles(foods, value => value === state.recent.food, 'selectRecentFood');
+      } else if (currentStep === 2) {
+        document.getElementById('selectedPath').textContent = `${state.likeHigh.length}/2 선택`;
+        grid.innerHTML = categoryTiles(categories, value => state.likeHigh.includes(value), 'toggleLikeHigh');
+      } else {
+        document.getElementById('selectedPath').textContent = state.likeHigh.map(category => `${category} ${(state.likeFoods[category] || []).length}/2`).join(' · ');
+        const sections = [];
+        for (const category of state.likeHigh) {
+          const foods = await fetchFoods(category);
+          sections.push(`<div style="grid-column:1/-1;font-weight:850;margin-top:6px;">${category} · ${(state.likeFoods[category] || []).length}/2</div>`);
+          sections.push(foodTiles(foods, value => (state.likeFoods[category] || []).includes(value), 'toggleLikeFood', category));
+        }
+        grid.innerHTML = sections.join('');
+      }
+    }
+
+    function categoryTiles(options, selected, handler) {
+      return options.map(value => `<button type="button" class="tile primary ${selected(value) ? 'selected' : ''}" onclick="${handler}('${escapeAttr(value)}')">${value}</button>`).join('');
+    }
+
+    function foodTiles(options, selected, handler, category = '') {
+      return options.map(value => `<button type="button" class="tile food ${selected(value) ? 'selected' : ''}" onclick="${handler}('${escapeAttr(category)}','${escapeAttr(value)}')">${value}</button>`).join('');
+    }
+
+    async function fetchFoods(category) {
+      if (!category) return [];
+      return fetch(`/api/foods/${encodeURIComponent(category)}`).then(response => response.json());
+    }
+
+    function selectRecentHigh(value) {
+      state.recent = {high: value, food: ''};
+      currentStep = 1;
+      render();
+    }
+
+    function selectRecentFood(_category, value) {
+      state.recent.food = value;
+      currentStep = 2;
+      render();
+    }
+
+    function toggleLikeHigh(value) {
+      if (state.likeHigh.includes(value)) {
+        state.likeHigh = state.likeHigh.filter(item => item !== value);
+        delete state.likeFoods[value];
+      } else if (state.likeHigh.length < 2) {
+        state.likeHigh.push(value);
+        state.likeFoods[value] = [];
+      }
+      render();
+    }
+
+    function toggleLikeFood(category, value) {
+      const selected = state.likeFoods[category] || [];
+      if (selected.includes(value)) {
+        state.likeFoods[category] = selected.filter(item => item !== value);
+      } else if (selected.length < 2) {
+        state.likeFoods[category] = [...selected, value];
+      }
+      render();
+    }
+
+    function setStep(step) {
+      if (step === 1 && !state.recent.high) return;
+      if (step === 3 && state.likeHigh.length !== 2) return;
+      currentStep = step;
+      render();
+    }
+
+    function goBack() {
+      currentStep = Math.max(0, currentStep - 1);
+      render();
+    }
+
+    function goNext() {
+      if (stepComplete(currentStep)) {
+        currentStep = Math.min(3, currentStep + 1);
+        render();
+      }
+    }
+
+    function stepComplete(step) {
+      return [
+        Boolean(state.recent.high),
+        Boolean(state.recent.food),
+        state.likeHigh.length === 2,
+        preferredFoodsComplete()
+      ][step];
+    }
+
+    function preferredFoodsComplete() {
+      return state.likeHigh.length === 2 && state.likeHigh.every(category => (state.likeFoods[category] || []).length === 2);
+    }
+
+    function renderSummary() {
+      const preferred = state.likeHigh.map(category => `${category}: ${(state.likeFoods[category] || []).join(', ') || '선택 중'}`).join(' / ');
+      document.getElementById('summary').innerHTML = `
+        <div class="summary-row"><span>최근 음식: ${[state.recent.high, state.recent.food].filter(Boolean).join(' > ') || '선택 중'}</span></div>
+        <div class="summary-row"><span>선호 음식: ${preferred || '선택 중'}</span></div>
+      `;
+    }
+
+    function updateSubmitButton() {
+      document.getElementById('submitButton').disabled = !selectedMealType || !state.recent.food || !preferredFoodsComplete();
+    }
+
     async function submitSurvey() {
-      const data = formData();
-      if (!valid(data)) return show('모든 항목을 선택하고 선택값이 서로 겹치지 않게 해주세요.', 'error');
+      if (!selectedMealType) {
+        showStatus('점심 또는 저녁을 선택해주세요.', 'error');
+        return;
+      }
+      if (!state.recent.food || !preferredFoodsComplete()) {
+        showStatus('최근 음식 1개와 선호 대분류별 음식 2개씩을 모두 선택해주세요.', 'error');
+        return;
+      }
+
       const button = document.getElementById('submitButton');
       button.disabled = true;
       button.textContent = '제출 중...';
+
+      const payload = {
+        source: 'mobile',
+        device_id: deviceId,
+        user_id: document.getElementById('userId').value.trim(),
+        meal_type: selectedMealType,
+        like_high: state.likeHigh,
+        like_low: state.likeHigh.flatMap(category => state.likeFoods[category].map(food => `${category}|${food}`)),
+        recent_high: [state.recent.high],
+        recent_low: [`${state.recent.high}|${state.recent.food}`]
+      };
+
       try {
         const response = await fetch(`/api/session/${sessionId}/add-participant`, {
-          method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
         });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || '제출 실패');
-        show(`접수되었습니다. 현재 ${result.participant_count}명이 참여했습니다.`, 'success');
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || '제출 실패');
+        }
+        showStatus(`접수되었습니다. 현재 ${data.participant_count}명이 참여했습니다.`, 'success');
         button.textContent = '제출 완료';
-      } catch (error) {
+      } catch (e) {
         button.disabled = false;
         button.textContent = '제출하기';
-        show(error.message, 'error');
+        showStatus(e.message, 'error');
       }
     }
-    function show(message, type) {
+
+    function foodName(value) {
+      return String(value).split('|').pop();
+    }
+
+    function showStatus(message, type) {
       const status = document.getElementById('status');
       status.textContent = message;
       status.className = `status ${type}`;
     }
-    function disable(message) {
-      show(message, 'error');
-      document.getElementById('submitButton').disabled = true;
+
+    function escapeAttr(value) {
+      return String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     }
-    document.addEventListener('DOMContentLoaded', initialize);
+
+    document.addEventListener('DOMContentLoaded', loadSurvey);
   </script>
 </body>
 </html>

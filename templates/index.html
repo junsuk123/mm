@@ -15,54 +15,54 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
-      padding: 20px;
+      padding: 12px;
     }
 
     .container {
-      max-width: 1440px;
+      max-width: 1600px;
       margin: 0 auto;
     }
 
     header {
       color: white;
       text-align: center;
-      margin-bottom: 30px;
-    }
-
-    header h1 {
-      font-size: 2.5em;
       margin-bottom: 10px;
     }
 
+    header h1 {
+      font-size: 1.8em;
+      margin-bottom: 2px;
+    }
+
     header p {
-      font-size: 1.1em;
+      font-size: 0.92em;
       opacity: 0.9;
     }
 
     .main-grid {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 20px;
+      gap: 12px;
+      margin-bottom: 0;
     }
 
     .card {
       background: white;
       border-radius: 10px;
-      padding: 20px;
+      padding: 14px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     }
 
     .card h2 {
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       color: #333;
-      font-size: 1.4em;
+      font-size: 1.18em;
       border-bottom: 2px solid #667eea;
-      padding-bottom: 10px;
+      padding-bottom: 7px;
     }
 
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 9px;
     }
 
     label {
@@ -74,7 +74,7 @@
 
     input, select {
       width: 100%;
-      padding: 10px;
+      padding: 7px 9px;
       border: 1px solid #ddd;
       border-radius: 5px;
       font-size: 1em;
@@ -90,7 +90,7 @@
     button {
       background: #667eea;
       color: white;
-      padding: 12px 20px;
+      padding: 9px 12px;
       border: none;
       border-radius: 5px;
       cursor: pointer;
@@ -118,7 +118,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      margin: 12px 0;
+      margin: 8px 0;
       color: #444;
       font-weight: 600;
     }
@@ -201,6 +201,70 @@
       color: #667eea;
     }
 
+    .user-folders {
+      max-height: 210px;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background: #f8fafc;
+    }
+
+    .user-folder {
+      min-width: 0;
+      padding: 10px 6px;
+      border: 1px solid #e5e7eb;
+      border-radius: 9px;
+      background: white;
+      text-align: center;
+      transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .user-folder:hover {
+      transform: translateY(-2px);
+      border-color: #c7d2fe;
+      box-shadow: 0 6px 14px rgba(67, 56, 202, 0.12);
+    }
+
+    .user-folder.selected {
+      border-color: #4f46e5;
+      background: #eef2ff;
+      box-shadow: inset 0 0 0 2px #4f46e5, 0 6px 14px rgba(67, 56, 202, 0.14);
+    }
+
+    .user-folder.selected .folder-icon {
+      transform: scale(1.08);
+    }
+
+    .selection-status {
+      margin-bottom: 8px;
+      color: #475569;
+      font-size: 0.88em;
+      font-weight: 700;
+    }
+
+    .folder-icon {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 2.4em;
+      line-height: 1;
+      filter: drop-shadow(0 3px 3px rgba(180, 120, 20, 0.2));
+    }
+
+    .folder-id {
+      display: block;
+      color: #3346b6;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.86em;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
     .remove-btn {
       background: #dc3545;
       color: white;
@@ -222,7 +286,9 @@
     }
 
     .terminal-log {
-      min-height: 420px;
+      flex: 1;
+      height: calc(100% - 42px);
+      min-height: 0;
       background: #111827;
       color: #d1fae5;
       border-radius: 8px;
@@ -230,15 +296,16 @@
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
       font-size: 0.82em;
       line-height: 1.45;
-      overflow-x: auto;
+      overflow: hidden;
       border: 1px solid rgba(255, 255, 255, 0.12);
     }
 
     .terminal-screen {
-      min-height: 330px;
+      height: 100%;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 9px;
+      overflow: hidden;
     }
 
     .terminal-line {
@@ -401,6 +468,10 @@
     }
 
     @media (max-width: 768px) {
+      body {
+        padding: 12px;
+      }
+
       .main-grid {
         grid-template-columns: 1fr;
       }
@@ -411,6 +482,41 @@
 
       .qr-grid {
         grid-template-columns: 1fr;
+      }
+
+      .terminal-log {
+        min-height: 300px;
+      }
+    }
+
+    @media (min-width: 769px) {
+      body {
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .container {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .main-grid {
+        flex: 1;
+        min-height: 0;
+        grid-template-columns: minmax(310px, 0.95fr) minmax(330px, 1.05fr) minmax(360px, 1.15fr);
+      }
+
+      .main-grid > .card {
+        height: 100%;
+        min-height: 0;
+        overflow-y: auto;
+      }
+
+      .main-grid > .card:last-child {
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
       }
     }
   </style>
@@ -424,9 +530,9 @@
     </header>
 
     <div class="main-grid">
-      <!-- 세션 설정 및 참가자 수집 -->
+      <!-- 모바일 수집 세션 설정 -->
       <div class="card">
-        <h2>📋 새 추천 세션</h2>
+        <h2>📱 모바일 수집 세션</h2>
         
         <div class="form-group">
           <label>그룹 수</label>
@@ -441,28 +547,18 @@
         <div class="form-group">
           <label>식당 검색 provider</label>
           <select id="provider">
-            <option value="mock" selected>mock (API 키 없이 인근 식당 추천)</option>
-            <option value="naver">naver (네이버 지역 검색)</option>
+            <option value="naver" selected>naver (네이버 지역 검색)</option>
+            <option value="mock">mock (API 키 없이 테스트)</option>
           </select>
         </div>
 
-        <label class="toggle-row">
-          <input type="checkbox" id="includeDemoParticipants" checked>
-          기본 참가자 데이터 포함
-        </label>
-
-        <label class="toggle-row">
-          <input type="checkbox" id="mobileEnabled">
-          모바일 QR 수집 사용
-        </label>
-
-        <div id="mobileBaseUrlGroup" class="form-group" style="display: none;">
+        <div id="mobileBaseUrlGroup" class="form-group">
           <label>모바일 접속 주소</label>
           <input type="text" id="mobileBaseUrl" placeholder="예: http://192.168.0.10:5000">
           <button type="button" class="secondary-btn" style="margin-top: 8px;" onclick="loadNetworkInfo()">접속 주소 자동 감지</button>
         </div>
 
-        <button onclick="createSession()">✨ 새 세션 시작</button>
+        <button onclick="createSession()">✨ 모바일 접수 시작</button>
 
         <div id="sessionStatus" style="margin-top: 10px; display: none;" class="status"></div>
         <div id="sessionId" style="margin-top: 10px; color: #666; font-size: 0.9em; display: none;"></div>
@@ -477,72 +573,7 @@
           </div>
         </div>
 
-        <hr style="margin: 20px 0;">
-
-        <h2 style="font-size: 1.2em; margin-top: 20px; margin-bottom: 15px;">👤 참가자 추가</h2>
-
-        <div class="form-group">
-          <label>사용자 ID (선택)</label>
-          <input type="text" id="userId" placeholder="예: U01">
-        </div>
-
-        <div style="background: #f0fff4; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
-          <h3 style="color: #198754; margin-bottom: 10px;">1. 최근 먹은 음식</h3>
-          <div class="form-group">
-            <label>대분류</label>
-            <select id="recentMain" onchange="updateSubcategorySelects('recent')">
-              <option value="">선택...</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>소분류</label>
-            <select id="recentSubcategory">
-              <option value="">선택...</option>
-            </select>
-          </div>
-        </div>
-
-        <div style="background: #f0f8ff; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
-          <h3 style="color: #667eea; margin-bottom: 10px;">2. 선호 음식 1</h3>
-          <div class="form-group">
-            <label>선호 대분류</label>
-            <select id="preferredMain1" onchange="updateSubcategorySelects(1)">
-              <option value="">선택...</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>선호 소분류 1</label>
-            <select id="preferredSub1A"><option value="">선택...</option></select>
-          </div>
-          <div class="form-group">
-            <label>선호 소분류 2</label>
-            <select id="preferredSub1B"><option value="">선택...</option></select>
-          </div>
-        </div>
-
-        <div style="background: #f0f8ff; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
-          <h3 style="color: #667eea; margin-bottom: 10px;">3. 선호 음식 2</h3>
-          <div class="form-group">
-            <label>선호 대분류</label>
-            <select id="preferredMain2" onchange="updateSubcategorySelects(2)">
-              <option value="">선택...</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>선호 소분류 1</label>
-            <select id="preferredSub2A"><option value="">선택...</option></select>
-          </div>
-          <div class="form-group">
-            <label>선호 소분류 2</label>
-            <select id="preferredSub2B"><option value="">선택...</option></select>
-          </div>
-        </div>
-
-        <div class="button-group">
-          <button onclick="addParticipant()">➕ 참가자 추가</button>
-          <button class="secondary-btn" onclick="generateRecommendations()">🚀 추천 생성</button>
-        </div>
-        <div style="margin-top: 10px;">
+        <div style="margin-top: 12px;">
           <button class="danger-btn" onclick="closeAndGenerate()">마감 및 실행</button>
         </div>
       </div>
@@ -550,6 +581,14 @@
       <!-- 참가자 목록 및 결과 -->
       <div class="card">
         <h2>📊 참가자 및 결과</h2>
+
+        <div id="userFoldersContainer">
+          <h3 style="margin: 8px 0 5px;">📁 이번 세션 참여자 선택</h3>
+          <div class="selection-status" id="selectionStatus">폴더를 눌러 함께 추천받을 사용자를 선택하세요.</div>
+          <div class="user-folders" id="userFolders">
+            <div style="color: #999;">사용자 폴더를 불러오는 중...</div>
+          </div>
+        </div>
 
         <div id="participantsContainer" style="display: none;">
           <h3 style="margin-top: 15px; margin-bottom: 10px;">참가자 목록</h3>
@@ -570,7 +609,7 @@
         <h2>⌨️ 리눅스 명령어 처리 과정</h2>
         <div class="terminal-log" id="cliLog">
           <div class="terminal-screen">
-            <div class="terminal-line terminal-output">마감 및 실행을 누르면 내부 명령어 흐름이 표시됩니다.</div>
+            <div class="terminal-line terminal-output">서버 CLI 로그에 연결하는 중...</div>
           </div>
         </div>
       </div>
@@ -581,29 +620,12 @@
     let currentSessionId = null;
     let participants = [];
     let participantPoll = null;
-    let terminalStream = null;
-    const MAX_TERMINAL_LINES = 240;
-
-    // 카테고리 데이터 로드
-    async function loadCategories() {
-      try {
-        const response = await fetch('/api/categories');
-        const categories = await response.json();
-        
-        const selectors = ['recentMain', 'preferredMain1', 'preferredMain2'];
-        selectors.forEach(id => {
-          const select = document.getElementById(id);
-          categories.forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat;
-            option.textContent = cat;
-            select.appendChild(option);
-          });
-        });
-      } catch (e) {
-        console.error('카테고리 로드 실패:', e);
-      }
-    }
+    let terminalPoll = null;
+    let cliEventCursor = -1;
+    let cliEventQueue = [];
+    let cliQueueRunning = false;
+    let userFolderPoll = null;
+    let selectedParticipantIds = new Set();
 
     async function loadNetworkInfo() {
       try {
@@ -616,32 +638,10 @@
       }
     }
 
-    function toggleMobileBaseUrl() {
-      const enabled = document.getElementById('mobileEnabled').checked;
-      document.getElementById('mobileBaseUrlGroup').style.display = enabled ? 'block' : 'none';
-      if (enabled && !document.getElementById('mobileBaseUrl').value) {
-        loadNetworkInfo();
-      }
-    }
-
-    async function updateSubcategorySelects(slot) {
-      const recent = slot === 'recent';
-      const main = document.getElementById(recent ? 'recentMain' : `preferredMain${slot}`).value;
-      const ids = recent ? ['recentSubcategory'] : [`preferredSub${slot}A`, `preferredSub${slot}B`];
-      ids.forEach(id => document.getElementById(id).innerHTML = '<option value="">선택...</option>');
-      if (!main) return;
-      const subs = await (await fetch(`/api/subcategories/${encodeURIComponent(main)}`)).json();
-      ids.forEach(id => {
-        subs.forEach(sub => document.getElementById(id).add(new Option(sub, sub)));
-      });
-    }
-
     async function createSession() {
       const groupCount = parseInt(document.getElementById('groupCount').value);
       const location = document.getElementById('location').value;
       const provider = document.getElementById('provider').value;
-      const mobileEnabled = document.getElementById('mobileEnabled').checked;
-      const includeDemoParticipants = document.getElementById('includeDemoParticipants').checked;
       const publicBaseUrl = document.getElementById('mobileBaseUrl').value.trim();
 
       try {
@@ -652,8 +652,8 @@
             groups: groupCount,
             location,
             provider,
-            mobile_enabled: mobileEnabled,
-            include_demo_participants: includeDemoParticipants,
+            mobile_enabled: true,
+            participant_ids: Array.from(selectedParticipantIds),
             public_base_url: publicBaseUrl
           })
         });
@@ -662,7 +662,7 @@
         participants = data.participants || [];
 
         document.getElementById('sessionStatus').style.display = 'block';
-        document.getElementById('sessionStatus').textContent = `✅ 세션 생성됨: ${currentSessionId}`;
+        document.getElementById('sessionStatus').textContent = `✅ 세션 생성됨: ${currentSessionId} · 선택 ${participants.length}명`;
         document.getElementById('sessionStatus').className = 'status success';
         document.getElementById('sessionId').style.display = 'block';
         document.getElementById('sessionId').textContent = `세션 ID: ${currentSessionId}`;
@@ -671,6 +671,7 @@
         document.getElementById('resultsContainer').style.display = 'none';
         renderQrPanel(data.join_url || '');
         updateParticipantsList();
+        loadUserFolders();
         startParticipantPolling();
       } catch (e) {
         alert('세션 생성 실패: ' + e.message);
@@ -703,6 +704,10 @@
       }
       refreshSession();
       participantPoll = setInterval(refreshSession, 2500);
+      if (userFolderPoll) {
+        clearInterval(userFolderPoll);
+      }
+      userFolderPoll = setInterval(loadUserFolders, 2500);
     }
 
     async function refreshSession() {
@@ -722,111 +727,55 @@
       }
     }
 
-    async function addParticipant() {
-      if (!currentSessionId) {
-        alert('먼저 세션을 생성해주세요');
-        return;
-      }
-
-      const data = {
-        user_id: document.getElementById('userId').value || `U${participants.length + 1}`,
-        recent_main: document.getElementById('recentMain').value,
-        recent_subcategory: document.getElementById('recentSubcategory').value,
-        preferred: [1, 2].map(slot => ({
-          main: document.getElementById(`preferredMain${slot}`).value,
-          subcategories: [
-            document.getElementById(`preferredSub${slot}A`).value,
-            document.getElementById(`preferredSub${slot}B`).value
-          ]
-        }))
-      };
-      const mains = data.preferred.map(item => item.main);
-      if (!data.recent_main || !data.recent_subcategory
-          || mains.some(value => !value) || new Set(mains).size !== 2
-          || data.preferred.some(item => item.subcategories.some(value => !value)
-            || new Set(item.subcategories).size !== 2)) {
-        alert('최근 음식과 서로 다른 선호 대분류 2개, 각 대분류의 서로 다른 소분류 2개를 모두 선택해주세요.');
-        return;
-      }
-
-      try {
-        const response = await fetch(`/api/session/${currentSessionId}/add-participant`, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(data)
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          participants.push(result.participant || data);
-          updateParticipantsList();
-          
-          // 폼 초기화
-          document.getElementById('userId').value = '';
-          ['recentMain', 'preferredMain1', 'preferredMain2'].forEach(id => document.getElementById(id).value = '');
-          ['recentSubcategory', 'preferredSub1A', 'preferredSub1B', 'preferredSub2A', 'preferredSub2B'].forEach(id => {
-            document.getElementById(id).innerHTML = '<option value="">선택...</option>';
-          });
-        }
-      } catch (e) {
-        alert('참가자 추가 실패: ' + e.message);
-      }
-    }
-
     function updateParticipantsList() {
       const list = document.getElementById('participantsList');
       document.getElementById('mobileCount').textContent = `참가자 ${participants.length}명 접수`;
-
-      const activeKeys = new Set();
-      participants.forEach((participant, index) => {
-        const key = participantDomKey(participant, index);
-        activeKeys.add(key);
-
-        let item = list.querySelector(`[data-participant-key="${cssEscape(key)}"]`);
-        if (!item) {
-          item = document.createElement('div');
-          item.className = 'participant-item';
-          item.dataset.participantKey = key;
-        }
-
-        const signature = participantSignature(participant, index);
-        if (item.dataset.signature !== signature) {
-          item.dataset.signature = signature;
-          item.innerHTML = `
-            <strong>${escapeHtml(participant.user_id || `U${index + 1}`)}</strong>
-            <span style="color: #666; font-size: 0.9em;">${participant.source === 'mobile' ? '모바일' : '관리자'}</span>
-          `;
-        }
-
-        const currentAtIndex = list.children[index];
-        if (currentAtIndex !== item) {
-          list.insertBefore(item, currentAtIndex || null);
-        }
-      });
-
-      Array.from(list.children).forEach(item => {
-        if (!activeKeys.has(item.dataset.participantKey)) {
-          item.remove();
-        }
-      });
+      list.innerHTML = participants.map((p, i) => `
+        <div class="participant-item">
+          <strong>${p.participant_id || p.user_id || `U${String(i + 1).padStart(4, '0')}`} · ${p.display_name || p.user_id || '이름 없음'}</strong>
+          <span style="color: #666; font-size: 0.9em;">${p.source === 'mobile' ? '모바일' : '예시'}</span>
+        </div>
+      `).join('');
     }
 
-    function participantDomKey(participant, index) {
-      return String(participant.user_id || participant.id || `participant-${index}`);
-    }
-
-    function participantSignature(participant, index) {
-      return JSON.stringify({
-        user_id: participant.user_id || `U${index + 1}`,
-        source: participant.source || 'admin'
-      });
-    }
-
-    function cssEscape(value) {
-      if (window.CSS && CSS.escape) {
-        return CSS.escape(value);
+    async function loadUserFolders() {
+      try {
+        const response = await fetch('/api/participants', {cache: 'no-store'});
+        if (!response.ok) {
+          return;
+        }
+        const data = await response.json();
+        const folders = data.participants || [];
+        const container = document.getElementById('userFolders');
+        container.innerHTML = folders.length
+          ? folders.map(folder => `
+              <div class="user-folder ${selectedParticipantIds.has(folder.participant_id) ? 'selected' : ''}"
+                   onclick="toggleParticipantSelection('${escapeHtml(folder.participant_id)}')">
+                <span class="folder-icon" aria-hidden="true">📁</span>
+                <span class="folder-id">${escapeHtml(folder.participant_id)}</span>
+              </div>
+            `).join('')
+          : '<div style="color: #999;">저장된 사용자 폴더가 없습니다.</div>';
+        updateSelectionStatus();
+      } catch (e) {
+        console.error('사용자 폴더 목록 갱신 실패:', e);
       }
-      return String(value).replace(/["\\]/g, '\\$&');
+    }
+
+    function toggleParticipantSelection(participantId) {
+      if (selectedParticipantIds.has(participantId)) {
+        selectedParticipantIds.delete(participantId);
+      } else {
+        selectedParticipantIds.add(participantId);
+      }
+      loadUserFolders();
+    }
+
+    function updateSelectionStatus() {
+      const count = selectedParticipantIds.size;
+      document.getElementById('selectionStatus').textContent = count
+        ? `${count}명 선택됨 · 다음에 시작하는 새 세션에 적용됩니다.`
+        : '폴더를 눌러 함께 추천받을 사용자를 선택하세요. QR 신규 참여자는 세션에 자동 추가됩니다.';
     }
 
     function removeParticipant(index) {
@@ -842,9 +791,8 @@
       }
 
       const resultsDiv = document.getElementById('results');
-      const cliLog = document.getElementById('cliLog');
       resultsDiv.innerHTML = '<div style="grid-column: 1/-1;"><div class="spinner"></div> 추천 생성 중...</div>';
-      resetTerminal('내부 명령어 실행을 시작합니다...');
+      appendTerminalEvent({type: 'output', text: '── 추천 CLI 실행 요청 ──'});
       document.getElementById('resultsContainer').style.display = 'block';
 
       try {
@@ -863,23 +811,12 @@
       }
     }
 
-    function resetTerminal(message) {
-      if (terminalStream) {
-        terminalStream.close();
-        terminalStream = null;
-      }
-      document.getElementById('cliLog').innerHTML = terminalFrame(`
-        <div class="terminal-line terminal-output">${escapeHtml(message)}</div>
-      `);
-    }
-
-    function terminalFrame(innerHtml) {
-      return `<div class="terminal-screen">${innerHtml}</div>`;
-    }
-
     function appendTerminalEvent(event) {
       const cliLog = document.getElementById('cliLog');
       const screen = cliLog.querySelector('.terminal-screen');
+      if (event.type === 'command') {
+        screen.innerHTML = '';
+      }
       const line = document.createElement('div');
       line.className = event.type === 'command'
         ? 'terminal-line terminal-command'
@@ -888,10 +825,61 @@
         ? `<span class="terminal-prompt">$ </span>${escapeHtml(event.text)}`
         : escapeHtml(event.text);
       screen.appendChild(line);
-      while (screen.children.length > MAX_TERMINAL_LINES) {
-        screen.firstElementChild.remove();
+      while (screen.children.length > 8) {
+        const removable = screen.children[0].classList.contains('terminal-command')
+          ? screen.children[1]
+          : screen.children[0];
+        if (!removable) {
+          break;
+        }
+        removable.remove();
       }
-      cliLog.scrollTop = cliLog.scrollHeight;
+    }
+
+    function queueTerminalEvents(events) {
+      cliEventQueue.push(...events);
+      if (!cliQueueRunning) {
+        drainTerminalQueue();
+      }
+    }
+
+    function drainTerminalQueue() {
+      const event = cliEventQueue.shift();
+      if (!event) {
+        cliQueueRunning = false;
+        return;
+      }
+      cliQueueRunning = true;
+      appendTerminalEvent(event);
+      const delay = event.type === 'command' ? 250 : 20;
+      setTimeout(drainTerminalQueue, delay);
+    }
+
+    async function pollCliEvents() {
+      try {
+        const response = await fetch(`/api/cli-events?after=${cliEventCursor}`, {cache: 'no-store'});
+        if (!response.ok) {
+          return;
+        }
+        const data = await response.json();
+        const events = data.events || [];
+        if (events.length) {
+          cliEventCursor = Math.max(cliEventCursor, ...events.map(event => event.id));
+          queueTerminalEvents(events);
+        }
+      } catch (e) {
+        console.error('CLI 로그 갱신 실패:', e);
+      }
+    }
+
+    function startCliPolling() {
+      const cliLog = document.getElementById('cliLog');
+      cliLog.innerHTML = '<div class="terminal-screen"></div>';
+      pollCliEvents();
+      if (terminalPoll) {
+        clearInterval(terminalPoll);
+      }
+      terminalPoll = setInterval(pollCliEvents, 250);
     }
 
     function renderRecommendationGroups(groups) {
@@ -920,36 +908,32 @@
       `).join('');
     }
 
-    function pollRecommendationJob(jobId) {
+    async function pollRecommendationJob(jobId) {
       const resultsDiv = document.getElementById('results');
-      terminalStream = new EventSource(`/api/job/${jobId}/events`);
+      const poll = async () => {
+        const response = await fetch(`/api/job/${jobId}`);
+        const job = await response.json();
 
-      terminalStream.addEventListener('cli', event => {
-        appendTerminalEvent(JSON.parse(event.data));
-      });
-
-      terminalStream.addEventListener('completed', event => {
-        const payload = JSON.parse(event.data);
-        terminalStream.close();
-        terminalStream = null;
-        appendTerminalEvent({type: 'output', text: '완료: 추천 결과를 화면에 표시합니다.'});
-        renderRecommendationGroups(payload.result?.groups || []);
-      });
-
-      terminalStream.addEventListener('failed', event => {
-        const payload = JSON.parse(event.data);
-        terminalStream.close();
-        terminalStream = null;
-        resultsDiv.innerHTML = '<div style="grid-column: 1/-1; color: #dc3545;">추천 생성 실패</div>';
-        appendTerminalEvent({type: 'output', text: payload.error || '추천 생성 실패'});
-      });
-
-      terminalStream.onerror = () => {
-        if (!terminalStream) {
-          return;
+        if (job.status === 'completed') {
+          queueTerminalEvents([{type: 'output', text: '완료: 추천 결과를 화면에 표시합니다.'}]);
+          renderRecommendationGroups(job.result.groups || []);
+          return true;
+        } else if (job.status === 'failed') {
+          resultsDiv.innerHTML = '<div style="grid-column: 1/-1; color: #dc3545;">추천 생성 실패</div>';
+          appendTerminalEvent({type: 'output', text: job.error || '추천 생성 실패'});
+          return true;
         }
-        appendTerminalEvent({type: 'output', text: '실시간 연결을 다시 시도하고 있습니다...'});
+        return false;
       };
+
+      if (await poll()) {
+        return;
+      }
+      const jobPoll = setInterval(async () => {
+        if (await poll()) {
+          clearInterval(jobPoll);
+        }
+      }, 500);
     }
 
     function escapeHtml(value) {
@@ -976,9 +960,9 @@
 
     // 페이지 로드 시 카테고리 로드
     document.addEventListener('DOMContentLoaded', () => {
-      loadCategories();
+      startCliPolling();
       loadNetworkInfo();
-      document.getElementById('mobileEnabled').addEventListener('change', toggleMobileBaseUrl);
+      loadUserFolders();
     });
   </script>
 </body>

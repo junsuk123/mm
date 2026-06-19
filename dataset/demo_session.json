@@ -5,251 +5,251 @@
     {
       "user_id": "김민준",
       "preferences": {
-        "recent": {
-          "main": "한식",
-          "subcategory": "국물/탕류"
+        "like": {
+          "high": [
+            "한식",
+            "중식"
+          ],
+          "low": [
+            "한식|김치찌개",
+            "한식|된장찌개",
+            "중식|짜장면",
+            "중식|짬뽕"
+          ]
         },
-        "preferred": [
-          {
-            "main": "한식",
-            "subcategories": [
-              "국물/탕류",
-              "밥/정식류"
-            ]
-          },
-          {
-            "main": "중식",
-            "subcategories": [
-              "면/밥류",
-              "튀김류"
-            ]
-          }
-        ]
+        "recent": {
+          "high": [
+            "한식"
+          ],
+          "low": [
+            "한식|순두부찌개"
+          ]
+        }
       }
     },
     {
       "user_id": "이서준",
       "preferences": {
-        "recent": {
-          "main": "한식",
-          "subcategory": "구이/고기류"
+        "like": {
+          "high": [
+            "한식",
+            "중식"
+          ],
+          "low": [
+            "한식|삼겹살",
+            "한식|불고기",
+            "중식|짜장면",
+            "중식|짬뽕"
+          ]
         },
-        "preferred": [
-          {
-            "main": "한식",
-            "subcategories": [
-              "구이/고기류",
-              "밥/정식류"
-            ]
-          },
-          {
-            "main": "중식",
-            "subcategories": [
-              "면/밥류",
-              "튀김류"
-            ]
-          }
-        ]
+        "recent": {
+          "high": [
+            "한식"
+          ],
+          "low": [
+            "한식|불고기"
+          ]
+        }
       }
     },
     {
       "user_id": "박도윤",
       "preferences": {
-        "recent": {
-          "main": "일식",
-          "subcategory": "밥/덮밥류"
+        "like": {
+          "high": [
+            "일식",
+            "세계음식"
+          ],
+          "low": [
+            "일식|라멘",
+            "일식|우동",
+            "세계음식|쌀국수",
+            "세계음식|팟타이"
+          ]
         },
-        "preferred": [
-          {
-            "main": "일식",
-            "subcategories": [
-              "면류",
-              "밥/덮밥류"
-            ]
-          },
-          {
-            "main": "멕시칸",
-            "subcategories": [
-              "타코/부리또류",
-              "퀘사디아/나초류"
-            ]
-          }
-        ]
+        "recent": {
+          "high": [
+            "일식"
+          ],
+          "low": [
+            "일식|초밥"
+          ]
+        }
       }
     },
     {
       "user_id": "최하준",
       "preferences": {
-        "recent": {
-          "main": "일식",
-          "subcategory": "면류"
+        "like": {
+          "high": [
+            "일식",
+            "세계음식"
+          ],
+          "low": [
+            "일식|초밥",
+            "일식|돈부리",
+            "세계음식|쌀국수",
+            "세계음식|팟타이"
+          ]
         },
-        "preferred": [
-          {
-            "main": "일식",
-            "subcategories": [
-              "밥/덮밥류",
-              "면류"
-            ]
-          },
-          {
-            "main": "멕시칸",
-            "subcategories": [
-              "타코/부리또류",
-              "퀘사디아/나초류"
-            ]
-          }
-        ]
+        "recent": {
+          "high": [
+            "일식"
+          ],
+          "low": [
+            "일식|라멘"
+          ]
+        }
       }
     },
     {
       "user_id": "정시우",
       "preferences": {
-        "recent": {
-          "main": "중식",
-          "subcategory": "면/밥류"
+        "like": {
+          "high": [
+            "중식",
+            "양식"
+          ],
+          "low": [
+            "중식|짜장면",
+            "중식|짬뽕",
+            "양식|크림파스타",
+            "양식|토마토파스타"
+          ]
         },
-        "preferred": [
-          {
-            "main": "중식",
-            "subcategories": [
-              "면/밥류",
-              "튀김류"
-            ]
-          },
-          {
-            "main": "양식/이탈리안",
-            "subcategories": [
-              "파스타/리조또류",
-              "피자류"
-            ]
-          }
-        ]
+        "recent": {
+          "high": [
+            "중식"
+          ],
+          "low": [
+            "중식|짬뽕"
+          ]
+        }
       }
     },
     {
       "user_id": "강지호",
       "preferences": {
-        "recent": {
-          "main": "중식",
-          "subcategory": "면/밥류"
+        "like": {
+          "high": [
+            "중식",
+            "양식"
+          ],
+          "low": [
+            "중식|볶음밥",
+            "중식|소스덮밥",
+            "양식|크림파스타",
+            "양식|토마토파스타"
+          ]
         },
-        "preferred": [
-          {
-            "main": "중식",
-            "subcategories": [
-              "면/밥류",
-              "튀김류"
-            ]
-          },
-          {
-            "main": "양식/이탈리안",
-            "subcategories": [
-              "파스타/리조또류",
-              "피자류"
-            ]
-          }
-        ]
+        "recent": {
+          "high": [
+            "중식"
+          ],
+          "low": [
+            "중식|볶음밥"
+          ]
+        }
       }
     },
     {
       "user_id": "윤서아",
       "preferences": {
-        "recent": {
-          "main": "양식/이탈리안",
-          "subcategory": "파스타/리조또류"
+        "like": {
+          "high": [
+            "양식",
+            "일식"
+          ],
+          "low": [
+            "양식|크림파스타",
+            "양식|토마토파스타",
+            "일식|초밥",
+            "일식|돈부리"
+          ]
         },
-        "preferred": [
-          {
-            "main": "양식/이탈리안",
-            "subcategories": [
-              "파스타/리조또류",
-              "피자류"
-            ]
-          },
-          {
-            "main": "일식",
-            "subcategories": [
-              "밥/덮밥류",
-              "면류"
-            ]
-          }
-        ]
+        "recent": {
+          "high": [
+            "양식"
+          ],
+          "low": [
+            "양식|토마토파스타"
+          ]
+        }
       }
     },
     {
       "user_id": "한지유",
       "preferences": {
-        "recent": {
-          "main": "양식/이탈리안",
-          "subcategory": "피자류"
+        "like": {
+          "high": [
+            "양식",
+            "일식"
+          ],
+          "low": [
+            "양식|페퍼로니피자",
+            "양식|치즈피자",
+            "일식|초밥",
+            "일식|돈부리"
+          ]
         },
-        "preferred": [
-          {
-            "main": "양식/이탈리안",
-            "subcategories": [
-              "피자류",
-              "파스타/리조또류"
-            ]
-          },
-          {
-            "main": "일식",
-            "subcategories": [
-              "밥/덮밥류",
-              "면류"
-            ]
-          }
-        ]
+        "recent": {
+          "high": [
+            "양식"
+          ],
+          "low": [
+            "양식|치즈피자"
+          ]
+        }
       }
     },
     {
       "user_id": "오하린",
       "preferences": {
-        "recent": {
-          "main": "태국식",
-          "subcategory": "면류"
+        "like": {
+          "high": [
+            "세계음식",
+            "한식"
+          ],
+          "low": [
+            "세계음식|쌀국수",
+            "세계음식|팟타이",
+            "한식|비빔밥",
+            "한식|김치볶음밥"
+          ]
         },
-        "preferred": [
-          {
-            "main": "멕시칸",
-            "subcategories": [
-              "타코/부리또류",
-              "퀘사디아/나초류"
-            ]
-          },
-          {
-            "main": "한식",
-            "subcategories": [
-              "밥/정식류",
-              "국물/탕류"
-            ]
-          }
-        ]
+        "recent": {
+          "high": [
+            "세계음식"
+          ],
+          "low": [
+            "세계음식|팟타이"
+          ]
+        }
       }
     },
     {
       "user_id": "임서연",
       "preferences": {
-        "recent": {
-          "main": "멕시칸",
-          "subcategory": "타코/부리또류"
+        "like": {
+          "high": [
+            "세계음식",
+            "한식"
+          ],
+          "low": [
+            "세계음식|타코",
+            "세계음식|부리토",
+            "한식|비빔밥",
+            "한식|김치볶음밥"
+          ]
         },
-        "preferred": [
-          {
-            "main": "멕시칸",
-            "subcategories": [
-              "타코/부리또류",
-              "퀘사디아/나초류"
-            ]
-          },
-          {
-            "main": "한식",
-            "subcategories": [
-              "밥/정식류",
-              "국물/탕류"
-            ]
-          }
-        ]
+        "recent": {
+          "high": [
+            "세계음식"
+          ],
+          "low": [
+            "세계음식|타코"
+          ]
+        }
       }
     }
   ]
