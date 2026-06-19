@@ -62,6 +62,23 @@ Options:
 EOF
 }
 
+require_command() {
+  command_name=$1
+  install_hint=$2
+  if command -v "$command_name" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  printf '%s\n' "Missing required command: $command_name" >&2
+  printf '%s\n' "$install_hint" >&2
+  exit 127
+}
+
+check_dependencies() {
+  require_command jq "Install it with: sudo apt update && sudo apt install -y jq"
+  require_command python3 "Install it with: sudo apt update && sudo apt install -y python3"
+}
+
 prompt_text() {
   prompt_message=$1
   printf '%s' "$prompt_message" >&2
@@ -806,6 +823,8 @@ main() {
     esac
     shift
   done
+
+  check_dependencies
 
   if [ "$mode" = collect-session ]; then
     collect_session_data

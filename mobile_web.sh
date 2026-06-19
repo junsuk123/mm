@@ -17,6 +17,13 @@ else
 fi
 
 ensure_python_deps() {
+  if ! command -v jq >/dev/null 2>&1; then
+    printf '%s\n' "Missing required command: jq" >&2
+    printf '%s\n' "Install it with:" >&2
+    printf '%s\n' "  sudo apt update && sudo apt install -y jq" >&2
+    return 1
+  fi
+
   if "$PYTHON_CMD" - <<'PY' >/dev/null 2>&1
 import flask
 PY
@@ -87,6 +94,8 @@ wait_for_tunnel_url() {
   return 1
 }
 
+ensure_python_deps
+
 if [ -n "${MM_PUBLIC_BASE_URL:-}" ]; then
   PUBLIC_URL=${MM_PUBLIC_BASE_URL%/}
 else
@@ -97,7 +106,6 @@ fi
 
 printf '%s\n' "Mobile public URL: $PUBLIC_URL" >&2
 printf '%s\n' "Admin UI: http://127.0.0.1:$PORT" >&2
-ensure_python_deps
 
 (
   cd "$SCRIPT_DIR"

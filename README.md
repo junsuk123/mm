@@ -17,7 +17,11 @@
 
 ## 빠른 실행
 
-최초 1회 Python 의존성 설치:
+최초 1회 시스템 도구와 Python 의존성 설치:
+
+```bash
+sudo apt update && sudo apt install -y jq python3 python3-pip
+```
 
 ```bash
 python3 -m pip install -r requirements.txt

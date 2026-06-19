@@ -222,6 +222,20 @@ def get_reachable_base_urls(port=5000):
 
     return urls
 
+def normalize_base_url(value):
+    base_url = str(value or '').strip().rstrip('/')
+    if not base_url:
+        return ''
+    if not base_url.startswith(('http://', 'https://')):
+        base_url = f'http://{base_url}'
+    return base_url
+
+def get_public_base_url(client_base_url=''):
+    env_base_url = normalize_base_url(os.environ.get('MM_PUBLIC_BASE_URL'))
+    if env_base_url:
+        return env_base_url
+    return normalize_base_url(client_base_url)
+
 @app.route('/')
 def index():
     """메인 대시보드"""
@@ -251,7 +265,7 @@ def api_foods(category, subcategory):
 def api_network_info():
     """QR에 넣을 수 있는 접속 주소 후보."""
     port = int(os.environ.get('PORT', 5000))
-    env_base_url = os.environ.get('MM_PUBLIC_BASE_URL', '').rstrip('/')
+    env_base_url = get_public_base_url()
     urls = get_reachable_base_urls(port)
     if env_base_url:
         urls.insert(0, env_base_url)
@@ -266,7 +280,7 @@ def create_session():
     session_id = str(uuid.uuid4())[:8]
     mobile_enabled = bool(data.get('mobile_enabled', False))
     include_demo_participants = bool(data.get('include_demo_participants', True))
-    public_base_url = (data.get('public_base_url') or os.environ.get('MM_PUBLIC_BASE_URL') or request.host_url).rstrip('/')
+    public_base_url = get_public_base_url(data.get('public_base_url')) or normalize_base_url(request.host_url)
     join_url = f'{public_base_url}/join/{session_id}'
     participants = load_demo_participants() if include_demo_participants else []
     
@@ -287,6 +301,7 @@ def create_session():
     return jsonify({
         'session_id': session_id,
         'join_url': session_data['join_url'],
+        'public_base_url': public_base_url,
         'mobile_enabled': mobile_enabled,
         'provider': session_data['provider'],
         'participant_count': len(participants),
