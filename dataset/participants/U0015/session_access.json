@@ -1,0 +1,22 @@
+{
+  "participant_id": "U0015",
+  "sessions": [
+    {
+      "session_id": "2d68edac",
+      "first_accessed_at": "2026-06-20T16:25:54.586250",
+      "last_accessed_at": "2026-06-20T16:25:54.588852",
+      "access_count": 2,
+      "source": "survey_submission"
+    },
+    {
+      "session_id": "fb3a4bee",
+      "first_accessed_at": "2026-06-20T16:27:48.766038",
+      "last_accessed_at": "2026-06-20T16:27:48.766038",
+      "access_count": 1,
+      "source": "qr_access"
+    }
+  ],
+  "device_identifier": "db2752ce-d88a-41ea-b991-73bab197a185",
+  "last_session_id": "fb3a4bee",
+  "updated_at": "2026-06-20T16:27:48.766038"
+}

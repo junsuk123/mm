@@ -1,0 +1,34 @@
+{
+  "participant_id": "U0001",
+  "date": "2026-06-20",
+  "meals": {
+    "lunch": {
+      "submitted_at": "2026-06-20T00:00:00",
+      "session_id": "demo-baseline",
+      "preferences": {
+        "like": {
+          "high": [
+            "한식",
+            "중식"
+          ],
+          "low": [
+            "한식|김치찌개",
+            "한식|된장찌개",
+            "중식|짜장면",
+            "중식|짬뽕"
+          ]
+        },
+        "recent": {
+          "high": [
+            "한식"
+          ],
+          "low": [
+            "한식|순두부찌개"
+          ]
+        }
+      }
+    }
+  },
+  "updated_at": "2026-06-20T00:00:00",
+  "session_id": "demo-baseline"
+}

@@ -1,0 +1,36 @@
+{
+  "participant_id": "U0017",
+  "user_id": "두근두근한 소라게",
+  "auto_generated_name": true,
+  "source": "mobile",
+  "created_at": "2026-06-20T17:12:30.088509",
+  "updated_at": "2026-06-20T17:24:17.884048",
+  "preferences": {
+    "like": {
+      "high": [
+        "태국식",
+        "양식/이탈리안"
+      ],
+      "low": [
+        "태국식|해산물류",
+        "태국식|고기류",
+        "양식/이탈리안|브런치류",
+        "양식/이탈리안|해산물류"
+      ]
+    },
+    "recent": {
+      "high": [
+        "태국식"
+      ],
+      "low": [
+        "태국식|해산물류"
+      ]
+    }
+  },
+  "session_id": "1d9a25ff",
+  "submitted_at": "2026-06-20T17:24:17.884048",
+  "meal_data": {
+    "date": "2026-06-20",
+    "meal_type": "lunch"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "participant_id": "U0016",
+  "restaurants": [
+    {
+      "restaurant_id": "d56bb90f68117e7b",
+      "name": "박가객주상회",
+      "address": "서울특별시 성동구 성수동2가 300-39 지하1층",
+      "category": "중식",
+      "food": "볶음류",
+      "excluded_at": "2026-06-20T16:32:18.217549",
+      "recommendation_id": "20260620T163114503333_637c07b0"
+    }
+  ],
+  "updated_at": "2026-06-20T16:32:18.217549"
+}

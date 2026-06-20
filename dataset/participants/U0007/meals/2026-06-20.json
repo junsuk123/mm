@@ -1,0 +1,34 @@
+{
+  "participant_id": "U0007",
+  "date": "2026-06-20",
+  "meals": {
+    "lunch": {
+      "submitted_at": "2026-06-20T00:00:00",
+      "session_id": "demo-baseline",
+      "preferences": {
+        "like": {
+          "high": [
+            "양식",
+            "일식"
+          ],
+          "low": [
+            "양식|크림파스타",
+            "양식|토마토파스타",
+            "일식|초밥",
+            "일식|돈부리"
+          ]
+        },
+        "recent": {
+          "high": [
+            "양식"
+          ],
+          "low": [
+            "양식|토마토파스타"
+          ]
+        }
+      }
+    }
+  },
+  "updated_at": "2026-06-20T00:00:00",
+  "session_id": "demo-baseline"
+}

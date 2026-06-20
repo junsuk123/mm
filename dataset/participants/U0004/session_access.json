@@ -1,0 +1,15 @@
+{
+  "participant_id": "U0004",
+  "device_identifier": "demo-0004",
+  "sessions": [
+    {
+      "session_id": "demo-baseline",
+      "first_accessed_at": "2026-06-20T00:00:00",
+      "last_accessed_at": "2026-06-20T00:00:00",
+      "access_count": 1,
+      "source": "demo_seed"
+    }
+  ],
+  "last_session_id": "demo-baseline",
+  "updated_at": "2026-06-20T00:00:00"
+}

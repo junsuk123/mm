@@ -1,0 +1,34 @@
+{
+  "participant_id": "U0004",
+  "date": "2026-06-20",
+  "meals": {
+    "lunch": {
+      "submitted_at": "2026-06-20T00:00:00",
+      "session_id": "demo-baseline",
+      "preferences": {
+        "like": {
+          "high": [
+            "일식",
+            "세계음식"
+          ],
+          "low": [
+            "일식|초밥",
+            "일식|돈부리",
+            "세계음식|쌀국수",
+            "세계음식|팟타이"
+          ]
+        },
+        "recent": {
+          "high": [
+            "일식"
+          ],
+          "low": [
+            "일식|라멘"
+          ]
+        }
+      }
+    }
+  },
+  "updated_at": "2026-06-20T00:00:00",
+  "session_id": "demo-baseline"
+}

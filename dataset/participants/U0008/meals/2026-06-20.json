@@ -1,0 +1,34 @@
+{
+  "participant_id": "U0008",
+  "date": "2026-06-20",
+  "meals": {
+    "lunch": {
+      "submitted_at": "2026-06-20T00:00:00",
+      "session_id": "demo-baseline",
+      "preferences": {
+        "like": {
+          "high": [
+            "양식",
+            "일식"
+          ],
+          "low": [
+            "양식|페퍼로니피자",
+            "양식|치즈피자",
+            "일식|초밥",
+            "일식|돈부리"
+          ]
+        },
+        "recent": {
+          "high": [
+            "양식"
+          ],
+          "low": [
+            "양식|치즈피자"
+          ]
+        }
+      }
+    }
+  },
+  "updated_at": "2026-06-20T00:00:00",
+  "session_id": "demo-baseline"
+}

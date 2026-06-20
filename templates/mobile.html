@@ -5,168 +5,243 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>모바일 음식 설문</title>
   <style>
+    :root {
+      --primary: #7494bc;
+      --primary-dark: #587fab;
+      --primary-deep: #355d89;
+      --primary-soft: #d9e9fa;
+      --primary-pale: #eef7ff;
+      --primary-faint: #f8fbff;
+      --surface: #ffffff;
+      --border: #bdd4ea;
+      --text: #294866;
+      --text-soft: #6685a3;
+      --disabled: #b7c8d8;
+      --mint: #e3f7ef;
+      --mint-border: #a9dcc8;
+      --lavender: #f0eafd;
+      --peach: #fff0e4;
+      --success-bg: #e3f7ef;
+      --success-text: #39735e;
+      --error-bg: #ffe9ef;
+      --error-text: #a2526b;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
+    html,
     body {
-      min-height: 100vh;
-      background: #f5f7fb;
-      color: #172033;
+      height: 100%;
+    }
+
+    body {
+      background: linear-gradient(145deg, #e8f5ff 0%, #f4edff 52%, #fff3e9 100%);
+      color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      padding: 16px;
+      padding: 8px;
+      overflow: hidden;
     }
 
     main {
+      height: calc(100vh - 16px);
+      height: calc(100dvh - 16px);
       max-width: 560px;
       margin: 0 auto;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+      gap: 8px;
     }
 
     header {
-      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 1px 2px;
     }
 
     h1 {
-      font-size: 1.45rem;
+      font-size: 1.28rem;
       line-height: 1.25;
-      margin-bottom: 6px;
     }
 
     .muted {
-      color: #64748b;
-      line-height: 1.4;
+      color: var(--text-soft);
+      line-height: 1.3;
+      font-size: 0.82rem;
+    }
+
+    .restart {
+      min-height: 34px;
+      flex: 0 0 auto;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--primary-dark);
+      padding: 5px 10px;
+      font-size: 0.84rem;
+      font-weight: 850;
     }
 
     .panel {
-      background: #fff;
-      border: 1px solid #dbe3ef;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 14px;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+      padding: 10px;
+      box-shadow: 0 5px 16px rgba(88, 119, 159, 0.1);
+    }
+
+    .setup-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(145px, 1fr);
+      gap: 8px;
+      align-items: end;
     }
 
     label {
       display: block;
-      margin-bottom: 7px;
-      color: #334155;
-      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 800;
     }
 
     input {
       width: 100%;
-      min-height: 44px;
-      border: 1px solid #cbd5e1;
+      min-height: 38px;
+      border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 10px 12px;
-      font-size: 1rem;
+      padding: 7px 9px;
+      font-size: 0.9rem;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    input:focus {
+      outline: 2px solid var(--primary-soft);
+      border-color: var(--primary);
     }
 
     .meal-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 12px;
+      gap: 6px;
     }
 
     .meal-button {
-      min-height: 58px;
-      border: 1px solid #cbd5e1;
-      border-radius: 9px;
-      background: #fff;
-      color: #334155;
-      font-size: 1rem;
+      min-height: 38px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--primary-faint);
+      color: var(--text);
+      font-size: 0.86rem;
       font-weight: 850;
     }
 
     .meal-button.selected {
-      border-color: #2563eb;
-      background: #2563eb;
+      border-color: var(--primary);
+      background: var(--primary);
       color: #fff;
-      box-shadow: 0 7px 16px rgba(37, 99, 235, 0.2);
+      box-shadow: 0 7px 16px rgba(116, 148, 188, 0.28);
     }
 
     .step-tabs {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 7px;
-      margin-bottom: 12px;
+      gap: 5px;
+      margin-bottom: 7px;
     }
 
     .step-tab {
-      min-height: 38px;
-      border: 1px solid #dbe3ef;
+      min-height: 32px;
+      border: 1px solid var(--border);
       border-radius: 6px;
-      background: #fff;
-      color: #64748b;
-      font-size: 0.86rem;
+      background: var(--primary-faint);
+      color: var(--text-soft);
+      font-size: 0.78rem;
       font-weight: 800;
     }
 
     .step-tab.active {
-      background: #2563eb;
-      border-color: #2563eb;
+      background: var(--primary);
+      border-color: var(--primary);
       color: #fff;
     }
 
     .step-tab.done {
-      background: #dcfce7;
-      border-color: #86efac;
-      color: #166534;
+      background: var(--mint);
+      border-color: var(--mint-border);
+      color: #39735e;
     }
 
     .chooser-head {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: 8px;
+      margin-bottom: 4px;
     }
 
     h2 {
-      font-size: 1.18rem;
+      font-size: 1rem;
       line-height: 1.3;
     }
 
     .level {
       display: inline-flex;
       align-items: center;
-      min-height: 28px;
-      padding: 4px 8px;
+      min-height: 24px;
+      padding: 3px 7px;
       border-radius: 999px;
-      background: #eef2ff;
-      color: #3730a3;
-      font-size: 0.82rem;
+      background: var(--lavender);
+      color: var(--primary-deep);
+      font-size: 0.75rem;
       font-weight: 800;
       white-space: nowrap;
     }
 
     .path {
-      min-height: 22px;
-      margin-bottom: 10px;
-      color: #475569;
-      font-size: 0.94rem;
+      min-height: 18px;
+      margin-bottom: 5px;
+      color: var(--primary-dark);
+      font-size: 0.8rem;
       font-weight: 700;
       line-height: 1.35;
     }
 
+    .chooser-panel {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
     .tile-grid {
+      min-height: 0;
+      flex: 1 1 auto;
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-auto-rows: minmax(50px, auto);
+      align-content: start;
+      gap: 6px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: 1px 2px 4px 1px;
     }
 
     .tile {
       width: 100%;
-      aspect-ratio: 1 / 1;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      background: #fff;
-      color: #1e293b;
-      padding: 10px;
-      font-size: clamp(0.9rem, 3.6vw, 1.05rem);
+      min-height: 50px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 6px 4px;
+      font-size: clamp(0.72rem, 2.9vw, 0.9rem);
       font-weight: 850;
       line-height: 1.25;
       text-align: center;
@@ -181,71 +256,78 @@
     }
 
     .tile.primary {
-      border-color: #bfdbfe;
-      background: #eff6ff;
+      border-color: #b5d5ef;
+      background: var(--primary-pale);
     }
 
     .tile.secondary {
-      border-color: #99f6e4;
-      background: #f0fdfa;
+      border-color: #d2c2ef;
+      background: var(--lavender);
     }
 
     .tile.food {
-      border-color: #bbf7d0;
-      background: #f0fdf4;
+      border-color: var(--mint-border);
+      background: var(--mint);
     }
 
     .tile.selected {
-      border-color: #2563eb;
-      background: #dbeafe;
-      color: #1d4ed8;
-      box-shadow: inset 0 0 0 2px #2563eb;
+      border-color: var(--primary);
+      background: #cfe5fb;
+      color: var(--primary-deep);
+      box-shadow: inset 0 0 0 2px var(--primary);
+    }
+
+    .tile:disabled {
+      background: #eef2f6;
+      border-color: #dce4ec;
+      color: var(--disabled);
+      box-shadow: none;
     }
 
     .actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 9px;
-      margin-top: 12px;
+      gap: 6px;
+      margin-top: 6px;
     }
 
     .action {
-      min-height: 46px;
+      min-height: 36px;
       border: 0;
       border-radius: 7px;
-      background: #64748b;
+      background: #9ebcda;
       color: #fff;
-      font-size: 0.98rem;
+      font-size: 0.86rem;
       font-weight: 800;
     }
 
     .action.skip {
-      background: #475569;
+      background: var(--primary-dark);
     }
 
     .submit {
-      position: sticky;
-      bottom: 12px;
       width: 100%;
-      min-height: 50px;
+      min-height: 44px;
       border: 0;
       border-radius: 7px;
-      background: #16a34a;
+      background: var(--primary);
       color: #fff;
-      font-size: 1.05rem;
+      font-size: 0.98rem;
       font-weight: 850;
-      box-shadow: 0 10px 24px rgba(22, 163, 74, 0.25);
+      box-shadow: 0 10px 24px rgba(116, 148, 188, 0.3);
+    }
+
+    .submit:not(:disabled) {
+      background: linear-gradient(135deg, #7494bc, #829fd0);
     }
 
     .submit:disabled {
-      background: #94a3b8;
+      background: var(--disabled);
       box-shadow: none;
     }
 
     .summary {
-      display: grid;
-      gap: 7px;
-      margin-top: 12px;
+      display: none;
     }
 
     .summary-row {
@@ -254,10 +336,10 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--border);
       border-radius: 6px;
       padding: 7px 9px;
-      color: #334155;
+      color: var(--text);
       font-size: 0.9rem;
       font-weight: 700;
     }
@@ -265,61 +347,250 @@
     .summary-row button {
       border: 0;
       background: transparent;
-      color: #2563eb;
+      color: var(--primary-dark);
       font-weight: 850;
       font-size: 0.9rem;
     }
 
     .status {
       display: none;
-      margin: 12px 0;
-      padding: 12px;
+      padding: 8px 10px;
       border-radius: 7px;
+      font-size: 0.82rem;
       font-weight: 750;
       line-height: 1.4;
     }
 
     .status.success {
       display: block;
-      background: #dcfce7;
-      color: #166534;
+      background: var(--success-bg);
+      color: var(--success-text);
     }
 
     .status.error {
       display: block;
-      background: #fee2e2;
-      color: #991b1b;
+      background: var(--error-bg);
+      color: var(--error-text);
     }
 
-    @media (min-width: 500px) {
+    .feedback-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(29, 52, 77, 0.5);
+      backdrop-filter: blur(4px);
+    }
+
+    .feedback-overlay.open {
+      display: flex;
+    }
+
+    .feedback-dialog {
+      position: relative;
+      width: min(100%, 440px);
+      max-height: min(82vh, 620px);
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+      padding: 22px 16px 16px;
+      box-shadow: 0 24px 64px rgba(25, 53, 82, 0.28);
+    }
+
+    .feedback-close {
+      position: absolute;
+      top: 8px;
+      right: 9px;
+      width: 34px;
+      height: 34px;
+      border: 0;
+      border-radius: 50%;
+      background: var(--primary-faint);
+      color: var(--text-soft);
+      font-size: 1.35rem;
+      line-height: 1;
+    }
+
+    .feedback-dialog h2 {
+      padding-right: 34px;
+      font-size: 1.18rem;
+    }
+
+    .feedback-description {
+      margin: 6px 0 14px;
+    }
+
+    .feedback-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .feedback-restaurant {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--primary-faint);
+      padding: 10px;
+    }
+
+    .feedback-name {
+      font-weight: 850;
+      line-height: 1.3;
+    }
+
+    .feedback-meta {
+      margin-top: 3px;
+      color: var(--text-soft);
+      font-size: 0.78rem;
+      line-height: 1.35;
+    }
+
+    .feedback-exclude {
+      min-height: 38px;
+      border: 0;
+      border-radius: 7px;
+      background: var(--error-bg);
+      color: var(--error-text);
+      padding: 7px 10px;
+      font-size: 0.82rem;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .result-rank {
+      min-width: 42px;
+      color: var(--primary-deep);
+      font-size: 0.76rem;
+      font-weight: 900;
+      text-align: right;
+    }
+
+    .navigation-panel {
+      margin-top: 12px;
+      border: 1px solid var(--mint-border);
+      border-radius: 9px;
+      background: var(--mint);
+      padding: 10px;
+    }
+
+    .navigation-status {
+      color: var(--success-text);
+      font-size: 0.8rem;
+      font-weight: 750;
+      line-height: 1.45;
+    }
+
+    .navigation-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .navigation-button {
+      min-height: 36px;
+      border: 1px solid var(--mint-border);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--success-text);
+      padding: 7px 10px;
+      font-size: 0.8rem;
+      font-weight: 850;
+    }
+
+    .navigation-button.primary {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #fff;
+    }
+
+    @media (max-width: 359px) {
       .tile-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .setup-panel {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-height: 650px) {
+      header .muted,
+      .chooser-head .muted {
+        display: none;
+      }
+
+      .panel {
+        padding: 7px;
+      }
+
+      .tile-grid {
+        grid-auto-rows: minmax(44px, auto);
+      }
+
+      .tile {
+        min-height: 44px;
       }
     }
   </style>
 </head>
 <body>
+  <div id="feedbackOverlay" class="feedback-overlay" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle">
+    <section class="feedback-dialog">
+      <button class="feedback-close" type="button" aria-label="평가 닫기" onclick="dismissPreviousRecommendation()">×</button>
+      <h2 id="feedbackTitle">지난번 추천은 어떠셨나요?</h2>
+      <p class="feedback-description muted">다음에 가고 싶지 않은 식당이 있다면 제외 목록에 추가할 수 있어요.</p>
+      <div id="feedbackList" class="feedback-list"></div>
+    </section>
+  </div>
+
+  <div id="resultOverlay" class="feedback-overlay" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <section class="feedback-dialog">
+      <button class="feedback-close" type="button" aria-label="추천 결과 닫기" onclick="closeCurrentRecommendation()">×</button>
+      <h2 id="resultTitle">추천이 완료됐어요!</h2>
+      <p class="feedback-description muted">함께 고른 취향을 반영한 이번 그룹의 추천 식당입니다.</p>
+      <div id="resultList" class="feedback-list"></div>
+      <div id="navigationPanel" class="navigation-panel">
+        <div id="navigationStatus" class="navigation-status">위치 기반 네이버 길찾기 설정을 확인하고 있어요.</div>
+        <div class="navigation-actions">
+          <button id="navigationStartButton" class="navigation-button primary" type="button" onclick="enableAndStartNavigation()">현재 위치에서 길찾기</button>
+          <button id="navigationOffButton" class="navigation-button" type="button" onclick="disableNavigation()">길찾기 끄기</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
   <main>
     <header>
-      <h1>음식 선호 설문</h1>
-      <p class="muted">최근 음식과 선호 음식을 대분류·소분류로 선택합니다.</p>
+      <div>
+        <h1>음식 선호 설문</h1>
+        <p class="muted">대분류를 고른 뒤 소분류를 선택하세요.</p>
+      </div>
+      <button class="restart" type="button" onclick="restartSurvey()">↻ 다시하기</button>
     </header>
 
-    <section class="panel">
-      <label for="userId">이름 또는 별명</label>
-      <input id="userId" type="text" placeholder="비워두면 자동 번호가 붙습니다">
-    </section>
-
-    <section class="panel">
-      <h2 style="margin-bottom: 6px;">추천 받을 끼니</h2>
-      <p class="muted">이번 식당 추천이 점심용인지 저녁용인지 선택해주세요.</p>
-      <div class="meal-buttons">
-        <button id="lunchButton" class="meal-button" type="button" onclick="selectMealType('lunch')">☀️ 점심</button>
-        <button id="dinnerButton" class="meal-button" type="button" onclick="selectMealType('dinner')">🌙 저녁</button>
+    <section class="panel setup-panel">
+      <div>
+        <label for="userId">이름 또는 별명</label>
+        <input id="userId" type="text" placeholder="비워두면 귀여운 동물 별칭 자동 생성">
+      </div>
+      <div>
+        <label>추천 받을 끼니</label>
+        <div class="meal-buttons">
+          <button id="lunchButton" class="meal-button" type="button" onclick="selectMealType('lunch')">☀️ 점심</button>
+          <button id="dinnerButton" class="meal-button" type="button" onclick="selectMealType('dinner')">🌙 저녁</button>
+        </div>
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel chooser-panel">
       <div class="step-tabs" id="stepTabs"></div>
       <div class="chooser-head">
         <div>
@@ -352,11 +623,21 @@
     let categories = [];
     let currentStep = 0;
     let selectedMealType = '';
+    let renderVersion = 0;
+    let lastRecommendation = null;
+    let feedbackSubmitting = false;
+    let recommendationPollTimer = null;
+    let currentSessionRecommendation = null;
+    let sessionAcceptingResponses = true;
+    let navigationSettings = null;
+    let navigationLaunching = false;
     const steps = [
       {title: '최근 먹은 음식', level: '대분류', hint: '대분류 1개를 선택하세요.'},
       {title: '최근 먹은 음식', level: '소분류', hint: '최근 먹은 음식 1개를 선택하세요.'},
-      {title: '선호 음식', level: '대분류', hint: '서로 다른 대분류 2개를 선택하세요.'},
-      {title: '선호 음식', level: '소분류', hint: '각 대분류에서 음식 2개씩 선택하세요.'}
+      {title: '첫 번째 선호 음식', level: '대분류', hint: '첫 번째 대분류 1개를 선택하세요.'},
+      {title: '첫 번째 선호 음식', level: '소분류', hint: '선택한 대분류에서 소분류 2개를 선택하세요.'},
+      {title: '두 번째 선호 음식', level: '대분류', hint: '첫 번째와 다른 대분류 1개를 선택하세요.'},
+      {title: '두 번째 선호 음식', level: '소분류', hint: '선택한 대분류에서 소분류 2개를 선택하세요.'}
     ];
 
     async function loadSurvey() {
@@ -367,16 +648,27 @@
         return;
       }
       const session = await sessionResponse.json();
-      if (!session.mobile_enabled || session.status !== 'collecting') {
+      if (!session.mobile_enabled) {
         showStatus('현재 모바일 접수가 열려 있지 않습니다.', 'error');
         document.getElementById('submitButton').disabled = true;
         return;
+      }
+      if (session.status !== 'collecting') {
+        sessionAcceptingResponses = false;
+        document.getElementById('submitButton').disabled = true;
+        showStatus(
+          session.status === 'completed'
+            ? '추천이 완료되었습니다. 결과를 불러오는 중입니다.'
+            : '설문 접수가 마감되었습니다. 추천 결과를 기다려주세요.',
+          'success'
+        );
       }
 
       const response = await fetch('/api/categories');
       categories = await response.json();
       await loadSavedProfile();
       render();
+      startRecommendationPolling();
     }
 
     function getOrCreateDeviceId() {
@@ -394,13 +686,23 @@
 
     async function loadSavedProfile() {
       try {
-        const response = await fetch(`/api/participant/${encodeURIComponent(deviceId)}`);
+        if (sessionStorage.getItem('mm_restart_blank') === '1') {
+          sessionStorage.removeItem('mm_restart_blank');
+          return;
+        }
+        const response = await fetch(`/api/participant/${encodeURIComponent(deviceId)}?session_id=${encodeURIComponent(sessionId)}`);
         const data = await response.json();
         const profile = data.profile;
         if (!profile) {
           return;
         }
+        navigationSettings = data.navigation || navigationSettings;
         document.getElementById('userId').value = profile.user_id || '';
+        if (data.last_recommendation?.recommendations?.length) {
+          lastRecommendation = data.last_recommendation;
+          showPreviousRecommendation();
+          return;
+        }
         const preferences = profile.preferences || {};
         state.recent.high = preferences.recent?.high?.[0] || '';
         state.recent.food = foodName(preferences.recent?.low?.[0] || '');
@@ -415,6 +717,348 @@
       } catch (e) {
         console.error('저장된 설문을 불러오지 못했습니다:', e);
       }
+    }
+
+    function showPreviousRecommendation() {
+      const recommendations = lastRecommendation?.recommendations || [];
+      document.getElementById('feedbackList').innerHTML = recommendations.map((restaurant, index) => `
+        <article class="feedback-restaurant">
+          <div>
+            <div class="feedback-name">${escapeHtml(restaurant.name || '이름 없는 식당')}</div>
+            <div class="feedback-meta">${escapeHtml([restaurant.food, restaurant.category, restaurant.address].filter(Boolean).join(' · '))}</div>
+          </div>
+          <button class="feedback-exclude" type="button" onclick="excludePreviousRestaurant(${index})">안 갈래요</button>
+        </article>
+      `).join('');
+      document.getElementById('feedbackOverlay').classList.add('open');
+    }
+
+    async function sendRecommendationFeedback(action, restaurant = null) {
+      if (!lastRecommendation || feedbackSubmitting) return false;
+      feedbackSubmitting = true;
+      try {
+        const response = await fetch(`/api/participant/${encodeURIComponent(deviceId)}/recommendation-feedback`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            recommendation_id: lastRecommendation.recommendation_id,
+            action,
+            restaurant
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || '평가 저장 실패');
+        }
+        return true;
+      } catch (error) {
+        showStatus(error.message, 'error');
+        return false;
+      } finally {
+        feedbackSubmitting = false;
+      }
+    }
+
+    async function excludePreviousRestaurant(index) {
+      const restaurant = lastRecommendation?.recommendations?.[index];
+      if (!restaurant) return;
+      const saved = await sendRecommendationFeedback('exclude', restaurant);
+      if (!saved) return;
+      closeFeedbackAndStartSurvey();
+      showStatus(`${restaurant.name}은(는) 앞으로 추천에서 제외할게요. 다시 설문해주세요.`, 'success');
+    }
+
+    async function dismissPreviousRecommendation() {
+      await sendRecommendationFeedback('dismiss');
+      closeFeedbackAndStartSurvey();
+    }
+
+    function closeFeedbackAndStartSurvey() {
+      document.getElementById('feedbackOverlay').classList.remove('open');
+      lastRecommendation = null;
+      resetSurveyState();
+      render();
+    }
+
+    function startRecommendationPolling() {
+      if (recommendationPollTimer) return;
+      checkCurrentRecommendation();
+      recommendationPollTimer = window.setInterval(checkCurrentRecommendation, 2500);
+    }
+
+    async function checkCurrentRecommendation() {
+      try {
+        if (document.getElementById('feedbackOverlay').classList.contains('open')) {
+          return;
+        }
+        const response = await fetch(
+          `/api/session/${encodeURIComponent(sessionId)}/participant-recommendation/${encodeURIComponent(deviceId)}`,
+          {cache: 'no-store'}
+        );
+        if (!response.ok) return;
+        const data = await response.json();
+        navigationSettings = data.navigation || navigationSettings;
+        const recommendation = data.recommendation;
+        if (!recommendation?.recommendations?.length) {
+          if (data.status === 'closed') {
+            showStatus('설문이 마감되었습니다. 추천 결과를 계산하고 있어요.', 'success');
+          }
+          return;
+        }
+
+        const shownKey = `mm_shown_recommendation_${recommendation.recommendation_id}`;
+        if (sessionStorage.getItem(shownKey) === '1') {
+          stopRecommendationPolling();
+          return;
+        }
+        currentSessionRecommendation = recommendation;
+        sessionStorage.setItem(shownKey, '1');
+        showCurrentRecommendation();
+        stopRecommendationPolling();
+      } catch (error) {
+        console.error('추천 결과 확인 실패:', error);
+      }
+    }
+
+    function stopRecommendationPolling() {
+      if (!recommendationPollTimer) return;
+      window.clearInterval(recommendationPollTimer);
+      recommendationPollTimer = null;
+    }
+
+    function showCurrentRecommendation() {
+      const recommendations = currentSessionRecommendation?.recommendations || [];
+      document.getElementById('resultList').innerHTML = recommendations.map((restaurant, index) => `
+        <article class="feedback-restaurant">
+          <div>
+            <div class="feedback-name">${escapeHtml(restaurant.name || '이름 없는 식당')}</div>
+            <div class="feedback-meta">${escapeHtml([restaurant.food, restaurant.category, restaurant.address].filter(Boolean).join(' · '))}</div>
+          </div>
+          <span class="result-rank">TOP ${index + 1}</span>
+        </article>
+      `).join('');
+      document.getElementById('resultOverlay').classList.add('open');
+      showStatus('추천이 완료되었습니다.', 'success');
+      prepareNavigationForRecommendation();
+    }
+
+    function closeCurrentRecommendation() {
+      document.getElementById('resultOverlay').classList.remove('open');
+      currentSessionRecommendation = null;
+    }
+
+    async function loadNavigationSettings() {
+      try {
+        const response = await fetch(
+          `/api/participant/${encodeURIComponent(deviceId)}/location-settings`,
+          {cache: 'no-store'}
+        );
+        if (!response.ok) return navigationSettings;
+        navigationSettings = await response.json();
+      } catch (error) {
+        console.error('길찾기 설정 조회 실패:', error);
+      }
+      return navigationSettings;
+    }
+
+    async function updateNavigationSettings(payload) {
+      const response = await fetch(
+        `/api/participant/${encodeURIComponent(deviceId)}/location-settings`,
+        {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        }
+      );
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || '길찾기 설정 저장 실패');
+      }
+      navigationSettings = data.navigation;
+      return navigationSettings;
+    }
+
+    async function prepareNavigationForRecommendation() {
+      const settings = navigationSettings || await loadNavigationSettings();
+      const status = document.getElementById('navigationStatus');
+      const startButton = document.getElementById('navigationStartButton');
+      const offButton = document.getElementById('navigationOffButton');
+
+      if (!settings?.global_enabled) {
+        status.textContent = '관리자 설정에서 위치 기반 길찾기가 비활성화되어 있습니다.';
+        startButton.style.display = 'none';
+        offButton.style.display = 'none';
+        return;
+      }
+
+      startButton.style.display = '';
+      offButton.style.display = '';
+      if (!settings.enabled || settings.consent_status === 'denied') {
+        status.textContent = '위치 길찾기가 꺼져 있습니다. 원할 때 다시 켤 수 있어요.';
+        startButton.textContent = '길찾기 켜기';
+        offButton.style.display = 'none';
+        return;
+      }
+      if (settings.consent_status !== 'granted') {
+        status.textContent = '현재 위치를 네이버 길찾기 출발지로 사용하려면 동의해주세요. 위치 좌표는 서버에 저장하지 않습니다.';
+        startButton.textContent = '동의하고 길찾기';
+        offButton.textContent = '사용 안 함';
+        return;
+      }
+
+      status.textContent = '저장된 동의에 따라 현재 위치를 확인해 네이버 길찾기를 실행합니다.';
+      startButton.textContent = '네이버 길찾기 다시 열기';
+      offButton.textContent = '길찾기 끄기';
+      await launchNaverDirections();
+    }
+
+    async function enableAndStartNavigation() {
+      try {
+        navigationSettings = await updateNavigationSettings({
+          enabled: true,
+          consent_status: 'granted'
+        });
+        document.getElementById('navigationStatus').textContent =
+          '현재 위치를 확인하고 있어요. 브라우저의 위치 권한 요청을 허용해주세요.';
+        document.getElementById('navigationOffButton').style.display = '';
+        await launchNaverDirections();
+      } catch (error) {
+        document.getElementById('navigationStatus').textContent = error.message;
+      }
+    }
+
+    async function disableNavigation() {
+      try {
+        navigationSettings = await updateNavigationSettings({
+          enabled: false,
+          consent_status: 'denied'
+        });
+        document.getElementById('navigationStatus').textContent =
+          '위치 길찾기를 껐습니다. 이후 추천에서도 자동 실행하지 않습니다.';
+        document.getElementById('navigationStartButton').textContent = '길찾기 켜기';
+        document.getElementById('navigationOffButton').style.display = 'none';
+      } catch (error) {
+        document.getElementById('navigationStatus').textContent = error.message;
+      }
+    }
+
+    async function launchNaverDirections() {
+      if (navigationLaunching) return;
+      const restaurant = currentSessionRecommendation?.recommendations?.[0];
+      if (!restaurant) return;
+      const destination = destinationCoordinates(restaurant);
+      if (!destination) {
+        document.getElementById('navigationStatus').textContent =
+          '식당 좌표를 확인할 수 없어 네이버 지도 검색으로 연결합니다.';
+        openNaverSearch(restaurant);
+        return;
+      }
+      if (!navigator.geolocation) {
+        document.getElementById('navigationStatus').textContent =
+          '이 브라우저는 현재 위치 기능을 지원하지 않아 네이버 지도 검색으로 연결합니다.';
+        openNaverSearch(restaurant);
+        return;
+      }
+
+      navigationLaunching = true;
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          navigationLaunching = false;
+          const start = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          };
+          document.getElementById('navigationStatus').textContent =
+            '네이버 지도 앱에서 길찾기를 열고 있습니다.';
+          openNaverRoute(start, destination, restaurant);
+        },
+        async error => {
+          navigationLaunching = false;
+          document.getElementById('navigationStatus').textContent =
+            `현재 위치를 가져오지 못했습니다: ${geolocationErrorMessage(error)} 네이버 지도 검색으로 연결합니다.`;
+          if (error.code === error.PERMISSION_DENIED) {
+            try {
+              navigationSettings = await updateNavigationSettings({
+                enabled: false,
+                consent_status: 'denied'
+              });
+            } catch (settingsError) {
+              console.error(settingsError);
+            }
+          }
+          openNaverSearch(restaurant);
+        },
+        {enableHighAccuracy: true, timeout: 10000, maximumAge: 60000}
+      );
+    }
+
+    function destinationCoordinates(restaurant) {
+      let longitude = Number(restaurant.mapx);
+      let latitude = Number(restaurant.mapy);
+      if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
+        return null;
+      }
+      if (Math.abs(longitude) > 180) longitude /= 10000000;
+      if (Math.abs(latitude) > 90) latitude /= 10000000;
+      if (
+        longitude < -180 || longitude > 180
+        || latitude < -90 || latitude > 90
+      ) {
+        return null;
+      }
+      return {longitude, latitude};
+    }
+
+    function openNaverRoute(start, destination, restaurant) {
+      const params = new URLSearchParams({
+        slat: start.latitude.toFixed(7),
+        slng: start.longitude.toFixed(7),
+        sname: '현재 위치',
+        dlat: destination.latitude.toFixed(7),
+        dlng: destination.longitude.toFixed(7),
+        dname: restaurant.name || '추천 식당',
+        appname: window.location.hostname || 'restaurant.recommendation.web'
+      });
+      const appUrl = `nmap://route/car?${params.toString()}`;
+      const fallbackUrl = naverSearchUrl(restaurant);
+      const startedAt = Date.now();
+      window.location.href = appUrl;
+      window.setTimeout(() => {
+        if (!document.hidden && Date.now() - startedAt < 3000) {
+          window.location.href = fallbackUrl;
+        }
+      }, 1400);
+    }
+
+    function openNaverSearch(restaurant) {
+      window.location.href = naverSearchUrl(restaurant);
+    }
+
+    function naverSearchUrl(restaurant) {
+      const query = [restaurant.name, restaurant.address].filter(Boolean).join(' ');
+      return `https://map.naver.com/p/search/${encodeURIComponent(query)}`;
+    }
+
+    function geolocationErrorMessage(error) {
+      if (error.code === error.PERMISSION_DENIED) return '위치 권한이 거부되었습니다.';
+      if (error.code === error.POSITION_UNAVAILABLE) return '현재 위치를 확인할 수 없습니다.';
+      if (error.code === error.TIMEOUT) return '위치 확인 시간이 초과되었습니다.';
+      return '알 수 없는 위치 오류입니다.';
+    }
+
+    function resetSurveyState() {
+      state.recent = {high: '', food: ''};
+      state.likeHigh = [];
+      state.likeFoods = {};
+      currentStep = 0;
+      selectedMealType = '';
+      document.getElementById('lunchButton').classList.remove('selected');
+      document.getElementById('dinnerButton').classList.remove('selected');
+    }
+
+    function restartSurvey() {
+      sessionStorage.setItem('mm_restart_blank', '1');
+      window.location.reload();
     }
 
     function selectMealType(mealType) {
@@ -435,8 +1079,9 @@
     }
 
     function render() {
+      const version = ++renderVersion;
       renderTabs();
-      renderChooser();
+      renderChooser(version);
       renderSummary();
       updateSubmitButton();
     }
@@ -444,22 +1089,22 @@
     function renderTabs() {
       document.getElementById('stepTabs').innerHTML = [
         {label: '최근 음식', step: 0, done: Boolean(state.recent.high && state.recent.food)},
-        {label: '선호 대분류', step: 2, done: state.likeHigh.length === 2},
-        {label: '선호 음식', step: 3, done: preferredFoodsComplete()}
+        {label: '선호 1', step: 2, done: preferredChoiceComplete(0)},
+        {label: '선호 2', step: 4, done: preferredChoiceComplete(1)}
       ].map(item => {
-        const active = currentStep === item.step || (item.step === 0 && currentStep === 1);
+        const active = currentStep === item.step || currentStep === item.step + 1;
         return `<button type="button" class="step-tab ${active ? 'active' : ''} ${item.done ? 'done' : ''}" onclick="setStep(${item.step})">${item.label}</button>`;
       }).join('');
     }
 
-    async function renderChooser() {
+    async function renderChooser(version) {
       const step = steps[currentStep];
       document.getElementById('groupTitle').textContent = step.title;
       document.getElementById('groupHint').textContent = step.hint;
       document.getElementById('levelLabel').textContent = step.level;
       document.getElementById('backButton').disabled = currentStep === 0;
       document.getElementById('nextButton').disabled = !stepComplete(currentStep);
-      document.getElementById('nextButton').style.visibility = currentStep === 3 ? 'hidden' : 'visible';
+      document.getElementById('nextButton').style.visibility = currentStep === steps.length - 1 ? 'hidden' : 'visible';
       const grid = document.getElementById('tileGrid');
 
       if (currentStep === 0) {
@@ -468,24 +1113,37 @@
       } else if (currentStep === 1) {
         document.getElementById('selectedPath').textContent = [state.recent.high, state.recent.food].filter(Boolean).join(' > ');
         const foods = await fetchFoods(state.recent.high);
+        if (version !== renderVersion) return;
         grid.innerHTML = foodTiles(foods, value => value === state.recent.food, 'selectRecentFood');
-      } else if (currentStep === 2) {
-        document.getElementById('selectedPath').textContent = `${state.likeHigh.length}/2 선택`;
-        grid.innerHTML = categoryTiles(categories, value => state.likeHigh.includes(value), 'toggleLikeHigh');
       } else {
-        document.getElementById('selectedPath').textContent = state.likeHigh.map(category => `${category} ${(state.likeFoods[category] || []).length}/2`).join(' · ');
-        const sections = [];
-        for (const category of state.likeHigh) {
+        const choiceIndex = Math.floor((currentStep - 2) / 2);
+        const category = state.likeHigh[choiceIndex] || '';
+        if (currentStep % 2 === 0) {
+          const unavailable = choiceIndex === 1 ? state.likeHigh[0] : '';
+          document.getElementById('selectedPath').textContent = category || '';
+          grid.innerHTML = categoryTiles(
+            categories,
+            value => value === category,
+            'selectLikeHigh',
+            unavailable
+          );
+        } else {
+          const selectedFoods = state.likeFoods[category] || [];
+          document.getElementById('selectedPath').textContent = `${category} > ${selectedFoods.length}/2 선택`;
           const foods = await fetchFoods(category);
-          sections.push(`<div style="grid-column:1/-1;font-weight:850;margin-top:6px;">${category} · ${(state.likeFoods[category] || []).length}/2</div>`);
-          sections.push(foodTiles(foods, value => (state.likeFoods[category] || []).includes(value), 'toggleLikeFood', category));
+          if (version !== renderVersion) return;
+          grid.innerHTML = foodTiles(
+            foods,
+            value => selectedFoods.includes(value),
+            'toggleLikeFood',
+            category
+          );
         }
-        grid.innerHTML = sections.join('');
       }
     }
 
-    function categoryTiles(options, selected, handler) {
-      return options.map(value => `<button type="button" class="tile primary ${selected(value) ? 'selected' : ''}" onclick="${handler}('${escapeAttr(value)}')">${value}</button>`).join('');
+    function categoryTiles(options, selected, handler, disabledValue = '') {
+      return options.map(value => `<button type="button" class="tile primary ${selected(value) ? 'selected' : ''}" onclick="${handler}('${escapeAttr(value)}')" ${value === disabledValue ? 'disabled' : ''}>${value}</button>`).join('');
     }
 
     function foodTiles(options, selected, handler, category = '') {
@@ -494,7 +1152,7 @@
 
     async function fetchFoods(category) {
       if (!category) return [];
-      return fetch(`/api/foods/${encodeURIComponent(category)}`).then(response => response.json());
+      return fetch(`/api/foods?category=${encodeURIComponent(category)}`).then(response => response.json());
     }
 
     function selectRecentHigh(value) {
@@ -509,14 +1167,19 @@
       render();
     }
 
-    function toggleLikeHigh(value) {
-      if (state.likeHigh.includes(value)) {
-        state.likeHigh = state.likeHigh.filter(item => item !== value);
-        delete state.likeFoods[value];
-      } else if (state.likeHigh.length < 2) {
-        state.likeHigh.push(value);
-        state.likeFoods[value] = [];
+    function selectLikeHigh(value) {
+      const choiceIndex = Math.floor((currentStep - 2) / 2);
+      if (choiceIndex === 1 && value === state.likeHigh[0]) {
+        return;
       }
+      const previous = state.likeHigh[choiceIndex];
+      if (previous && previous !== value) {
+        delete state.likeFoods[previous];
+      }
+      state.likeHigh[choiceIndex] = value;
+      state.likeHigh = state.likeHigh.slice(0, choiceIndex + 1);
+      state.likeFoods[value] = previous === value ? (state.likeFoods[value] || []) : [];
+      currentStep += 1;
       render();
     }
 
@@ -525,14 +1188,20 @@
       if (selected.includes(value)) {
         state.likeFoods[category] = selected.filter(item => item !== value);
       } else if (selected.length < 2) {
-        state.likeFoods[category] = [...selected, value];
+        const nextSelected = [...selected, value];
+        state.likeFoods[category] = nextSelected;
+        if (currentStep === 3 && nextSelected.length === 2) {
+          currentStep = 4;
+        }
       }
       render();
     }
 
     function setStep(step) {
       if (step === 1 && !state.recent.high) return;
-      if (step === 3 && state.likeHigh.length !== 2) return;
+      if (step >= 3 && !state.likeHigh[0]) return;
+      if (step >= 4 && !preferredChoiceComplete(0)) return;
+      if (step === 5 && !state.likeHigh[1]) return;
       currentStep = step;
       render();
     }
@@ -544,7 +1213,7 @@
 
     function goNext() {
       if (stepComplete(currentStep)) {
-        currentStep = Math.min(3, currentStep + 1);
+        currentStep = Math.min(steps.length - 1, currentStep + 1);
         render();
       }
     }
@@ -553,13 +1222,23 @@
       return [
         Boolean(state.recent.high),
         Boolean(state.recent.food),
-        state.likeHigh.length === 2,
-        preferredFoodsComplete()
+        Boolean(state.likeHigh[0]),
+        preferredChoiceComplete(0),
+        Boolean(state.likeHigh[1]),
+        preferredChoiceComplete(1)
       ][step];
     }
 
+    function preferredChoiceComplete(index) {
+      const category = state.likeHigh[index];
+      return Boolean(category) && (state.likeFoods[category] || []).length === 2;
+    }
+
     function preferredFoodsComplete() {
-      return state.likeHigh.length === 2 && state.likeHigh.every(category => (state.likeFoods[category] || []).length === 2);
+      return state.likeHigh.length === 2
+        && state.likeHigh[0] !== state.likeHigh[1]
+        && preferredChoiceComplete(0)
+        && preferredChoiceComplete(1);
     }
 
     function renderSummary() {
@@ -571,7 +1250,10 @@
     }
 
     function updateSubmitButton() {
-      document.getElementById('submitButton').disabled = !selectedMealType || !state.recent.food || !preferredFoodsComplete();
+      document.getElementById('submitButton').disabled = !sessionAcceptingResponses
+        || !selectedMealType
+        || !state.recent.food
+        || !preferredFoodsComplete();
     }
 
     async function submitSurvey() {
@@ -611,6 +1293,7 @@
         }
         showStatus(`접수되었습니다. 현재 ${data.participant_count}명이 참여했습니다.`, 'success');
         button.textContent = '제출 완료';
+        startRecommendationPolling();
       } catch (e) {
         button.disabled = false;
         button.textContent = '제출하기';
@@ -630,6 +1313,15 @@
 
     function escapeAttr(value) {
       return String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     }
 
     document.addEventListener('DOMContentLoaded', loadSurvey);

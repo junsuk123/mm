@@ -1,8 +1,8 @@
 {
-  "user_id": "M11",
+  "user_id": "새콤한 마멋",
   "source": "mobile",
   "created_at": "2026-06-20T00:39:22.464436",
-  "updated_at": "2026-06-20T00:47:23.624575",
+  "updated_at": "2026-06-20T17:18:42.472813",
   "preferences": {
     "like": {
       "high": [
@@ -24,5 +24,6 @@
         "중식|유린기"
       ]
     }
-  }
+  },
+  "auto_generated_name": true
 }

@@ -1,1 +1,5 @@
-{"identifier_type":"example","device_identifier":"demo-0002","updated_at":"2026-06-20T00:00:00"}
+{
+  "identifier_type": "example",
+  "device_identifier": "demo-0002",
+  "updated_at": "2026-06-20T00:00:00"
+}

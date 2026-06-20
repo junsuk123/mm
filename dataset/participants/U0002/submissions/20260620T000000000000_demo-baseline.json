@@ -1,0 +1,35 @@
+{
+  "participant_id": "U0002",
+  "user_id": "이서준",
+  "source": "demo",
+  "created_at": "2026-06-20T00:00:00",
+  "updated_at": "2026-06-20T00:00:00",
+  "preferences": {
+    "like": {
+      "high": [
+        "한식",
+        "중식"
+      ],
+      "low": [
+        "한식|삼겹살",
+        "한식|불고기",
+        "중식|짜장면",
+        "중식|짬뽕"
+      ]
+    },
+    "recent": {
+      "high": [
+        "한식"
+      ],
+      "low": [
+        "한식|불고기"
+      ]
+    }
+  },
+  "session_id": "demo-baseline",
+  "submitted_at": "2026-06-20T00:00:00",
+  "meal_data": {
+    "date": "2026-06-20",
+    "meal_type": "lunch"
+  }
+}

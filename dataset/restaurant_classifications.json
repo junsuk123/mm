@@ -1,0 +1,124 @@
+{
+  "rules": [
+    {
+      "source_category": "한식",
+      "food_pattern": "탕|국|찌개",
+      "category": "한식",
+      "subcategory": "국물/탕류"
+    },
+    {
+      "source_category": "한식",
+      "food_pattern": "삼겹살|불고기",
+      "category": "한식",
+      "subcategory": "구이/고기류"
+    },
+    {
+      "source_category": "한식",
+      "category": "한식",
+      "subcategory": "밥/정식류"
+    },
+    {
+      "source_category": "중식",
+      "food_pattern": "짜장면|짬뽕",
+      "category": "중식",
+      "subcategory": "면/밥류"
+    },
+    {
+      "source_category": "중식",
+      "food_pattern": "만두",
+      "category": "중식",
+      "subcategory": "만두/딤섬류"
+    },
+    {
+      "source_category": "중식",
+      "food_pattern": "마라",
+      "category": "중식",
+      "subcategory": "마라/훠궈류"
+    },
+    {
+      "source_category": "중식",
+      "category": "중식",
+      "subcategory": "고기류"
+    },
+    {
+      "source_category": "일식",
+      "food_pattern": "초밥|회",
+      "category": "일식",
+      "subcategory": "초밥/회류"
+    },
+    {
+      "source_category": "일식",
+      "food_pattern": "라멘|우동",
+      "category": "일식",
+      "subcategory": "면류"
+    },
+    {
+      "source_category": "일식",
+      "food_pattern": "돈가스|돈까스|가츠|톤카츠",
+      "category": "일식",
+      "subcategory": "튀김/돈카츠류"
+    },
+    {
+      "source_category": "일식",
+      "category": "일식",
+      "subcategory": "정식류"
+    },
+    {
+      "source_category": "분식",
+      "food_pattern": "떡볶이",
+      "category": "분식",
+      "subcategory": "떡볶이류"
+    },
+    {
+      "source_category": "분식",
+      "food_pattern": "라면",
+      "category": "분식",
+      "subcategory": "라면/국수류"
+    },
+    {
+      "source_category": "분식",
+      "food_pattern": "만두",
+      "category": "분식",
+      "subcategory": "만두류"
+    },
+    {
+      "source_category": "분식",
+      "category": "분식",
+      "subcategory": "튀김류"
+    },
+    {
+      "source_category": "세계음식",
+      "food_pattern": "쌀국수",
+      "category": "베트남식",
+      "subcategory": "면/국물류"
+    },
+    {
+      "source_category": "세계음식",
+      "food_pattern": "양꼬치",
+      "category": "중동/터키식",
+      "subcategory": "케밥/구이류"
+    },
+    {
+      "source_category": "양식",
+      "food_pattern": "버거",
+      "category": "미국식",
+      "subcategory": "버거/샌드위치류"
+    },
+    {
+      "source_category": "양식",
+      "food_pattern": "스테이크",
+      "category": "미국식",
+      "subcategory": "스테이크/바비큐류"
+    },
+    {
+      "source_category": "양식",
+      "food_pattern": "피자",
+      "category": "양식/이탈리안",
+      "subcategory": "피자류"
+    },
+    {
+      "category": "양식/이탈리안",
+      "subcategory": "파스타/리조또류"
+    }
+  ]
+}

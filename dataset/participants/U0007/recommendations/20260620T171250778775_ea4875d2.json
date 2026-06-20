@@ -1,0 +1,33 @@
+{
+  "recommendation_id": "20260620T171250778775_ea4875d2",
+  "participant_id": "U0007",
+  "session_id": "ea4875d2",
+  "group_id": 2,
+  "recommended_at": "2026-06-20T17:12:50.778769",
+  "recommendations": [
+    {
+      "restaurant_id": "5887d571962b5364",
+      "name": "이이요",
+      "food": "돈부리",
+      "matched_terms": [
+        "돈부리"
+      ],
+      "category": "일식당",
+      "category_group": "음식점",
+      "sub_category": "일식당",
+      "raw_category": "음식점>일식>일식당",
+      "location": "세종대학교",
+      "address": "서울특별시 광진구 능동 225-1",
+      "roadAddress": "서울특별시 광진구 능동로32길 6",
+      "link": "",
+      "mapx": "1270789289",
+      "mapy": "375552102",
+      "subcategory": "",
+      "score": 0.3,
+      "reason": "matched preferred food 돈부리"
+    }
+  ],
+  "feedback": {
+    "status": "pending"
+  }
+}
