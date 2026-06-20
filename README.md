@@ -247,10 +247,11 @@ sh scripts/recommend.sh --demo --provider mock --location 건국대학교
 
 참가자의 입력은 `like`, `recent`로 모입니다. `like`에는 선호 대분류 2개와 대분류별 음식 2개씩, `recent`에는 최근 대분류와 음식 1개가 저장됩니다.
 
-점수 계산:
+후보 필터와 점수 계산:
 
 ```text
-score = 0.5 * 선호 대분류 + 0.3 * 선호 소분류 - 0.5 * 최근 대분류 또는 음식
+최근 먹은 음식과 일치하는 식당은 추천 후보에서 제거
+score = 0.5 * 선호 대분류 + 0.3 * 선호 소분류
 ```
 
 그룹 생성은 `scripts/grouping_cli.sh` 안의 `jq` 프로그램이 처리합니다. 참가자마다 선호 대분류와 소분류 음식명을 term으로 만들고, 참가자 간 term 겹침 비율로 유사도를 계산합니다.
@@ -263,7 +264,7 @@ score = 0.5 * 선호 대분류 + 0.3 * 선호 소분류 - 0.5 * 최근 대분류
 
 그룹이 만들어지면 각 그룹의 선호를 합쳐 그룹 프로필을 만들고, provider로 주변 식당 후보를 가져옵니다. `mock` provider는 `dataset/mock_restaurants.json`의 `distance_m` 값과 `dataset/restaurant_classifications.json`의 분류 규칙을 사용하고, `naver` provider는 네이버 지역 검색 API로 지정 위치 근처의 식당을 가져옵니다. 분류 규칙은 위에서부터 처음 일치한 항목을 적용하며, `food_pattern`이 없는 항목은 해당 원본 카테고리의 기본값 또는 전체 기본값입니다.
 
-각 그룹원의 `excluded_restaurants`를 CLI에서 하나로 합친 뒤, `scripts/recommend.sh`의 `jq` 후보 필터가 식당 ID 또는 식당명·주소가 일치하는 후보를 제거합니다. 남은 후보는 그룹 프로필 기준으로 점수를 계산한 뒤, 점수가 가장 높고 가까운 식당 한 곳을 반환합니다.
+각 그룹원의 `excluded_restaurants`를 CLI에서 하나로 합친 뒤, `scripts/recommend.sh`의 `jq` 후보 필터가 식당 ID 또는 식당명·주소가 일치하는 후보와 최근 먹은 음식에 해당하는 후보를 제거합니다. 남은 후보는 그룹 프로필 기준으로 점수를 계산한 뒤, 점수가 가장 높고 가까운 식당 한 곳을 반환합니다.
 
 이 과정의 CLI 구현은 `sh`, `jq`, `mktemp`, `scripts/grouping_cli.sh`, provider shell dispatch를 조합합니다. 그룹화의 유사도 계산과 반복 병합도 Python이 아니라 `jq` 기반 CLI가 담당합니다. 웹 GUI는 사용자의 편의를 위한 화면을 유지하고, 내부에서 같은 CLI 파이프라인을 호출한 뒤 그 명령 처리 과정을 시각화합니다.
 

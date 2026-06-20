@@ -2005,7 +2005,7 @@ def aggregate_preferences(members):
         prefs = p['preferences']
         like_high.extend(leaf_values(prefs['like'].get('high', [])))
         like_low.extend(leaf_values(prefs['like'].get('low', [])))
-        recent.extend(leaf_values(prefs['recent'].get('high', []) + prefs['recent'].get('low', [])))
+        recent.extend(leaf_values(prefs['recent'].get('low', [])))
     
     return {
         'positive': list(dict.fromkeys(like_high + like_low)),
@@ -2021,8 +2021,6 @@ def build_recommendation_reason(restaurant, profile):
         parts.append(f"matched preferred category {restaurant['category']}")
     if restaurant['food'] in profile['like_low']:
         parts.append(f"matched preferred food {restaurant['food']}")
-    if restaurant['category'] in profile['recent'] or restaurant['food'] in profile['recent']:
-        parts.append("recently eaten category or food was penalized")
     return "; ".join(parts) if parts else "selected as the best available candidate from the search results"
 
 def search_mock_restaurants(search_terms, location):
@@ -2050,7 +2048,7 @@ def search_mock_restaurants(search_terms, location):
 def get_restaurant_recommendations(profile, location, provider='naver'):
     """그룹 프로필로 인근 식당 후보를 가져와 점수화."""
     try:
-        search_terms = list(dict.fromkeys(profile['positive'] + profile['recent']))
+        search_terms = list(dict.fromkeys(profile['positive']))
         if provider == 'naver':
             restaurants = search_restaurants(search_terms, location)
         else:
@@ -2059,13 +2057,18 @@ def get_restaurant_recommendations(profile, location, provider='naver'):
         candidates = []
         for r in restaurants:
             matched_terms = r.get('matched_terms', [r.get('food', '')])
+            if (
+                any(term in profile['recent'] for term in matched_terms)
+                or r['food'] in profile['recent']
+                or r.get('subcategory') in profile['recent']
+            ):
+                continue
+
             score = 0.0
             if r['category'] in profile['like_high']:
                 score += 0.5
             if r['food'] in profile['like_low']:
                 score += 0.3
-            if any(term in profile['recent'] for term in matched_terms) or r['category'] in profile['recent'] or r['food'] in profile['recent']:
-                score -= 0.5
             
             candidates.append({
                 'restaurant_id': r['restaurant_id'],

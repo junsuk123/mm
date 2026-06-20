@@ -386,7 +386,7 @@ build_profile_file_from_user() {
     | {
         like_high: (.like.high | map(leaf)),
         like_low: (.like.low | map(leaf)),
-        recent: ((.recent.high + .recent.low) | map(leaf))
+        recent: (.recent.low | map(leaf))
       }
     | .positive = ((.like_high + .like_low) | unique)
   ' "$USERS_FILE" > "$profile_file"
@@ -512,7 +512,7 @@ build_group_profile_file() {
           {like_high: [], like_low: [], recent: []};
           .like_high += ($p.like.high | map(leaf))
           | .like_low += ($p.like.low | map(leaf))
-          | .recent += (($p.recent.high + $p.recent.low) | map(leaf))
+          | .recent += ($p.recent.low | map(leaf))
         )
       | .positive = ((.like_high + .like_low) | unique)
       | .like_high |= unique
@@ -550,7 +550,7 @@ build_group_profile_file_from_members() {
           {like_high: [], like_low: [], recent: []};
           .like_high += ($p.like.high | map(leaf))
           | .like_low += ($p.like.low | map(leaf))
-          | .recent += (($p.recent.high + $p.recent.low) | map(leaf))
+          | .recent += ($p.recent.low | map(leaf))
         )
       | .positive = ((.like_high + .like_low) | unique)
       | .like_high |= unique
@@ -596,7 +596,7 @@ recommend_from_profile_file() {
   add_tmp_file "$terms_file"
   : > "$candidate_file"
 
-  jq -r '[.positive[], .recent[]] | unique | .[]' "$profile_file" > "$terms_file"
+  jq -r '.positive | unique | .[]' "$profile_file" > "$terms_file"
   seen_ids='|'
 
   while IFS= read -r term; do
@@ -641,20 +641,23 @@ recommend_from_profile_file() {
           and ((.address // "") == ($r.roadAddress // $r.address // ""))
         )
       );
+    def is_recent($r; $p):
+      has($p.recent; $r.food)
+      or has($p.recent; $r.subcategory)
+      or any($r.matched_terms[]?; . as $term | has($p.recent; $term));
     def score($r; $p):
       (if has($p.like_high; $r.category) then 0.5 else 0 end)
-      + (if has($p.like_low; $r.food) then 0.3 else 0 end)
-      - (if has($p.recent; $r.category) or has($p.recent; $r.food) then 0.5 else 0 end);
+      + (if has($p.like_low; $r.food) then 0.3 else 0 end);
     def reason($r; $p):
       [
         (if has($p.like_high; $r.category) then "matched preferred category \($r.category)" else empty end),
-        (if has($p.like_low; $r.food) then "matched preferred food \($r.food)" else empty end),
-        (if has($p.recent; $r.category) or has($p.recent; $r.food) then "recently eaten category or food was penalized" else empty end)
+        (if has($p.like_low; $r.food) then "matched preferred food \($r.food)" else empty end)
       ] as $parts
       | if ($parts | length) > 0 then ($parts | join("; ")) else "selected as the best available candidate from the search results" end;
 
     map(
       select(is_excluded(.) | not)
+      | select(is_recent(.; $profile[0]) | not)
       | select(
           ($walking_minutes == 0)
           or (

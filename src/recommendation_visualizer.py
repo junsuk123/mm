@@ -105,7 +105,7 @@ def flatten_preferences(preferences: dict[str, Any]) -> dict[str, list[str]]:
         "preferred_main": preferred_main,
         "preferred_subcategory": preferred_subcategory,
         "positive": unique_preserve(preferred_main + preferred_subcategory),
-        "recent": [recent["main"], recent["subcategory"]],
+        "recent": [recent["subcategory"]],
     }
 
 
@@ -154,10 +154,6 @@ def score_restaurant(restaurant: dict[str, Any], profile: dict[str, list[str]]) 
         pref_match += 0.5
     if restaurant.get("subcategory") in profile["preferred_subcategory"]:
         pref_match += 0.4
-    if restaurant.get("category") in profile["recent"]:
-        pref_match -= 0.2
-    if restaurant.get("subcategory") in profile["recent"]:
-        pref_match -= 0.7
 
     return pref_match
 
@@ -166,11 +162,18 @@ def candidate_restaurants(profile: dict[str, list[str]], location: str) -> list[
     if os.environ.get("MM_VISUALIZER_SKIP_LIVE") == "1" or search_restaurants is None:
         return []
 
-    search_terms = unique_preserve(profile["positive"] + profile["recent"])
+    search_terms = unique_preserve(profile["positive"])
     restaurants = search_restaurants(search_terms, location)
     candidates: list[CandidateView] = []
 
     for restaurant in restaurants:
+        if (
+            restaurant.get("subcategory") in profile["recent"]
+            or restaurant.get("food") in profile["recent"]
+            or any(term in profile["recent"] for term in restaurant.get("matched_terms", []))
+        ):
+            continue
+
         matched_terms = [
             term
             for term in search_terms
