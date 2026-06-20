@@ -1,0 +1,15 @@
+{
+  "participant_id": "U0011",
+  "restaurants": [
+    {
+      "restaurant_id": "a8150b8e6a851b2c",
+      "name": "위아더퓨쳐",
+      "address": "서울특별시 성동구 송정동 66-42 1층",
+      "category": "양식",
+      "food": "크림파스타",
+      "excluded_at": "2026-06-21T02:56:22.326498",
+      "recommendation_id": "20260621T025529274494_072766c1"
+    }
+  ],
+  "updated_at": "2026-06-21T02:56:22.326498"
+}

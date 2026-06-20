@@ -590,11 +590,6 @@
             <option value="3">3개 그룹</option>
             <option value="4">4개 그룹</option>
             <option value="5">5개 그룹</option>
-            <option value="6">6개 그룹</option>
-            <option value="7">7개 그룹</option>
-            <option value="8">8개 그룹</option>
-            <option value="9">9개 그룹</option>
-            <option value="10">10개 그룹</option>
           </select>
           <div style="margin-top: 6px; color: var(--text-soft); font-size: 0.82em;">세션 생성 시 선택한 수로 참가자 그룹을 구성합니다.</div>
         </div>
@@ -723,6 +718,7 @@
     let cliQueueRunning = false;
     let userFolderPoll = null;
     let selectedParticipantIds = new Set();
+    let activeParticipantIds = new Set();
 
     async function loadNetworkInfo() {
       try {
@@ -766,6 +762,10 @@
         }
         currentSessionId = data.session_id;
         participants = data.participants || [];
+        selectedParticipantIds = new Set(data.selected_participant_ids || []);
+        activeParticipantIds = new Set(
+          participants.map(participant => participant.participant_id).filter(Boolean)
+        );
 
         document.getElementById('sessionStatus').style.display = 'block';
         document.getElementById('sessionStatus').textContent =
@@ -828,7 +828,12 @@
         }
         const data = await response.json();
         participants = data.participants || [];
+        selectedParticipantIds = new Set(data.selected_participant_ids || []);
+        activeParticipantIds = new Set(
+          participants.map(participant => participant.participant_id).filter(Boolean)
+        );
         updateParticipantsList();
+        loadUserFolders();
       } catch (e) {
         console.error('세션 갱신 실패:', e);
       }
@@ -856,7 +861,7 @@
         const container = document.getElementById('userFolders');
         container.innerHTML = folders.length
           ? folders.map(folder => `
-              <div class="user-folder ${folder.source === 'demo' || selectedParticipantIds.has(folder.participant_id) ? 'selected' : ''}"
+              <div class="user-folder ${folder.source === 'demo' || activeParticipantIds.has(folder.participant_id) || selectedParticipantIds.has(folder.participant_id) ? 'selected' : ''}"
                    ${folder.source === 'demo' ? '' : `onclick="toggleParticipantSelection('${escapeHtml(folder.participant_id)}')"`}>
                 <span class="folder-icon" aria-hidden="true">📁</span>
                 <span class="folder-id">${escapeHtml(folder.user_id || '이름 없음')}</span>
@@ -869,20 +874,51 @@
       }
     }
 
-    function toggleParticipantSelection(participantId) {
+    async function toggleParticipantSelection(participantId) {
       if (selectedParticipantIds.has(participantId)) {
         selectedParticipantIds.delete(participantId);
       } else {
         selectedParticipantIds.add(participantId);
       }
       loadUserFolders();
+      if (!currentSessionId) {
+        return;
+      }
+      try {
+        const response = await fetch(`/api/session/${currentSessionId}/participants`, {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            participant_ids: Array.from(selectedParticipantIds)
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || '세션 참가자 갱신 실패');
+        }
+        selectedParticipantIds = new Set(data.selected_participant_ids || []);
+        participants = data.participants || [];
+        activeParticipantIds = new Set(
+          participants.map(participant => participant.participant_id).filter(Boolean)
+        );
+        updateParticipantsList();
+        loadUserFolders();
+      } catch (e) {
+        await refreshSession();
+        alert('세션 참가자 갱신 실패: ' + e.message);
+      }
     }
 
     function updateSelectionStatus() {
       const count = selectedParticipantIds.size;
-      document.getElementById('selectionStatus').textContent = count
-        ? `샘플 10명은 항상 포함 · 실제 사용자 ${count}명 추가 선택됨`
-        : '샘플 참가자 10명은 항상 포함됩니다. 실제 사용자 폴더를 눌러 추가하세요.';
+      const activeActualCount = participants.filter(
+        participant => participant.source !== 'demo'
+      ).length;
+      document.getElementById('selectionStatus').textContent = currentSessionId
+        ? `샘플 10명은 항상 포함 · 현재 세션 실제 사용자 ${activeActualCount}명 · 저장 폴더 선택 ${count}명`
+        : count
+          ? `샘플 10명은 항상 포함 · 실제 사용자 ${count}명 추가 선택됨`
+          : '샘플 참가자 10명은 항상 포함됩니다. 실제 사용자 폴더를 눌러 추가하세요.';
     }
 
     function removeParticipant(index) {

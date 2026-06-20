@@ -162,6 +162,38 @@ jq --slurpfile menu "$MENU_TREE_FILE" --argjson group_count "$group_count" '
       )
     | sort_by(.first_index);
 
+  def rebalance_once($clusters):
+    (
+      [
+        range(0; $clusters | length) as $index
+        | select(($clusters[$index].members | length) == 1)
+        | $index
+      ][0]
+    ) as $single_index
+    | (
+      [
+        range(0; $clusters | length) as $index
+        | select(($clusters[$index].members | length) > 2)
+        | {
+            index: $index,
+            size: ($clusters[$index].members | length)
+          }
+      ]
+      | max_by([.size, -.index])
+      | .index
+    ) as $donor_index
+    | ($clusters[$donor_index].members[-1]) as $member
+    | $clusters
+    | .[$donor_index].members = .[$donor_index].members[:-1]
+    | .[$single_index].members += [$member];
+
+  def rebalance_singletons:
+    until(
+      all(.[]; (.members | length) != 1)
+      or all(.[]; (.members | length) <= 2);
+      rebalance_once(.)
+    );
+
   (.participants // []) as $participants
   | if $group_count <= 0 or ($participants | length) == 0 then
       {groups: []}
@@ -175,23 +207,25 @@ jq --slurpfile menu "$MENU_TREE_FILE" --argjson group_count "$group_count" '
           | to_entries[]
           | {members: [.value.user_id], first_index: .key}
         ] as $initial_clusters
-      | ([$group_count, ($initial_clusters | length)] | min) as $target_count
+      | (
+          if ($initial_clusters | length) == 1 then 1
+          else [
+            $group_count,
+            (($initial_clusters | length) / 2 | floor)
+          ] | min
+          end
+        ) as $target_count
       | (
           $initial_clusters
           | until(length <= $target_count; merge_once(.; $terms))
+          | rebalance_singletons
         ) as $clusters
       | {
-          groups: (
-            [
-              $clusters
-              | to_entries[]
-              | {group_id: (.key + 1), members: .value.members}
-            ]
-            + [
-                range(($clusters | length) + 1; $group_count + 1)
-                | {group_id: ., members: []}
-              ]
-          )
+          groups: [
+            $clusters
+            | to_entries[]
+            | {group_id: (.key + 1), members: .value.members}
+          ]
         }
     end
 ' "$session_file"

@@ -1,0 +1,36 @@
+{
+  "participant_id": "U0011",
+  "user_id": "반짝이는 공작",
+  "auto_generated_name": true,
+  "source": "mobile",
+  "created_at": "2026-06-21T02:54:59.185465",
+  "updated_at": "2026-06-21T02:54:59.185465",
+  "preferences": {
+    "like": {
+      "high": [
+        "일식",
+        "중식"
+      ],
+      "low": [
+        "일식|튀김/돈카츠류",
+        "일식|초밥/회류",
+        "중식|만두/딤섬류",
+        "중식|면/밥류"
+      ]
+    },
+    "recent": {
+      "high": [
+        "양식/이탈리안"
+      ],
+      "low": [
+        "양식/이탈리안|스테이크/고기류"
+      ]
+    }
+  },
+  "session_id": "072766c1",
+  "submitted_at": "2026-06-21T02:54:59.185465",
+  "meal_data": {
+    "date": "2026-06-21",
+    "meal_type": "lunch"
+  }
+}

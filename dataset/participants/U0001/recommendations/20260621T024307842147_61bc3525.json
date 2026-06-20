@@ -1,0 +1,36 @@
+{
+  "recommendation_id": "20260621T024307842147_61bc3525",
+  "participant_id": "U0001",
+  "session_id": "61bc3525",
+  "group_id": 1,
+  "recommended_at": "2026-06-21T02:43:07.842134",
+  "recommendations": [
+    {
+      "restaurant_id": "94a6dbe890f8e501",
+      "name": "후문 카페",
+      "food": "김치볶음밥",
+      "matched_terms": [
+        "김치볶음밥"
+      ],
+      "category": "양식",
+      "category_group": "음식점",
+      "sub_category": "양식",
+      "raw_category": "음식점>양식",
+      "location": "세종대학교",
+      "address": "서울특별시 광진구 능동 256-13",
+      "roadAddress": "서울특별시 광진구 능동로36길 183",
+      "link": "",
+      "mapx": "1270885687",
+      "mapy": "375526447",
+      "distance_m": 1301,
+      "walking_minutes": 21,
+      "review_rank": 1,
+      "subcategory": "",
+      "score": 0.8,
+      "reason": "matched preferred category 양식; matched preferred food 김치볶음밥"
+    }
+  ],
+  "feedback": {
+    "status": "pending"
+  }
+}

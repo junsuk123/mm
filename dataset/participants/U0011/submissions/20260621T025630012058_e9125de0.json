@@ -1,0 +1,36 @@
+{
+  "participant_id": "U0011",
+  "user_id": "반짝이는 공작",
+  "auto_generated_name": true,
+  "source": "mobile",
+  "created_at": "2026-06-21T02:54:59.185465",
+  "updated_at": "2026-06-21T02:56:30.011517",
+  "preferences": {
+    "like": {
+      "high": [
+        "태국식",
+        "베트남식"
+      ],
+      "low": [
+        "태국식|면류",
+        "태국식|볶음류",
+        "베트남식|해산물류",
+        "베트남식|볶음류"
+      ]
+    },
+    "recent": {
+      "high": [
+        "한식"
+      ],
+      "low": [
+        "한식|찜/전골류"
+      ]
+    }
+  },
+  "session_id": "e9125de0",
+  "submitted_at": "2026-06-21T02:56:30.011517",
+  "meal_data": {
+    "date": "2026-06-21",
+    "meal_type": "dinner"
+  }
+}

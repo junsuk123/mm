@@ -589,6 +589,7 @@ recommend_from_profile_file() {
   exclusions_file=$5
   walking_minutes=$6
   review_top_n=$7
+  fallback_attempt=${8:-false}
 
   candidate_file=$(mktemp "${TMPDIR:-/tmp}/recommend-candidates.XXXXXX")
   add_tmp_file "$candidate_file"
@@ -620,6 +621,9 @@ recommend_from_profile_file() {
         esac
       done < "$restaurants_file"
     fi
+    if [ "$provider_name" = naver ]; then
+      sleep "${MM_NAVER_REQUEST_DELAY_SEC:-0.25}"
+    fi
   done < "$terms_file"
 
   jq -s \
@@ -642,9 +646,19 @@ recommend_from_profile_file() {
         )
       );
     def is_recent($r; $p):
-      has($p.recent; $r.food)
-      or has($p.recent; $r.subcategory)
-      or any($r.matched_terms[]?; . as $term | has($p.recent; $term));
+      (
+        (($r.food // "") != "")
+        and has($p.recent; $r.food)
+      )
+      or (
+        (($r.subcategory // "") != "")
+        and has($p.recent; $r.subcategory)
+      )
+      or any(
+        $r.matched_terms[]?;
+        . as $term
+        | (($term // "") != "") and has($p.recent; $term)
+      );
     def score($r; $p):
       (if has($p.like_high; $r.category) then 0.5 else 0 end)
       + (if has($p.like_low; $r.food) then 0.3 else 0 end);
@@ -658,21 +672,27 @@ recommend_from_profile_file() {
     map(
       select(is_excluded(.) | not)
       | select(is_recent(.; $profile[0]) | not)
-      | select(
-          ($walking_minutes == 0)
-          or (
-            (.walking_minutes // null) != null
-            and (.walking_minutes <= $walking_minutes)
+    ) as $eligible
+    | (
+        $eligible
+        | map(
+            select(
+              ($walking_minutes == 0)
+              or (
+                (.walking_minutes // null) != null
+                and (.walking_minutes <= $walking_minutes)
+              )
+            )
+            | select(
+                ($review_top_n == 0)
+                or (
+                  (.review_rank // null) != null
+                  and (.review_rank <= $review_top_n)
+                )
+              )
           )
-        )
-      | select(
-          ($review_top_n == 0)
-          or (
-            (.review_rank // null) != null
-            and (.review_rank <= $review_top_n)
-          )
-        )
-    )
+      ) as $strict
+    | (if ($strict | length) > 0 then $strict else $eligible end)
     | map(. + {
       score: ((score(.; $profile[0]) * 1000 | round) / 1000),
       reason: reason(.; $profile[0])
@@ -680,6 +700,19 @@ recommend_from_profile_file() {
     | sort_by(-.score)
     | .[:1]
   ' "$candidate_file" > "$result_file"
+
+  if [ "$(jq 'length' "$result_file")" -eq 0 ] && [ "$fallback_attempt" != true ]; then
+    fallback_profile_file=$(mktemp "${TMPDIR:-/tmp}/recommend-fallback-profile.XXXXXX")
+    add_tmp_file "$fallback_profile_file"
+    if [ "$provider_name" = naver ]; then
+      jq '.positive = ["음식점", "맛집"]' "$profile_file" > "$fallback_profile_file"
+    else
+      jq '.positive = (.like_high | unique)' "$profile_file" > "$fallback_profile_file"
+    fi
+    recommend_from_profile_file \
+      "$fallback_profile_file" "$location" "$provider_name" "$result_file" \
+      "$exclusions_file" 0 0 true
+  fi
 }
 
 recommend_for_single_user() {
@@ -735,22 +768,30 @@ recommend_for_groups() {
   assignments_file=$(mktemp "${TMPDIR:-/tmp}/recommend-assignments.XXXXXX")
   add_tmp_file "$assignments_file"
   build_group_assignments_file "$session_file" "$group_count" "$assignments_file"
+  effective_group_count=$(jq '.groups | length' "$assignments_file")
 
   web_step \
     "jq '<그룹별 선호 프로필 생성>' <세션파일> && scripts/providers/restaurant_provider.sh $provider_name '<선호메뉴>' '$location' | jq '<점수 계산 및 Top 1 선정>'" \
     "각 그룹의 선호 프로필로 식당을 검색하고 추천 점수 1위 식당을 선정했습니다."
   groups_file=$(mktemp "${TMPDIR:-/tmp}/recommend-groups.XXXXXX")
+  selected_restaurants_file=$(mktemp "${TMPDIR:-/tmp}/recommend-selected-restaurants.XXXXXX")
   add_tmp_file "$groups_file"
+  add_tmp_file "$selected_restaurants_file"
   : > "$groups_file"
+  printf '%s\n' '[]' > "$selected_restaurants_file"
 
   jq -c '.groups[]' "$assignments_file" | while IFS= read -r group_json; do
     group_index=$(printf '%s' "$group_json" | jq -r '.group_id')
     profile_file=$(mktemp "${TMPDIR:-/tmp}/recommend-group-profile.XXXXXX")
     recommendations_file=$(mktemp "${TMPDIR:-/tmp}/recommend-group-result.XXXXXX")
     exclusions_file=$(mktemp "${TMPDIR:-/tmp}/recommend-group-exclusions.XXXXXX")
+    combined_exclusions_file=$(mktemp "${TMPDIR:-/tmp}/recommend-group-all-exclusions.XXXXXX")
+    selected_restaurants_next_file=$(mktemp "${TMPDIR:-/tmp}/recommend-selected-restaurants-next.XXXXXX")
     add_tmp_file "$profile_file"
     add_tmp_file "$recommendations_file"
     add_tmp_file "$exclusions_file"
+    add_tmp_file "$combined_exclusions_file"
+    add_tmp_file "$selected_restaurants_next_file"
 
     members_json=$(printf '%s' "$group_json" | jq -c '.members')
     member_names_json=$(jq -c \
@@ -770,10 +811,35 @@ recommend_for_groups() {
     else
       printf '%s\n' '[]' > "$exclusions_file"
     fi
+    excluded_restaurant_count=$(jq 'length' "$exclusions_file")
+    jq -s '
+      add
+      | unique_by([
+          (.restaurant_id // ""),
+          (.name // ""),
+          (.address // "")
+        ])
+    ' "$exclusions_file" "$selected_restaurants_file" > "$combined_exclusions_file"
     recommend_from_profile_file \
       "$profile_file" "$location" "$provider_name" "$recommendations_file" \
-      "$exclusions_file" "$walking_minutes" "$review_top_n"
-    excluded_restaurant_count=$(jq 'length' "$exclusions_file")
+      "$combined_exclusions_file" "$walking_minutes" "$review_top_n"
+    jq -s '
+      .[0] + [
+        .[1][0]?
+        | select(. != null)
+        | {
+            restaurant_id: (.restaurant_id // ""),
+            name: (.name // ""),
+            address: (.roadAddress // .address // "")
+          }
+      ]
+      | unique_by([
+          (.restaurant_id // ""),
+          (.name // ""),
+          (.address // "")
+        ])
+    ' "$selected_restaurants_file" "$recommendations_file" > "$selected_restaurants_next_file"
+    cp "$selected_restaurants_next_file" "$selected_restaurants_file"
 
     group_json=$(jq -n \
       --argjson group_id "$group_index" \
@@ -799,7 +865,7 @@ recommend_for_groups() {
     --arg provider "$provider_name" \
     --arg location "$location" \
     --argjson participant_count "$PARTICIPANT_COUNT" \
-    --argjson group_count "$GROUP_COUNT" \
+    --argjson group_count "$effective_group_count" \
     '{
       session: {
         participant_count: $participant_count,

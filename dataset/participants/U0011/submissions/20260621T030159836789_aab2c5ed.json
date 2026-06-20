@@ -1,4 +1,5 @@
 {
+  "participant_id": "U0011",
   "user_id": "반짝이는 공작",
   "auto_generated_name": true,
   "source": "mobile",
@@ -25,5 +26,11 @@
         "일식|면류"
       ]
     }
+  },
+  "session_id": "aab2c5ed",
+  "submitted_at": "2026-06-21T03:01:59.836248",
+  "meal_data": {
+    "date": "2026-06-21",
+    "meal_type": "lunch"
   }
 }

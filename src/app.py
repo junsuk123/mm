@@ -296,6 +296,17 @@ def scan_device_participant_ids(device_id):
             matches.append(participant_id)
     return matches
 
+def participant_folder_matches_device(participant_id, device_id):
+    """폴더의 device.json이 현재 요청 기기와 정확히 같은지 확인한다."""
+    device_id = validate_device_id(device_id)
+    if not device_id or not PARTICIPANT_ID_PATTERN.fullmatch(str(participant_id or '')):
+        return False
+    stored_device = load_participant_device(participant_id) or {}
+    return (
+        validate_device_id(stored_device.get('device_identifier'))
+        == device_id
+    )
+
 def load_device_index():
     data = load_json_file(DEVICE_INDEX_FILE) or {}
     devices = data.get('devices', {})
@@ -503,8 +514,7 @@ def resolve_participant_id_for_device(device_id, create=False):
     indexed_id = str(devices.get(device_id) or '')
     matches = scan_device_participant_ids(device_id)
     if indexed_id and indexed_id not in matches:
-        indexed_device = load_participant_device(indexed_id) or {}
-        if indexed_device.get('device_identifier') == device_id:
+        if participant_folder_matches_device(indexed_id, device_id):
             matches.append(indexed_id)
     matches = sorted(set(matches))
 
@@ -520,6 +530,11 @@ def resolve_participant_id_for_device(device_id, create=False):
     if not create:
         return ''
     participant_id = next_participant_id()
+    save_json_atomic(participant_device_path(participant_id), {
+        'identifier_type': 'browser_uuid',
+        'device_identifier': device_id,
+        'updated_at': datetime.now().isoformat()
+    })
     devices[device_id] = participant_id
     save_device_index(devices)
     return participant_id
@@ -856,6 +871,10 @@ def save_participant_record(participant, session_id):
     with participant_records_lock:
         with participant_file_lock():
             participant_id = resolve_participant_id_for_device(device_id, create=True)
+            if not participant_folder_matches_device(participant_id, device_id):
+                raise ValueError(
+                    'Stored device information does not match the current device'
+                )
             now = datetime.now().isoformat()
             submitted_at = str(participant.get('submitted_at') or now)
             previous = load_participant_profile(participant_id) or {}
@@ -1698,8 +1717,14 @@ def create_session():
         review_top_n = int(data.get('review_top_n', 0) or 0)
     except (TypeError, ValueError):
         return jsonify({'error': 'Invalid session setting'}), 400
-    if group_count not in range(1, 11):
-        return jsonify({'error': 'group_count must be between 1 and 10'}), 400
+    max_group_count = max(1, len(participants) // 2)
+    if group_count not in range(1, max_group_count + 1):
+        return jsonify({
+            'error': (
+                f'group_count must be between 1 and {max_group_count} '
+                'so every group has at least two participants'
+            )
+        }), 400
     if walking_minutes not in {0, 5, 10, 15, 20, 25, 30}:
         return jsonify({'error': 'walking_minutes must be 0 or 5-30 in 5-minute steps'}), 400
     if review_top_n not in {0, 1, 3, 5}:
@@ -1740,7 +1765,62 @@ def create_session():
         'use_exclusions': session_data['use_exclusions'],
         'participant_count': len(participants),
         'sample_participant_count': len(demo_participants),
+        'selected_participant_ids': session_data['selected_participant_ids'],
         'participants': participants
+    })
+
+@app.route('/api/session/<session_id>/participants', methods=['PUT'])
+def update_session_participants(session_id):
+    """진행 중 세션의 저장 사용자 선택을 즉시 갱신한다."""
+    if not ensure_session_loaded(session_id):
+        return jsonify({'error': 'Session not found'}), 404
+
+    session_data = sessions_store[session_id]
+    if session_data.get('status') != 'collecting':
+        return jsonify({'error': 'Session is closed'}), 409
+
+    data = request.json or {}
+    requested_ids = data.get('participant_ids', [])
+    if not isinstance(requested_ids, list):
+        return jsonify({'error': 'participant_ids must be a list'}), 400
+
+    demo_ids = set(session_data.get('sample_participant_ids', []))
+    selected_participants = [
+        participant
+        for participant in load_selected_participants(requested_ids)
+        if participant.get('participant_id') not in demo_ids
+    ]
+    selected_ids = [
+        participant['participant_id']
+        for participant in selected_participants
+    ]
+    previous_selected_ids = set(session_data.get('selected_participant_ids', []))
+
+    preserved = [
+        participant
+        for participant in session_data.get('participants', [])
+        if (
+            participant.get('participant_id') in demo_ids
+            or participant.get('participant_id') not in previous_selected_ids
+        )
+    ]
+    existing_ids = {
+        participant.get('participant_id')
+        for participant in preserved
+    }
+    session_data['participants'] = preserved + [
+        participant
+        for participant in selected_participants
+        if participant.get('participant_id') not in existing_ids
+    ]
+    session_data['selected_participant_ids'] = selected_ids
+    persist_mobile_session(session_data)
+
+    return jsonify({
+        'success': True,
+        'selected_participant_ids': selected_ids,
+        'participant_count': len(session_data['participants']),
+        'participants': session_data['participants']
     })
 
 @app.route('/api/session/<session_id>/add-participant', methods=['POST'])
@@ -1961,6 +2041,7 @@ def get_cli_job(job_id):
 def generate_group_recommendations(session_data):
     """그룹별 추천 생성"""
     groups = []
+    selected_restaurant_ids = set()
     participants = session_data['participants']
     group_count = session_data['groups']
     grouped_members = build_groups_with_cli(participants, group_count)
@@ -1980,8 +2061,11 @@ def generate_group_recommendations(session_data):
         recommendations = get_restaurant_recommendations(
             group_profile,
             session_data['location'],
-            session_data.get('provider', 'naver')
+            session_data.get('provider', 'naver'),
+            selected_restaurant_ids
         )
+        if recommendations:
+            selected_restaurant_ids.add(recommendations[0]['restaurant_id'])
         
         groups.append({
             'group_id': group_idx,
@@ -2049,9 +2133,10 @@ def search_mock_restaurants(search_terms, location):
                 restaurants.append(item)
     return restaurants
 
-def get_restaurant_recommendations(profile, location, provider='naver'):
+def get_restaurant_recommendations(profile, location, provider='naver', excluded_restaurant_ids=None):
     """그룹 프로필로 인근 식당 후보를 가져와 점수화."""
     try:
+        excluded_restaurant_ids = excluded_restaurant_ids or set()
         search_terms = list(dict.fromkeys(profile['positive']))
         if provider == 'naver':
             restaurants = search_restaurants(search_terms, location)
@@ -2060,6 +2145,8 @@ def get_restaurant_recommendations(profile, location, provider='naver'):
 
         candidates = []
         for r in restaurants:
+            if r['restaurant_id'] in excluded_restaurant_ids:
+                continue
             matched_terms = r.get('matched_terms', [r.get('food', '')])
             if (
                 any(term in profile['recent'] for term in matched_terms)

@@ -1,0 +1,36 @@
+{
+  "recommendation_id": "20260621T030232613830_aab2c5ed",
+  "participant_id": "U0005",
+  "session_id": "aab2c5ed",
+  "group_id": 1,
+  "recommended_at": "2026-06-21T03:02:32.613810",
+  "recommendations": [
+    {
+      "restaurant_id": "7c31f8c1fc025f22",
+      "name": "숙성부심 군자본점",
+      "food": "김치찌개",
+      "matched_terms": [
+        "김치찌개"
+      ],
+      "category": "한식",
+      "category_group": "한식",
+      "sub_category": "돼지고기구이",
+      "raw_category": "한식>돼지고기구이",
+      "location": "세종대학교",
+      "address": "서울특별시 광진구 군자동 2-51 1층",
+      "roadAddress": "서울특별시 광진구 능동로 267 1층",
+      "link": "https://www.instagram.com/sooksungboosim?igsh=MWU1aGZyeTJscjVhOQ==",
+      "mapx": "1270774430",
+      "mapy": "375539087",
+      "distance_m": 415,
+      "walking_minutes": 7,
+      "review_rank": 1,
+      "subcategory": "",
+      "score": 0.8,
+      "reason": "matched preferred category 한식; matched preferred food 김치찌개"
+    }
+  ],
+  "feedback": {
+    "status": "pending"
+  }
+}

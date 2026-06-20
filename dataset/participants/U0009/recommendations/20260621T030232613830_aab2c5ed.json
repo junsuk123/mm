@@ -1,0 +1,36 @@
+{
+  "recommendation_id": "20260621T030232613830_aab2c5ed",
+  "participant_id": "U0009",
+  "session_id": "aab2c5ed",
+  "group_id": 3,
+  "recommended_at": "2026-06-21T03:02:32.613810",
+  "recommendations": [
+    {
+      "restaurant_id": "fbed67e39b9b3592",
+      "name": "굴림샤브&콩국수",
+      "food": "비빔밥",
+      "matched_terms": [
+        "비빔밥"
+      ],
+      "category": "한식",
+      "category_group": "음식점",
+      "sub_category": "한식",
+      "raw_category": "음식점>한식",
+      "location": "세종대학교",
+      "address": "서울특별시 광진구 화양동 111-12 105호, 106호",
+      "roadAddress": "서울특별시 광진구 능동로 172 105호, 106호",
+      "link": "http://gullim.co.kr/",
+      "mapx": "1270739740",
+      "mapy": "375459556",
+      "distance_m": 613,
+      "walking_minutes": 10,
+      "review_rank": 3,
+      "subcategory": "",
+      "score": 0.8,
+      "reason": "matched preferred category 한식; matched preferred food 비빔밥"
+    }
+  ],
+  "feedback": {
+    "status": "pending"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "recommendation_id": "20260621T030232613830_aab2c5ed",
+  "participant_id": "U0006",
+  "session_id": "aab2c5ed",
+  "group_id": 4,
+  "recommended_at": "2026-06-21T03:02:32.613810",
+  "recommendations": [
+    {
+      "restaurant_id": "13d6b22786bc09c3",
+      "name": "버거킹 군자능동점",
+      "food": "양식",
+      "matched_terms": [
+        "양식"
+      ],
+      "category": "양식",
+      "category_group": "양식",
+      "sub_category": "햄버거",
+      "raw_category": "양식>햄버거",
+      "location": "세종대학교",
+      "address": "서울특별시 광진구 군자동 235",
+      "roadAddress": "서울특별시 광진구 능동로 245",
+      "link": "",
+      "mapx": "1270765646",
+      "mapy": "375521860",
+      "distance_m": 249,
+      "walking_minutes": 4,
+      "review_rank": 2,
+      "subcategory": "",
+      "score": 0.5,
+      "reason": "matched preferred category 양식"
+    }
+  ],
+  "feedback": {
+    "status": "pending"
+  }
+}

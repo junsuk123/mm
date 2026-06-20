@@ -11,8 +11,10 @@ import math
 import os
 import re
 import sys
+import time
 from pathlib import Path
 from typing import Any
+from urllib.error import HTTPError
 from urllib.parse import quote_plus, urlencode
 from urllib.request import Request, urlopen
 
@@ -22,6 +24,7 @@ DEFAULT_CLIENT_ID = os.environ.get("NAVER_CLIENT_ID", "lGUa_EkwRbpimNJxGp5i")
 DEFAULT_CLIENT_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "i_JWpEJez1")
 WALKING_ROUTE_FACTOR = 1.25
 WALKING_METERS_PER_MINUTE = 80
+RATE_LIMIT_RETRY_DELAYS = (0.5, 1.0, 2.0, 4.0)
 
 RESTAURANT_TOP_CATEGORIES = {
     "음식점",
@@ -135,8 +138,20 @@ def fetch_local_results(
     request.add_header("X-Naver-Client-Id", client_id)
     request.add_header("X-Naver-Client-Secret", client_secret)
 
-    with urlopen(request, timeout=10) as response:
-        payload = json.loads(response.read().decode("utf-8"))
+    for attempt, retry_delay in enumerate((*RATE_LIMIT_RETRY_DELAYS, None)):
+        try:
+            with urlopen(request, timeout=10) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+            break
+        except HTTPError as error:
+            if error.code != 429 or retry_delay is None:
+                raise
+            print(
+                f"Naver API rate limit reached; retrying in {retry_delay:g}s "
+                f"({attempt + 1}/{len(RATE_LIMIT_RETRY_DELAYS)})",
+                file=sys.stderr,
+            )
+            time.sleep(retry_delay)
 
     return payload.get("items", [])
 
