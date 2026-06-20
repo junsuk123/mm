@@ -583,8 +583,20 @@
         <h2>📱 모바일 수집 세션</h2>
         
         <div class="form-group">
-          <label>그룹 수</label>
-          <input type="number" id="groupCount" value="2" min="1" max="5">
+          <label for="groupCount">그룹 수</label>
+          <select id="groupCount">
+            <option value="1">1개 그룹</option>
+            <option value="2" selected>2개 그룹</option>
+            <option value="3">3개 그룹</option>
+            <option value="4">4개 그룹</option>
+            <option value="5">5개 그룹</option>
+            <option value="6">6개 그룹</option>
+            <option value="7">7개 그룹</option>
+            <option value="8">8개 그룹</option>
+            <option value="9">9개 그룹</option>
+            <option value="10">10개 그룹</option>
+          </select>
+          <div style="margin-top: 6px; color: var(--text-soft); font-size: 0.82em;">세션 생성 시 선택한 수로 참가자 그룹을 구성합니다.</div>
         </div>
 
         <div class="form-group">
@@ -737,7 +749,7 @@
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
-            groups: groupCount,
+            group_count: groupCount,
             location,
             provider,
             walking_minutes: walkingMinutes,
@@ -757,7 +769,7 @@
 
         document.getElementById('sessionStatus').style.display = 'block';
         document.getElementById('sessionStatus').textContent =
-          `✅ 세션 생성됨: ${currentSessionId} · 샘플 ${data.sample_participant_count || 0}명 포함 · 전체 ${participants.length}명 · 안갈래요 ${data.use_exclusions ? '사용' : '미사용'}`;
+          `✅ 세션 생성됨: ${currentSessionId} · ${data.group_count}개 그룹 · 샘플 ${data.sample_participant_count || 0}명 포함 · 전체 ${participants.length}명 · 안갈래요 ${data.use_exclusions ? '사용' : '미사용'}`;
         document.getElementById('sessionStatus').className = 'status success';
         document.getElementById('sessionId').style.display = 'block';
         document.getElementById('sessionId').textContent = `세션 ID: ${currentSessionId}`;
