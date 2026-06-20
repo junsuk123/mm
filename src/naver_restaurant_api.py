@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import html
 import json
+import math
 import os
 import re
 import sys
@@ -19,6 +20,8 @@ NAVER_LOCAL_API_URL = "https://openapi.naver.com/v1/search/local.json"
 DEFAULT_DISPLAY = 5
 DEFAULT_CLIENT_ID = os.environ.get("NAVER_CLIENT_ID", "lGUa_EkwRbpimNJxGp5i")
 DEFAULT_CLIENT_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "i_JWpEJez1")
+WALKING_ROUTE_FACTOR = 1.25
+WALKING_METERS_PER_MINUTE = 80
 
 RESTAURANT_TOP_CATEGORIES = {
     "음식점",
@@ -115,13 +118,19 @@ def restaurant_id(item: dict[str, Any]) -> str:
     return hashlib.sha1(seed.encode("utf-8")).hexdigest()[:16]
 
 
-def fetch_local_results(query: str, display: int = DEFAULT_DISPLAY, client_id: str | None = None, client_secret: str | None = None) -> list[dict[str, Any]]:
+def fetch_local_results(
+    query: str,
+    display: int = DEFAULT_DISPLAY,
+    client_id: str | None = None,
+    client_secret: str | None = None,
+    sort: str = "random",
+) -> list[dict[str, Any]]:
     if not query.strip():
         return []
 
     client_id = client_id or DEFAULT_CLIENT_ID
     client_secret = client_secret or DEFAULT_CLIENT_SECRET
-    request_url = f"{NAVER_LOCAL_API_URL}?{urlencode({'query': query, 'display': display, 'start': 1, 'sort': 'random'})}"
+    request_url = f"{NAVER_LOCAL_API_URL}?{urlencode({'query': query, 'display': display, 'start': 1, 'sort': sort})}"
     request = Request(request_url)
     request.add_header("X-Naver-Client-Id", client_id)
     request.add_header("X-Naver-Client-Secret", client_secret)
@@ -132,9 +141,76 @@ def fetch_local_results(query: str, display: int = DEFAULT_DISPLAY, client_id: s
     return payload.get("items", [])
 
 
-def normalize_item(item: dict[str, Any], matched_term: str, location: str) -> dict[str, Any]:
+def coordinate(value: Any) -> float | None:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    if abs(number) > 1000:
+        number /= 10_000_000
+    return number
+
+
+def haversine_distance_m(
+    first: tuple[float, float] | None,
+    second: tuple[float, float] | None,
+) -> int | None:
+    if first is None or second is None:
+        return None
+    first_lng, first_lat = first
+    second_lng, second_lat = second
+    radius_m = 6_371_000
+    lat_delta = math.radians(second_lat - first_lat)
+    lng_delta = math.radians(second_lng - first_lng)
+    value = (
+        math.sin(lat_delta / 2) ** 2
+        + math.cos(math.radians(first_lat))
+        * math.cos(math.radians(second_lat))
+        * math.sin(lng_delta / 2) ** 2
+    )
+    value = min(1.0, max(0.0, value))
+    return round(radius_m * 2 * math.atan2(math.sqrt(value), math.sqrt(1 - value)))
+
+
+def item_coordinate(item: dict[str, Any]) -> tuple[float, float] | None:
+    lng = coordinate(item.get("mapx"))
+    lat = coordinate(item.get("mapy"))
+    if lng is None or lat is None:
+        return None
+    return lng, lat
+
+
+def estimated_walking_minutes(distance_m: int | None) -> int | None:
+    if distance_m is None:
+        return None
+    route_distance = distance_m * WALKING_ROUTE_FACTOR
+    return max(1, math.ceil(route_distance / WALKING_METERS_PER_MINUTE))
+
+
+def resolve_location_coordinate(
+    location: str,
+    client_id: str | None = None,
+    client_secret: str | None = None,
+) -> tuple[float, float] | None:
+    results = fetch_local_results(
+        location,
+        display=1,
+        client_id=client_id,
+        client_secret=client_secret,
+    )
+    return item_coordinate(results[0]) if results else None
+
+
+def normalize_item(
+    item: dict[str, Any],
+    matched_term: str,
+    location: str,
+    origin: tuple[float, float] | None = None,
+    review_rank: int | None = None,
+) -> dict[str, Any]:
     title = strip_html(item.get("title", ""))
     raw_category = str(item.get("category", "")).strip()
+    distance_m = haversine_distance_m(origin, item_coordinate(item))
     normalized = {
         "restaurant_id": restaurant_id(item),
         "name": title,
@@ -150,12 +226,22 @@ def normalize_item(item: dict[str, Any], matched_term: str, location: str) -> di
         "link": item.get("link", ""),
         "mapx": item.get("mapx"),
         "mapy": item.get("mapy"),
+        "distance_m": distance_m,
+        "walking_minutes": estimated_walking_minutes(distance_m),
+        "review_rank": review_rank,
     }
     return normalized
 
 
-def search_restaurants(terms: list[str], location: str, display: int = DEFAULT_DISPLAY, client_id: str | None = None, client_secret: str | None = None) -> list[dict[str, Any]]:
+def search_restaurants(
+    terms: list[str],
+    location: str,
+    display: int = DEFAULT_DISPLAY,
+    client_id: str | None = None,
+    client_secret: str | None = None,
+) -> list[dict[str, Any]]:
     seen: dict[str, dict[str, Any]] = {}
+    origin = resolve_location_coordinate(location, client_id, client_secret)
 
     for term in terms:
         clean_term = str(term).strip()
@@ -163,17 +249,33 @@ def search_restaurants(terms: list[str], location: str, display: int = DEFAULT_D
             continue
 
         query = f"{clean_term} {location}".strip()
-        for item in fetch_local_results(query, display=display, client_id=client_id, client_secret=client_secret):
+        results = fetch_local_results(
+            query,
+            display=display,
+            client_id=client_id,
+            client_secret=client_secret,
+            sort="comment",
+        )
+        for index, item in enumerate(results):
             raw_category = str(item.get("category", "")).strip()
             if not is_restaurant_category(raw_category):
                 continue
 
-            normalized = normalize_item(item, clean_term, location)
+            normalized = normalize_item(
+                item,
+                clean_term,
+                location,
+                origin=origin,
+                review_rank=index + 1,
+            )
             restaurant_key = normalized["restaurant_id"]
             if restaurant_key in seen:
                 matched_terms = seen[restaurant_key].setdefault("matched_terms", [])
                 if clean_term not in matched_terms:
                     matched_terms.append(clean_term)
+                previous_rank = seen[restaurant_key].get("review_rank")
+                if previous_rank is None or index + 1 < previous_rank:
+                    seen[restaurant_key]["review_rank"] = index + 1
                 continue
             seen[restaurant_key] = normalized
 

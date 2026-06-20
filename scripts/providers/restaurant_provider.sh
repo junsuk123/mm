@@ -45,6 +45,18 @@ provider_get_restaurants_by_food() {
               link: (.link // "")
             }
         )
+        | sort_by(-(.rating // 0))
+        | to_entries
+        | map(
+            .value + {
+              review_rank: (.key + 1),
+              walking_minutes: (
+                if (.value.distance_m // null) == null then null
+                else (((.value.distance_m * 1.25) / 80) | ceil)
+                end
+              )
+            }
+          )
       ' "$PROJECT_ROOT/dataset/mock_restaurants.json"
       ;;
     naver)

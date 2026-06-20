@@ -1047,6 +1047,8 @@ def persist_mobile_session(session_data):
         'groups': session_data.get('groups', 2),
         'location': session_data.get('location', '세종대학교'),
         'provider': session_data.get('provider', 'naver'),
+        'recommendation_filters': session_data.get('recommendation_filters', {}),
+        'use_exclusions': bool(session_data.get('use_exclusions', True)),
         'status': session_data.get('status', 'collecting'),
         'mobile_enabled': bool(session_data.get('mobile_enabled')),
         'join_url': session_data.get('join_url', ''),
@@ -1076,6 +1078,8 @@ def ensure_session_loaded(session_id):
         'groups': int(persisted.get('groups', 2)),
         'location': persisted.get('location', '세종대학교'),
         'provider': persisted.get('provider', 'naver'),
+        'recommendation_filters': persisted.get('recommendation_filters', {}),
+        'use_exclusions': bool(persisted.get('use_exclusions', True)),
         'status': persisted.get('status', 'collecting'),
         'mobile_enabled': bool(persisted.get('mobile_enabled')),
         'join_url': persisted.get('join_url', ''),
@@ -1688,6 +1692,15 @@ def create_session():
         if participant.get('participant_id') not in demo_ids
     ]
     participants = demo_participants + selected_participants
+    try:
+        walking_minutes = int(data.get('walking_minutes', 0) or 0)
+        review_top_n = int(data.get('review_top_n', 0) or 0)
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Invalid recommendation filter'}), 400
+    if walking_minutes not in {0, 5, 10, 15, 20, 25, 30}:
+        return jsonify({'error': 'walking_minutes must be 0 or 5-30 in 5-minute steps'}), 400
+    if review_top_n not in {0, 1, 3, 5}:
+        return jsonify({'error': 'review_top_n must be 0, 1, 3, or 5'}), 400
     
     session_data = {
         'id': session_id,
@@ -1701,6 +1714,11 @@ def create_session():
         'groups': int(data.get('groups', 2)),
         'location': data.get('location', '세종대학교'),
         'provider': data.get('provider', 'naver'),
+        'recommendation_filters': {
+            'walking_minutes': walking_minutes,
+            'review_top_n': review_top_n
+        },
+        'use_exclusions': bool(data.get('use_exclusions', True)),
         'status': 'collecting',
         'mobile_enabled': mobile_enabled,
         'join_url': join_url if mobile_enabled else ''
@@ -1714,6 +1732,8 @@ def create_session():
         'public_base_url': public_base_url,
         'mobile_enabled': mobile_enabled,
         'provider': session_data['provider'],
+        'recommendation_filters': session_data['recommendation_filters'],
+        'use_exclusions': session_data['use_exclusions'],
         'participant_count': len(participants),
         'sample_participant_count': len(demo_participants),
         'participants': participants
@@ -1776,6 +1796,8 @@ def build_cli_session_file(session_data):
     payload = {
         'participant_count': len(session_data['participants']),
         'group_count': int(session_data['groups']),
+        'recommendation_filters': session_data.get('recommendation_filters', {}),
+        'use_exclusions': bool(session_data.get('use_exclusions', True)),
         'participants': session_data['participants']
     }
     with os.fdopen(fd, 'w', encoding='utf-8') as f:

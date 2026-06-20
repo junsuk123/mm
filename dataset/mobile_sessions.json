@@ -1,5 +1,5 @@
 {
-  "latest_session_id": "1d9a25ff",
+  "latest_session_id": "546d8268",
   "sessions": {
     "7815e554": {
       "id": "7815e554",
@@ -10172,6 +10172,1099 @@
           },
           "participant_id": "U0017",
           "display_name": "두근두근한 소라게",
+          "excluded_restaurants": []
+        }
+      ]
+    },
+    "544660ab": {
+      "id": "544660ab",
+      "created": "2026-06-21T01:22:25.308976",
+      "updated": "2026-06-21T01:24:42.032956",
+      "groups": 2,
+      "location": "세종대학교",
+      "provider": "naver",
+      "recommendation_filters": {
+        "walking_minutes": 15,
+        "review_top_n": 3
+      },
+      "use_exclusions": true,
+      "status": "completed",
+      "mobile_enabled": true,
+      "join_url": "https://champions-stomach-enquiry-ann.trycloudflare.com/join/544660ab",
+      "selected_participant_ids": [],
+      "sample_participant_ids": [
+        "U0001",
+        "U0002",
+        "U0003",
+        "U0004",
+        "U0005",
+        "U0006",
+        "U0007",
+        "U0008",
+        "U0009",
+        "U0010"
+      ],
+      "participants": [
+        {
+          "participant_id": "U0001",
+          "device_id": "demo-0001",
+          "user_id": "U0001",
+          "display_name": "김민준",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "한식",
+                "중식"
+              ],
+              "low": [
+                "한식|김치찌개",
+                "한식|된장찌개",
+                "중식|짜장면",
+                "중식|짬뽕"
+              ]
+            },
+            "recent": {
+              "high": [
+                "한식"
+              ],
+              "low": [
+                "한식|순두부찌개"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0002",
+          "device_id": "demo-0002",
+          "user_id": "U0002",
+          "display_name": "이서준",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "한식",
+                "중식"
+              ],
+              "low": [
+                "한식|삼겹살",
+                "한식|불고기",
+                "중식|짜장면",
+                "중식|짬뽕"
+              ]
+            },
+            "recent": {
+              "high": [
+                "한식"
+              ],
+              "low": [
+                "한식|불고기"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0003",
+          "device_id": "demo-0003",
+          "user_id": "U0003",
+          "display_name": "박도윤",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "일식",
+                "세계음식"
+              ],
+              "low": [
+                "일식|라멘",
+                "일식|우동",
+                "세계음식|쌀국수",
+                "세계음식|팟타이"
+              ]
+            },
+            "recent": {
+              "high": [
+                "일식"
+              ],
+              "low": [
+                "일식|초밥"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0004",
+          "device_id": "demo-0004",
+          "user_id": "U0004",
+          "display_name": "최하준",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "일식",
+                "세계음식"
+              ],
+              "low": [
+                "일식|초밥",
+                "일식|돈부리",
+                "세계음식|쌀국수",
+                "세계음식|팟타이"
+              ]
+            },
+            "recent": {
+              "high": [
+                "일식"
+              ],
+              "low": [
+                "일식|라멘"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0005",
+          "device_id": "demo-0005",
+          "user_id": "U0005",
+          "display_name": "정시우",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "중식",
+                "양식"
+              ],
+              "low": [
+                "중식|짜장면",
+                "중식|짬뽕",
+                "양식|크림파스타",
+                "양식|토마토파스타"
+              ]
+            },
+            "recent": {
+              "high": [
+                "중식"
+              ],
+              "low": [
+                "중식|짬뽕"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0006",
+          "device_id": "demo-0006",
+          "user_id": "U0006",
+          "display_name": "강지호",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "중식",
+                "양식"
+              ],
+              "low": [
+                "중식|볶음밥",
+                "중식|소스덮밥",
+                "양식|크림파스타",
+                "양식|토마토파스타"
+              ]
+            },
+            "recent": {
+              "high": [
+                "중식"
+              ],
+              "low": [
+                "중식|볶음밥"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0007",
+          "device_id": "demo-0007",
+          "user_id": "U0007",
+          "display_name": "윤서아",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "양식",
+                "일식"
+              ],
+              "low": [
+                "양식|크림파스타",
+                "양식|토마토파스타",
+                "일식|초밥",
+                "일식|돈부리"
+              ]
+            },
+            "recent": {
+              "high": [
+                "양식"
+              ],
+              "low": [
+                "양식|토마토파스타"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0008",
+          "device_id": "demo-0008",
+          "user_id": "U0008",
+          "display_name": "한지유",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "양식",
+                "일식"
+              ],
+              "low": [
+                "양식|페퍼로니피자",
+                "양식|치즈피자",
+                "일식|초밥",
+                "일식|돈부리"
+              ]
+            },
+            "recent": {
+              "high": [
+                "양식"
+              ],
+              "low": [
+                "양식|치즈피자"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0009",
+          "device_id": "demo-0009",
+          "user_id": "U0009",
+          "display_name": "오하린",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "세계음식",
+                "한식"
+              ],
+              "low": [
+                "세계음식|쌀국수",
+                "세계음식|팟타이",
+                "한식|비빔밥",
+                "한식|김치볶음밥"
+              ]
+            },
+            "recent": {
+              "high": [
+                "세계음식"
+              ],
+              "low": [
+                "세계음식|팟타이"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0010",
+          "device_id": "demo-0010",
+          "user_id": "U0010",
+          "display_name": "임서연",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "세계음식",
+                "한식"
+              ],
+              "low": [
+                "세계음식|타코",
+                "세계음식|부리토",
+                "한식|비빔밥",
+                "한식|김치볶음밥"
+              ]
+            },
+            "recent": {
+              "high": [
+                "세계음식"
+              ],
+              "low": [
+                "세계음식|타코"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "device_id": "722dfff3-7c46-4219-9d49-dae86fc60da2",
+          "user_id": "U0018",
+          "source": "mobile",
+          "submitted_at": "2026-06-21T01:24:17.903530",
+          "meal_data": {
+            "date": "2026-06-21",
+            "meal_type": "lunch"
+          },
+          "preferences": {
+            "like": {
+              "high": [
+                "일식",
+                "분식"
+              ],
+              "low": [
+                "일식|튀김/돈카츠류",
+                "일식|밥/덮밥류",
+                "분식|떡볶이류",
+                "분식|라면/국수류"
+              ]
+            },
+            "recent": {
+              "high": [
+                "중식"
+              ],
+              "low": [
+                "중식|만두/딤섬류"
+              ]
+            }
+          },
+          "participant_id": "U0018",
+          "display_name": "순한 병아리",
+          "excluded_restaurants": []
+        }
+      ]
+    },
+    "941eeb1d": {
+      "id": "941eeb1d",
+      "created": "2026-06-21T01:26:37.488932",
+      "updated": "2026-06-21T01:26:37.490246",
+      "groups": 2,
+      "location": "세종대학교",
+      "provider": "naver",
+      "recommendation_filters": {
+        "walking_minutes": 15,
+        "review_top_n": 3
+      },
+      "use_exclusions": true,
+      "status": "collecting",
+      "mobile_enabled": true,
+      "join_url": "https://champions-stomach-enquiry-ann.trycloudflare.com/join/941eeb1d",
+      "selected_participant_ids": [],
+      "sample_participant_ids": [
+        "U0001",
+        "U0002",
+        "U0003",
+        "U0004",
+        "U0005",
+        "U0006",
+        "U0007",
+        "U0008",
+        "U0009",
+        "U0010"
+      ],
+      "participants": [
+        {
+          "participant_id": "U0001",
+          "device_id": "demo-0001",
+          "user_id": "U0001",
+          "display_name": "김민준",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "한식",
+                "중식"
+              ],
+              "low": [
+                "한식|김치찌개",
+                "한식|된장찌개",
+                "중식|짜장면",
+                "중식|짬뽕"
+              ]
+            },
+            "recent": {
+              "high": [
+                "한식"
+              ],
+              "low": [
+                "한식|순두부찌개"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0002",
+          "device_id": "demo-0002",
+          "user_id": "U0002",
+          "display_name": "이서준",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "한식",
+                "중식"
+              ],
+              "low": [
+                "한식|삼겹살",
+                "한식|불고기",
+                "중식|짜장면",
+                "중식|짬뽕"
+              ]
+            },
+            "recent": {
+              "high": [
+                "한식"
+              ],
+              "low": [
+                "한식|불고기"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0003",
+          "device_id": "demo-0003",
+          "user_id": "U0003",
+          "display_name": "박도윤",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "일식",
+                "세계음식"
+              ],
+              "low": [
+                "일식|라멘",
+                "일식|우동",
+                "세계음식|쌀국수",
+                "세계음식|팟타이"
+              ]
+            },
+            "recent": {
+              "high": [
+                "일식"
+              ],
+              "low": [
+                "일식|초밥"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0004",
+          "device_id": "demo-0004",
+          "user_id": "U0004",
+          "display_name": "최하준",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "일식",
+                "세계음식"
+              ],
+              "low": [
+                "일식|초밥",
+                "일식|돈부리",
+                "세계음식|쌀국수",
+                "세계음식|팟타이"
+              ]
+            },
+            "recent": {
+              "high": [
+                "일식"
+              ],
+              "low": [
+                "일식|라멘"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0005",
+          "device_id": "demo-0005",
+          "user_id": "U0005",
+          "display_name": "정시우",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "중식",
+                "양식"
+              ],
+              "low": [
+                "중식|짜장면",
+                "중식|짬뽕",
+                "양식|크림파스타",
+                "양식|토마토파스타"
+              ]
+            },
+            "recent": {
+              "high": [
+                "중식"
+              ],
+              "low": [
+                "중식|짬뽕"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0006",
+          "device_id": "demo-0006",
+          "user_id": "U0006",
+          "display_name": "강지호",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "중식",
+                "양식"
+              ],
+              "low": [
+                "중식|볶음밥",
+                "중식|소스덮밥",
+                "양식|크림파스타",
+                "양식|토마토파스타"
+              ]
+            },
+            "recent": {
+              "high": [
+                "중식"
+              ],
+              "low": [
+                "중식|볶음밥"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0007",
+          "device_id": "demo-0007",
+          "user_id": "U0007",
+          "display_name": "윤서아",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "양식",
+                "일식"
+              ],
+              "low": [
+                "양식|크림파스타",
+                "양식|토마토파스타",
+                "일식|초밥",
+                "일식|돈부리"
+              ]
+            },
+            "recent": {
+              "high": [
+                "양식"
+              ],
+              "low": [
+                "양식|토마토파스타"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0008",
+          "device_id": "demo-0008",
+          "user_id": "U0008",
+          "display_name": "한지유",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "양식",
+                "일식"
+              ],
+              "low": [
+                "양식|페퍼로니피자",
+                "양식|치즈피자",
+                "일식|초밥",
+                "일식|돈부리"
+              ]
+            },
+            "recent": {
+              "high": [
+                "양식"
+              ],
+              "low": [
+                "양식|치즈피자"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0009",
+          "device_id": "demo-0009",
+          "user_id": "U0009",
+          "display_name": "오하린",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "세계음식",
+                "한식"
+              ],
+              "low": [
+                "세계음식|쌀국수",
+                "세계음식|팟타이",
+                "한식|비빔밥",
+                "한식|김치볶음밥"
+              ]
+            },
+            "recent": {
+              "high": [
+                "세계음식"
+              ],
+              "low": [
+                "세계음식|팟타이"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0010",
+          "device_id": "demo-0010",
+          "user_id": "U0010",
+          "display_name": "임서연",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "세계음식",
+                "한식"
+              ],
+              "low": [
+                "세계음식|타코",
+                "세계음식|부리토",
+                "한식|비빔밥",
+                "한식|김치볶음밥"
+              ]
+            },
+            "recent": {
+              "high": [
+                "세계음식"
+              ],
+              "low": [
+                "세계음식|타코"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        }
+      ]
+    },
+    "546d8268": {
+      "id": "546d8268",
+      "created": "2026-06-21T01:32:42.622557",
+      "updated": "2026-06-21T01:33:39.763414",
+      "groups": 2,
+      "location": "세종대학교",
+      "provider": "naver",
+      "recommendation_filters": {
+        "walking_minutes": 15,
+        "review_top_n": 5
+      },
+      "use_exclusions": true,
+      "status": "completed",
+      "mobile_enabled": true,
+      "join_url": "https://test-partition-petroleum-protocols.trycloudflare.com/join/546d8268",
+      "selected_participant_ids": [],
+      "sample_participant_ids": [
+        "U0001",
+        "U0002",
+        "U0003",
+        "U0004",
+        "U0005",
+        "U0006",
+        "U0007",
+        "U0008",
+        "U0009",
+        "U0010"
+      ],
+      "participants": [
+        {
+          "participant_id": "U0001",
+          "device_id": "demo-0001",
+          "user_id": "U0001",
+          "display_name": "김민준",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "한식",
+                "중식"
+              ],
+              "low": [
+                "한식|김치찌개",
+                "한식|된장찌개",
+                "중식|짜장면",
+                "중식|짬뽕"
+              ]
+            },
+            "recent": {
+              "high": [
+                "한식"
+              ],
+              "low": [
+                "한식|순두부찌개"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0002",
+          "device_id": "demo-0002",
+          "user_id": "U0002",
+          "display_name": "이서준",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "한식",
+                "중식"
+              ],
+              "low": [
+                "한식|삼겹살",
+                "한식|불고기",
+                "중식|짜장면",
+                "중식|짬뽕"
+              ]
+            },
+            "recent": {
+              "high": [
+                "한식"
+              ],
+              "low": [
+                "한식|불고기"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0003",
+          "device_id": "demo-0003",
+          "user_id": "U0003",
+          "display_name": "박도윤",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "일식",
+                "세계음식"
+              ],
+              "low": [
+                "일식|라멘",
+                "일식|우동",
+                "세계음식|쌀국수",
+                "세계음식|팟타이"
+              ]
+            },
+            "recent": {
+              "high": [
+                "일식"
+              ],
+              "low": [
+                "일식|초밥"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0004",
+          "device_id": "demo-0004",
+          "user_id": "U0004",
+          "display_name": "최하준",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "일식",
+                "세계음식"
+              ],
+              "low": [
+                "일식|초밥",
+                "일식|돈부리",
+                "세계음식|쌀국수",
+                "세계음식|팟타이"
+              ]
+            },
+            "recent": {
+              "high": [
+                "일식"
+              ],
+              "low": [
+                "일식|라멘"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0005",
+          "device_id": "demo-0005",
+          "user_id": "U0005",
+          "display_name": "정시우",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "중식",
+                "양식"
+              ],
+              "low": [
+                "중식|짜장면",
+                "중식|짬뽕",
+                "양식|크림파스타",
+                "양식|토마토파스타"
+              ]
+            },
+            "recent": {
+              "high": [
+                "중식"
+              ],
+              "low": [
+                "중식|짬뽕"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0006",
+          "device_id": "demo-0006",
+          "user_id": "U0006",
+          "display_name": "강지호",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "중식",
+                "양식"
+              ],
+              "low": [
+                "중식|볶음밥",
+                "중식|소스덮밥",
+                "양식|크림파스타",
+                "양식|토마토파스타"
+              ]
+            },
+            "recent": {
+              "high": [
+                "중식"
+              ],
+              "low": [
+                "중식|볶음밥"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0007",
+          "device_id": "demo-0007",
+          "user_id": "U0007",
+          "display_name": "윤서아",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "양식",
+                "일식"
+              ],
+              "low": [
+                "양식|크림파스타",
+                "양식|토마토파스타",
+                "일식|초밥",
+                "일식|돈부리"
+              ]
+            },
+            "recent": {
+              "high": [
+                "양식"
+              ],
+              "low": [
+                "양식|토마토파스타"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0008",
+          "device_id": "demo-0008",
+          "user_id": "U0008",
+          "display_name": "한지유",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "양식",
+                "일식"
+              ],
+              "low": [
+                "양식|페퍼로니피자",
+                "양식|치즈피자",
+                "일식|초밥",
+                "일식|돈부리"
+              ]
+            },
+            "recent": {
+              "high": [
+                "양식"
+              ],
+              "low": [
+                "양식|치즈피자"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0009",
+          "device_id": "demo-0009",
+          "user_id": "U0009",
+          "display_name": "오하린",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "세계음식",
+                "한식"
+              ],
+              "low": [
+                "세계음식|쌀국수",
+                "세계음식|팟타이",
+                "한식|비빔밥",
+                "한식|김치볶음밥"
+              ]
+            },
+            "recent": {
+              "high": [
+                "세계음식"
+              ],
+              "low": [
+                "세계음식|팟타이"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "participant_id": "U0010",
+          "device_id": "demo-0010",
+          "user_id": "U0010",
+          "display_name": "임서연",
+          "source": "demo",
+          "submitted_at": "2026-06-20T00:00:00",
+          "preferences": {
+            "like": {
+              "high": [
+                "세계음식",
+                "한식"
+              ],
+              "low": [
+                "세계음식|타코",
+                "세계음식|부리토",
+                "한식|비빔밥",
+                "한식|김치볶음밥"
+              ]
+            },
+            "recent": {
+              "high": [
+                "세계음식"
+              ],
+              "low": [
+                "세계음식|타코"
+              ]
+            }
+          },
+          "excluded_restaurants": []
+        },
+        {
+          "device_id": "9231858a-0161-42e2-9dc1-9c31df488116",
+          "user_id": "U0019",
+          "source": "mobile",
+          "submitted_at": "2026-06-21T01:33:12.536942",
+          "meal_data": {
+            "date": "2026-06-21",
+            "meal_type": "lunch"
+          },
+          "preferences": {
+            "like": {
+              "high": [
+                "베트남식",
+                "분식"
+              ],
+              "low": [
+                "베트남식|볶음류",
+                "베트남식|면/국물류",
+                "분식|떡볶이류",
+                "분식|김밥류"
+              ]
+            },
+            "recent": {
+              "high": [
+                "한식"
+              ],
+              "low": [
+                "한식|국물/탕류"
+              ]
+            }
+          },
+          "participant_id": "U0019",
+          "display_name": "사랑스러운 물개",
           "excluded_restaurants": []
         }
       ]

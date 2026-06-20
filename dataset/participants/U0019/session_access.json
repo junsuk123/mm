@@ -1,0 +1,15 @@
+{
+  "participant_id": "U0019",
+  "sessions": [
+    {
+      "session_id": "546d8268",
+      "first_accessed_at": "2026-06-21T01:33:12.536942",
+      "last_accessed_at": "2026-06-21T01:33:12.538081",
+      "access_count": 2,
+      "source": "survey_submission"
+    }
+  ],
+  "device_identifier": "9231858a-0161-42e2-9dc1-9c31df488116",
+  "last_session_id": "546d8268",
+  "updated_at": "2026-06-21T01:33:12.538081"
+}

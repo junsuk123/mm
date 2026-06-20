@@ -151,6 +151,29 @@
       width: auto;
     }
 
+    .radio-options {
+      display: flex;
+      gap: 8px;
+    }
+
+    .radio-options label {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      gap: 7px;
+      margin: 0;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      cursor: pointer;
+      background: var(--surface);
+    }
+
+    .radio-options input {
+      width: auto;
+      padding: 0;
+    }
+
     .qr-panel {
       display: none;
       margin-top: 15px;
@@ -577,6 +600,43 @@
           </select>
         </div>
 
+        <div class="form-group">
+          <label>예상 도보 시간</label>
+          <select id="walkingMinutes">
+            <option value="0" selected>전체</option>
+            <option value="5">5분 이내</option>
+            <option value="10">10분 이내</option>
+            <option value="15">15분 이내</option>
+            <option value="20">20분 이내</option>
+            <option value="25">25분 이내</option>
+            <option value="30">30분 이내</option>
+          </select>
+          <div style="margin-top: 6px; color: var(--text-soft); font-size: 0.82em;">Naver 좌표 기반 예상치이며 실제 보행 경로와 다를 수 있습니다.</div>
+        </div>
+
+        <div class="form-group">
+          <label>리뷰 인기순 필터</label>
+          <select id="reviewTopN">
+            <option value="0" selected>전체</option>
+            <option value="1">검색어별 리뷰 많은 순 상위 1개</option>
+            <option value="3">검색어별 리뷰 많은 순 상위 3개</option>
+            <option value="5">검색어별 리뷰 많은 순 상위 5개</option>
+          </select>
+          <div style="margin-top: 6px; color: var(--text-soft); font-size: 0.82em;">Naver 공식 API는 리뷰 개수 대신 리뷰 수 정렬만 제공합니다.</div>
+        </div>
+
+        <div class="form-group">
+          <label>‘안갈래요’ 목록</label>
+          <div class="radio-options">
+            <label>
+              <input type="radio" name="useExclusions" value="true" checked> 사용
+            </label>
+            <label>
+              <input type="radio" name="useExclusions" value="false"> 미사용
+            </label>
+          </div>
+        </div>
+
         <div id="mobileBaseUrlGroup" class="form-group">
           <label>모바일 접속 주소</label>
           <input type="text" id="mobileBaseUrl" placeholder="예: http://192.168.0.10:5000">
@@ -667,6 +727,9 @@
       const groupCount = parseInt(document.getElementById('groupCount').value);
       const location = document.getElementById('location').value;
       const provider = document.getElementById('provider').value;
+      const walkingMinutes = parseInt(document.getElementById('walkingMinutes').value);
+      const reviewTopN = parseInt(document.getElementById('reviewTopN').value);
+      const useExclusions = document.querySelector('input[name="useExclusions"]:checked').value === 'true';
       const publicBaseUrl = document.getElementById('mobileBaseUrl').value.trim();
 
       try {
@@ -677,18 +740,24 @@
             groups: groupCount,
             location,
             provider,
+            walking_minutes: walkingMinutes,
+            review_top_n: reviewTopN,
+            use_exclusions: useExclusions,
             mobile_enabled: true,
             participant_ids: Array.from(selectedParticipantIds),
             public_base_url: publicBaseUrl
           })
         });
         const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || '세션 생성 실패');
+        }
         currentSessionId = data.session_id;
         participants = data.participants || [];
 
         document.getElementById('sessionStatus').style.display = 'block';
         document.getElementById('sessionStatus').textContent =
-          `✅ 세션 생성됨: ${currentSessionId} · 샘플 ${data.sample_participant_count || 0}명 포함 · 전체 ${participants.length}명`;
+          `✅ 세션 생성됨: ${currentSessionId} · 샘플 ${data.sample_participant_count || 0}명 포함 · 전체 ${participants.length}명 · 안갈래요 ${data.use_exclusions ? '사용' : '미사용'}`;
         document.getElementById('sessionStatus').className = 'status success';
         document.getElementById('sessionId').style.display = 'block';
         document.getElementById('sessionId').textContent = `세션 ID: ${currentSessionId}`;
@@ -924,6 +993,8 @@
               <div class="restaurant-info">
                 <div>🍽️ ${r.food}</div>
                 <div>⭐ ${r.rating || '-'}</div>
+                <div>🚶 ${r.walking_minutes ? `약 ${r.walking_minutes}분` : '-'}</div>
+                <div>💬 ${r.review_rank ? `리뷰 인기순 ${r.review_rank}위` : '-'}</div>
               </div>
               <div style="font-size: 0.9em; opacity: 0.88; margin-top: 5px;">📍 ${r.distance_m ? `${r.distance_m}m` : (r.address || r.location || '-')}</div>
               <div class="score">점수: ${r.score}</div>

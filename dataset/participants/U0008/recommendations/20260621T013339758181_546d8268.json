@@ -1,0 +1,36 @@
+{
+  "recommendation_id": "20260621T013339758181_546d8268",
+  "participant_id": "U0008",
+  "session_id": "546d8268",
+  "group_id": 2,
+  "recommended_at": "2026-06-21T01:33:39.758158",
+  "recommendations": [
+    {
+      "restaurant_id": "13b73e947fb69e58",
+      "name": "이화만두",
+      "food": "분식",
+      "matched_terms": [
+        "분식"
+      ],
+      "category": "분식",
+      "category_group": "분식",
+      "sub_category": "만두",
+      "raw_category": "분식>만두",
+      "location": "세종대학교",
+      "address": "서울특별시 광진구 능동 282-3 이화만두",
+      "roadAddress": "서울특별시 광진구 능동로 278-1 이화만두",
+      "link": "https://instagram.com/ewhamandu",
+      "mapx": "1270784423",
+      "mapy": "375547266",
+      "distance_m": 541,
+      "walking_minutes": 9,
+      "review_rank": 4,
+      "subcategory": "",
+      "score": 0.5,
+      "reason": "matched preferred category 분식"
+    }
+  ],
+  "feedback": {
+    "status": "pending"
+  }
+}

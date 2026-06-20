@@ -587,6 +587,8 @@ recommend_from_profile_file() {
   provider_name=$3
   result_file=$4
   exclusions_file=$5
+  walking_minutes=$6
+  review_top_n=$7
 
   candidate_file=$(mktemp "${TMPDIR:-/tmp}/recommend-candidates.XXXXXX")
   add_tmp_file "$candidate_file"
@@ -622,7 +624,9 @@ recommend_from_profile_file() {
 
   jq -s \
     --slurpfile profile "$profile_file" \
-    --slurpfile exclusions "$exclusions_file" '
+    --slurpfile exclusions "$exclusions_file" \
+    --argjson walking_minutes "$walking_minutes" \
+    --argjson review_top_n "$review_top_n" '
     def has($arr; $value): ($arr | contains([$value]));
     def is_excluded($r):
       any(
@@ -649,7 +653,23 @@ recommend_from_profile_file() {
       ] as $parts
       | if ($parts | length) > 0 then ($parts | join("; ")) else "selected as the best available candidate from the search results" end;
 
-    map(select(is_excluded(.) | not))
+    map(
+      select(is_excluded(.) | not)
+      | select(
+          ($walking_minutes == 0)
+          or (
+            (.walking_minutes // null) != null
+            and (.walking_minutes <= $walking_minutes)
+          )
+        )
+      | select(
+          ($review_top_n == 0)
+          or (
+            (.review_rank // null) != null
+            and (.review_rank <= $review_top_n)
+          )
+        )
+    )
     | map(. + {
       score: ((score(.; $profile[0]) * 1000 | round) / 1000),
       reason: reason(.; $profile[0])
@@ -673,7 +693,7 @@ recommend_for_single_user() {
   add_tmp_file "$recommendations_file"
   add_tmp_file "$exclusions_file"
   printf '%s\n' '[]' > "$exclusions_file"
-  recommend_from_profile_file "$profile_file" "$location" "$provider_name" "$recommendations_file" "$exclusions_file"
+  recommend_from_profile_file "$profile_file" "$location" "$provider_name" "$recommendations_file" "$exclusions_file" 0 0
 
   jq -n \
     --arg user_id "$user_id" \
@@ -702,6 +722,9 @@ recommend_for_groups() {
   location=$2
   session_file=$3
   group_count=$4
+  walking_minutes=$(jq -r '.recommendation_filters.walking_minutes // 0' "$session_file")
+  review_top_n=$(jq -r '.recommendation_filters.review_top_n // 0' "$session_file")
+  use_exclusions=$(jq -r 'if has("use_exclusions") then .use_exclusions else true end' "$session_file")
 
   web_step \
     "sh scripts/grouping_cli.sh --session-file <세션파일> --group-count $group_count | jq '.groups' > <그룹파일>" \
@@ -739,8 +762,14 @@ recommend_for_groups() {
         ]
       ' "$session_file")
     build_group_profile_file_from_members "$session_file" "$members_json" "$profile_file"
-    build_group_exclusions_file_from_members "$session_file" "$members_json" "$exclusions_file"
-    recommend_from_profile_file "$profile_file" "$location" "$provider_name" "$recommendations_file" "$exclusions_file"
+    if [ "$use_exclusions" = true ]; then
+      build_group_exclusions_file_from_members "$session_file" "$members_json" "$exclusions_file"
+    else
+      printf '%s\n' '[]' > "$exclusions_file"
+    fi
+    recommend_from_profile_file \
+      "$profile_file" "$location" "$provider_name" "$recommendations_file" \
+      "$exclusions_file" "$walking_minutes" "$review_top_n"
     excluded_restaurant_count=$(jq 'length' "$exclusions_file")
 
     group_json=$(jq -n \
@@ -768,7 +797,23 @@ recommend_for_groups() {
     --arg location "$location" \
     --argjson participant_count "$PARTICIPANT_COUNT" \
     --argjson group_count "$GROUP_COUNT" \
-    '{session: {participant_count: $participant_count, group_count: $group_count, location: $location}, provider: $provider, participants: $session[0].participants, groups: .}' \
+    '{
+      session: {
+        participant_count: $participant_count,
+        group_count: $group_count,
+        location: $location,
+        recommendation_filters: ($session[0].recommendation_filters // {}),
+        use_exclusions: (
+          if ($session[0] | has("use_exclusions"))
+          then $session[0].use_exclusions
+          else true
+          end
+        )
+      },
+      provider: $provider,
+      participants: $session[0].participants,
+      groups: .
+    }' \
     "$groups_file"
 }
 
