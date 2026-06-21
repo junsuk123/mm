@@ -1,0 +1,36 @@
+{
+  "recommendation_id": "20260621T161655497005_fb84fcbf",
+  "participant_id": "U0002",
+  "session_id": "fb84fcbf",
+  "group_id": 1,
+  "recommended_at": "2026-06-21T16:16:55.496988",
+  "recommendations": [
+    {
+      "restaurant_id": "6a5f2920838b196b",
+      "name": "C156",
+      "food": "김치볶음밥",
+      "matched_terms": [
+        "김치볶음밥"
+      ],
+      "category": "양식",
+      "category_group": "음식점",
+      "sub_category": "양식",
+      "raw_category": "음식점>양식",
+      "location": "세종대학교",
+      "address": "서울특별시 광진구 화양동 24-15 에이치 에비뉴 호텔 지하1층 C156레스토랑",
+      "roadAddress": "서울특별시 광진구 동일로 156 에이치 에비뉴 호텔 지하1층 C156레스토랑",
+      "link": "https://blog.naver.com/c156_office",
+      "mapx": "1270665684",
+      "mapy": "375460367",
+      "distance_m": 884,
+      "walking_minutes": 14,
+      "review_rank": 3,
+      "subcategory": "",
+      "score": 0.8,
+      "reason": "matched preferred category 양식; matched preferred food 김치볶음밥"
+    }
+  ],
+  "feedback": {
+    "status": "pending"
+  }
+}

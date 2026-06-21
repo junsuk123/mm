@@ -333,16 +333,15 @@
     }
 
     .terminal-log {
-      flex: 1;
-      height: calc(100% - 42px);
-      min-height: 0;
+      height: 104px;
+      flex: 0 0 104px;
       background: #304f70;
       color: #dce7f3;
       border-radius: 8px;
-      padding: 14px;
+      padding: 10px 12px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size: 0.82em;
-      line-height: 1.45;
+      font-size: 0.76em;
+      line-height: 1.35;
       overflow: hidden;
       border: 1px solid rgba(255, 255, 255, 0.12);
     }
@@ -351,7 +350,7 @@
       height: 100%;
       display: flex;
       flex-direction: column;
-      gap: 9px;
+      gap: 5px;
       overflow: hidden;
     }
 
@@ -397,6 +396,277 @@
 
     @keyframes blink {
       50% { opacity: 0; }
+    }
+
+    .insight-panel {
+      min-height: 0;
+      flex: 1;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(217, 235, 251, 0.8), transparent 30%),
+        linear-gradient(150deg, #fbfdff, #f7f3ff);
+    }
+
+    .insight-header {
+      padding: 12px 13px 9px;
+      border-bottom: 1px solid rgba(189, 212, 234, 0.75);
+    }
+
+    .insight-title {
+      color: var(--text);
+      font-size: 1em;
+      font-weight: 800;
+    }
+
+    .insight-subtitle {
+      margin-top: 3px;
+      color: var(--text-soft);
+      font-size: 0.76em;
+      line-height: 1.35;
+    }
+
+    .insight-tabs {
+      display: flex;
+      gap: 6px;
+      margin-top: 9px;
+      overflow-x: auto;
+    }
+
+    .insight-tab {
+      width: auto;
+      flex: 0 0 auto;
+      padding: 5px 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: white;
+      color: var(--text-soft);
+      font-size: 0.78em;
+    }
+
+    .insight-tab:hover,
+    .insight-tab.active {
+      background: var(--primary-deep);
+      color: white;
+    }
+
+    .insight-content {
+      min-height: 0;
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .insight-empty {
+      height: 100%;
+      min-height: 180px;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      color: var(--text-soft);
+      text-align: center;
+      line-height: 1.6;
+      font-size: 0.88em;
+    }
+
+    .preference-map {
+      width: 100%;
+      min-width: 420px;
+      height: auto;
+      display: block;
+      border: 1px solid rgba(189, 212, 234, 0.7);
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.84);
+    }
+
+    .map-column-label {
+      fill: #7891aa;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    .map-link {
+      fill: none;
+      stroke: #b6cce0;
+      stroke-width: 1.4;
+      opacity: 0.62;
+    }
+
+    .map-link.shared {
+      stroke: #7494bc;
+      stroke-width: 2.5;
+      opacity: 0.82;
+    }
+
+    .map-link.recommended {
+      stroke: #75b69c;
+      stroke-width: 2.8;
+      opacity: 0.9;
+    }
+
+    .map-member-node {
+      fill: #eef7ff;
+      stroke: #91b4d3;
+      stroke-width: 1.2;
+    }
+
+    .map-term-node {
+      fill: #f3edff;
+      stroke: #b4a3db;
+      stroke-width: 1.2;
+    }
+
+    .map-term-node.shared {
+      fill: #e5f2ff;
+      stroke: #668eb5;
+      stroke-width: 1.8;
+    }
+
+    .map-restaurant-node {
+      fill: #e3f7ef;
+      stroke: #65a98d;
+      stroke-width: 1.8;
+    }
+
+    .map-node-text {
+      fill: #294866;
+      font-size: 11px;
+      font-weight: 700;
+      dominant-baseline: middle;
+    }
+
+    .map-node-subtext {
+      fill: #6685a3;
+      font-size: 9px;
+      dominant-baseline: middle;
+    }
+
+    .insight-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .insight-metric {
+      padding: 8px;
+      border: 1px solid rgba(189, 212, 234, 0.8);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.85);
+    }
+
+    .metric-label {
+      color: var(--text-soft);
+      font-size: 0.7em;
+    }
+
+    .metric-value {
+      margin-top: 3px;
+      color: var(--primary-deep);
+      font-size: 1.05em;
+      font-weight: 850;
+    }
+
+    .insight-section {
+      margin-top: 8px;
+      padding: 9px;
+      border: 1px solid rgba(189, 212, 234, 0.8);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.86);
+    }
+
+    .insight-section-title {
+      margin-bottom: 7px;
+      color: var(--text);
+      font-size: 0.8em;
+      font-weight: 800;
+    }
+
+    .term-rank {
+      display: grid;
+      grid-template-columns: minmax(68px, auto) 1fr 34px;
+      gap: 7px;
+      align-items: center;
+      margin-top: 6px;
+      color: var(--text);
+      font-size: 0.75em;
+    }
+
+    .term-bar {
+      height: 7px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e8eff6;
+    }
+
+    .term-bar > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--primary), #9b8fc7);
+    }
+
+    .score-breakdown {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+    }
+
+    .insight-explanation {
+      margin-top: 8px;
+      padding: 9px 10px;
+      border-left: 3px solid var(--warning);
+      border-radius: 6px;
+      background: #fff9eb;
+      color: #6f6041;
+      font-size: 0.74em;
+      line-height: 1.5;
+    }
+
+    .insight-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      margin-top: 7px;
+      color: var(--text-soft);
+      font-size: 0.69em;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .legend-line {
+      width: 20px;
+      height: 0;
+      border-top: 2px solid #7494bc;
+    }
+
+    .legend-line.recommendation {
+      border-color: #75b69c;
+      border-top-width: 3px;
+    }
+
+    .score-chip {
+      padding: 7px 8px;
+      border-radius: 7px;
+      background: var(--primary-pale);
+      color: var(--text);
+      font-size: 0.75em;
+      line-height: 1.35;
+    }
+
+    .score-chip.on {
+      background: var(--success-soft);
+      color: #37755e;
+      font-weight: 750;
     }
 
     .group-card {
@@ -515,6 +785,82 @@
       margin-top: 5px;
     }
 
+    .field-help {
+      margin-top: 4px;
+      color: var(--text-soft);
+      font-size: 0.72em;
+      line-height: 1.25;
+    }
+
+    .session-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px 8px;
+    }
+
+    .session-fields .form-group {
+      margin: 0;
+      min-width: 0;
+    }
+
+    .session-fields .form-group.wide {
+      grid-column: 1 / -1;
+    }
+
+    .session-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .session-actions button {
+      min-width: 0;
+    }
+
+    .session-meta {
+      min-height: 0;
+    }
+
+    .section-heading {
+      margin: 0 0 5px;
+      color: var(--text);
+      font-size: 0.86em;
+      line-height: 1.2;
+    }
+
+    .insight-dashboard {
+      height: 100%;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: 7px;
+    }
+
+    .insight-map-zone {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .insight-map-zone .preference-map {
+      min-height: 0;
+      flex: 1;
+    }
+
+    .insight-summary-grid {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 7px;
+      height: clamp(108px, 15vh, 138px);
+      min-height: 0;
+    }
+
+    .insight-summary-grid .insight-section {
+      margin-top: 0;
+      min-width: 0;
+    }
+
     @media (max-width: 768px) {
       body {
         padding: 12px;
@@ -533,7 +879,11 @@
       }
 
       .terminal-log {
-        min-height: 300px;
+        min-height: 104px;
+      }
+
+      .insight-panel {
+        min-height: 520px;
       }
     }
 
@@ -541,6 +891,7 @@
       body {
         height: 100vh;
         overflow: hidden;
+        padding: 8px;
       }
 
       .container {
@@ -549,22 +900,465 @@
         flex-direction: column;
       }
 
+      header {
+        flex: 0 0 auto;
+        margin-bottom: 6px;
+      }
+
+      header h1 {
+        font-size: clamp(1.25rem, 2.1vh, 1.65rem);
+        line-height: 1.05;
+      }
+
+      header p {
+        font-size: clamp(0.68rem, 1.2vh, 0.82rem);
+      }
+
       .main-grid {
         flex: 1;
         min-height: 0;
-        grid-template-columns: minmax(310px, 0.95fr) minmax(330px, 1.05fr) minmax(360px, 1.15fr);
+        grid-template-columns: minmax(290px, 0.86fr) minmax(330px, 1fr) minmax(440px, 1.32fr);
+        gap: 8px;
       }
 
       .main-grid > .card {
         height: 100%;
         min-height: 0;
-        overflow-y: auto;
+        overflow: hidden;
+        padding: clamp(8px, 1.25vh, 12px);
       }
 
-      .main-grid > .card:last-child {
+      .main-grid > .card {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .card h2 {
+        flex: 0 0 auto;
+        margin-bottom: 7px;
+        padding-bottom: 5px;
+        font-size: clamp(0.92rem, 1.7vh, 1.08rem);
+      }
+
+      label {
+        margin-bottom: 3px;
+        font-size: clamp(0.7rem, 1.3vh, 0.82rem);
+      }
+
+      input,
+      select {
+        height: clamp(29px, 4vh, 35px);
+        padding: 4px 7px;
+        font-size: clamp(0.7rem, 1.35vh, 0.84rem);
+      }
+
+      button {
+        min-height: clamp(30px, 4.1vh, 36px);
+        padding: 5px 8px;
+        font-size: clamp(0.7rem, 1.35vh, 0.84rem);
+      }
+
+      .field-help {
+        display: none;
+      }
+
+      .radio-options {
+        gap: 5px;
+      }
+
+      .radio-options label {
+        min-height: clamp(29px, 4vh, 35px);
+        padding: 4px 7px;
+      }
+
+      .session-fields {
+        flex: 0 0 auto;
+      }
+
+      #mobileBaseUrlGroup {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 5px;
+        align-items: end;
+      }
+
+      #mobileBaseUrlGroup label {
+        grid-column: 1 / -1;
+      }
+
+      #mobileBaseUrlGroup button {
+        width: auto;
+        margin-top: 0 !important;
+        white-space: nowrap;
+      }
+
+      .session-meta {
+        flex: 1;
+        display: grid;
+        grid-template-rows: auto auto minmax(0, 1fr);
+        gap: 5px;
+        margin-top: 6px;
+        overflow: hidden;
+      }
+
+      .status {
+        margin: 0;
+        padding: 6px 8px;
+        font-size: 0.72em;
+        line-height: 1.25;
+      }
+
+      #sessionId {
+        margin-top: 0 !important;
+        font-size: 0.68em !important;
+      }
+
+      .qr-panel {
+        min-height: 0;
+        margin-top: 0;
+        padding: 7px;
+        overflow: hidden;
+      }
+
+      .qr-grid {
+        height: 100%;
+        grid-template-columns: clamp(72px, 10vh, 96px) minmax(0, 1fr);
+        gap: 8px;
+      }
+
+      #qrCode {
+        width: clamp(72px, 10vh, 96px);
+        height: clamp(72px, 10vh, 96px);
+      }
+
+      #qrCode img,
+      #qrCode canvas {
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      .qr-grid h3 {
+        margin-bottom: 3px !important;
+        font-size: 0.78em;
+      }
+
+      .join-link {
+        max-height: 2.5em;
+        overflow: hidden;
+        font-size: 0.62em;
+        line-height: 1.2;
+      }
+
+      #mobileCount {
+        margin-top: 4px !important;
+        font-size: 0.7em;
+      }
+
+      #userFoldersContainer {
+        flex: 0 0 auto;
+        min-height: 0;
+      }
+
+      .selection-status {
+        margin-bottom: 4px;
+        font-size: 0.68em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .user-folders {
+        max-height: none;
+        overflow: hidden;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 4px;
+        padding: 5px;
+      }
+
+      .user-folder {
+        min-height: 42px;
+        padding: 4px 2px;
+        border-radius: 6px;
+      }
+
+      .folder-icon {
+        display: inline;
+        margin: 0 2px 0 0;
+        font-size: 0.85em;
+        filter: none;
+      }
+
+      .folder-id {
+        display: inline;
+        font-size: 0.66em;
+      }
+
+      #participantsContainer {
+        flex: 0 0 auto;
+        min-height: 0;
+      }
+
+      #participantsContainer .section-heading {
+        margin-top: 6px !important;
+      }
+
+      .participants-list {
+        max-height: none;
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 4px;
+        padding: 5px;
+      }
+
+      .participant-item {
+        min-width: 0;
+        margin: 0;
+        padding: 4px 6px;
+        border-radius: 999px;
+        gap: 4px;
+        font-size: 0.65em;
+      }
+
+      .participant-item strong,
+      .participant-item span {
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+
+      #resultsContainer {
+        flex: 1;
+        min-height: 0;
+        margin-top: 6px !important;
         overflow: hidden;
         display: flex;
         flex-direction: column;
+      }
+
+      #resultsContainer .section-heading {
+        flex: 0 0 auto;
+      }
+
+      .results {
+        min-height: 0;
+        flex: 1;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 5px;
+      }
+
+      .results.groups-3,
+      .results.groups-5 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .results.groups-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: repeat(2, minmax(0, 1fr));
+      }
+
+      .results.groups-5 {
+        grid-template-rows: repeat(2, minmax(0, 1fr));
+      }
+
+      .group-card {
+        min-width: 0;
+        overflow: hidden;
+        padding: 7px;
+        border-radius: 7px;
+        box-shadow: none;
+      }
+
+      .group-card h3 {
+        margin-bottom: 4px;
+        padding-bottom: 3px;
+        font-size: 0.78em;
+      }
+
+      .members {
+        margin-bottom: 4px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-size: 0.62em;
+      }
+
+      .restaurant {
+        margin: 0;
+        padding: 6px;
+      }
+
+      .restaurant-name {
+        margin-bottom: 3px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-size: 0.72em;
+      }
+
+      .restaurant-info {
+        grid-template-columns: 1fr 1fr;
+        gap: 2px 5px;
+        font-size: 0.6em;
+      }
+
+      .restaurant-address,
+      .restaurant-reason {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-size: 0.58em !important;
+      }
+
+      .score {
+        margin-top: 2px;
+        font-size: 0.68em;
+      }
+
+      #noData {
+        flex: 1;
+        display: grid;
+        place-items: center;
+        padding: 10px !important;
+        font-size: 0.76em;
+      }
+
+      .terminal-log {
+        height: clamp(62px, 8.5vh, 82px);
+        flex-basis: clamp(62px, 8.5vh, 82px);
+        padding: 7px 9px;
+        font-size: clamp(0.56rem, 1.05vh, 0.68rem);
+      }
+
+      .terminal-screen {
+        gap: 3px;
+      }
+
+      .insight-panel {
+        margin-top: 7px;
+      }
+
+      .insight-header {
+        flex: 0 0 auto;
+        padding: 7px 9px 6px;
+      }
+
+      .insight-title {
+        font-size: 0.82em;
+      }
+
+      .insight-subtitle {
+        margin-top: 2px;
+        font-size: 0.62em;
+        line-height: 1.2;
+      }
+
+      .insight-tabs {
+        gap: 4px;
+        margin-top: 5px;
+        overflow: hidden;
+      }
+
+      .insight-tab {
+        padding: 3px 8px;
+        font-size: 0.65em;
+      }
+
+      .insight-content {
+        overflow: hidden;
+        padding: 7px;
+      }
+
+      .preference-map {
+        min-width: 0;
+        height: 100%;
+        border-radius: 7px;
+      }
+
+      .insight-legend {
+        gap: 5px 9px;
+        margin-top: 4px;
+        font-size: 0.58em;
+      }
+
+      .insight-metrics {
+        gap: 4px;
+        margin-top: 4px;
+      }
+
+      .insight-metric {
+        padding: 4px 6px;
+      }
+
+      .metric-label {
+        font-size: 0.58em;
+      }
+
+      .metric-value {
+        margin-top: 1px;
+        font-size: 0.8em;
+      }
+
+      .insight-section {
+        padding: 6px;
+      }
+
+      .insight-section-title {
+        margin-bottom: 4px;
+        font-size: 0.66em;
+      }
+
+      .term-rank {
+        grid-template-columns: minmax(48px, auto) 1fr 26px;
+        gap: 4px;
+        margin-top: 3px;
+        font-size: 0.58em;
+      }
+
+      .term-bar {
+        height: 5px;
+      }
+
+      .score-breakdown {
+        gap: 4px;
+      }
+
+      .score-chip {
+        padding: 4px 5px;
+        font-size: 0.56em;
+        line-height: 1.2;
+      }
+
+      .insight-explanation {
+        max-height: 3.8em;
+        margin-top: 4px;
+        padding: 5px 6px;
+        overflow: hidden;
+        font-size: 0.55em;
+        line-height: 1.25;
+      }
+    }
+
+    @media (min-width: 769px) and (max-height: 760px) {
+      .main-grid {
+        grid-template-columns: minmax(270px, 0.82fr) minmax(310px, 0.95fr) minmax(420px, 1.3fr);
+      }
+
+      .user-folder {
+        min-height: 34px;
+      }
+
+      .participant-item span {
+        display: none;
+      }
+
+      .insight-summary-grid {
+        grid-template-columns: 0.8fr 1.2fr;
+      }
+
+      .insight-explanation {
+        display: none;
       }
     }
   </style>
@@ -581,92 +1375,94 @@
       <!-- 모바일 수집 세션 설정 -->
       <div class="card">
         <h2>📱 모바일 수집 세션</h2>
-        
-        <div class="form-group">
-          <label for="groupCount">그룹 수</label>
-          <select id="groupCount">
-            <option value="1">1개 그룹</option>
-            <option value="2" selected>2개 그룹</option>
-            <option value="3">3개 그룹</option>
-            <option value="4">4개 그룹</option>
-            <option value="5">5개 그룹</option>
-          </select>
-          <div style="margin-top: 6px; color: var(--text-soft); font-size: 0.82em;">세션 생성 시 선택한 수로 참가자 그룹을 구성합니다.</div>
-        </div>
-
-        <div class="form-group">
-          <label>위치</label>
-          <input type="text" id="location" value="세종대학교" placeholder="예: 세종대학교">
-        </div>
-
-        <div class="form-group">
-          <label>식당 검색 provider</label>
-          <select id="provider">
-            <option value="naver" selected>naver (네이버 지역 검색)</option>
-            <option value="mock">mock (API 키 없이 테스트)</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>예상 도보 시간</label>
-          <select id="walkingMinutes">
-            <option value="0" selected>전체</option>
-            <option value="5">5분 이내</option>
-            <option value="10">10분 이내</option>
-            <option value="15">15분 이내</option>
-            <option value="20">20분 이내</option>
-            <option value="25">25분 이내</option>
-            <option value="30">30분 이내</option>
-          </select>
-          <div style="margin-top: 6px; color: var(--text-soft); font-size: 0.82em;">Naver 좌표 기반 예상치이며 실제 보행 경로와 다를 수 있습니다.</div>
-        </div>
-
-        <div class="form-group">
-          <label>리뷰 인기순 필터</label>
-          <select id="reviewTopN">
-            <option value="0" selected>전체</option>
-            <option value="1">검색어별 리뷰 많은 순 상위 1개</option>
-            <option value="3">검색어별 리뷰 많은 순 상위 3개</option>
-            <option value="5">검색어별 리뷰 많은 순 상위 5개</option>
-          </select>
-          <div style="margin-top: 6px; color: var(--text-soft); font-size: 0.82em;">Naver 공식 API는 리뷰 개수 대신 리뷰 수 정렬만 제공합니다.</div>
-        </div>
-
-        <div class="form-group">
-          <label>‘안갈래요’ 목록</label>
-          <div class="radio-options">
-            <label>
-              <input type="radio" name="useExclusions" value="true" checked> 사용
-            </label>
-            <label>
-              <input type="radio" name="useExclusions" value="false"> 미사용
-            </label>
+        <div class="session-fields">
+          <div class="form-group">
+            <label for="groupCount">그룹 수</label>
+            <select id="groupCount">
+              <option value="1">1개 그룹</option>
+              <option value="2" selected>2개 그룹</option>
+              <option value="3">3개 그룹</option>
+              <option value="4">4개 그룹</option>
+              <option value="5">5개 그룹</option>
+            </select>
+            <div class="field-help">선택한 수로 그룹을 구성합니다.</div>
           </div>
-        </div>
 
-        <div id="mobileBaseUrlGroup" class="form-group">
-          <label>모바일 접속 주소</label>
-          <input type="text" id="mobileBaseUrl" placeholder="예: http://192.168.0.10:5000">
-          <button type="button" class="secondary-btn" style="margin-top: 8px;" onclick="loadNetworkInfo()">접속 주소 자동 감지</button>
-        </div>
+          <div class="form-group">
+            <label>위치</label>
+            <input type="text" id="location" value="세종대학교" placeholder="예: 세종대학교">
+          </div>
 
-        <button onclick="createSession()">✨ 모바일 접수 시작</button>
+          <div class="form-group">
+            <label>식당 검색</label>
+            <select id="provider">
+              <option value="naver" selected>naver 지역 검색</option>
+              <option value="mock">mock 테스트</option>
+            </select>
+          </div>
 
-        <div id="sessionStatus" style="margin-top: 10px; display: none;" class="status"></div>
-        <div id="sessionId" style="margin-top: 10px; color: var(--text-soft); font-size: 0.9em; display: none;"></div>
-        <div id="qrPanel" class="qr-panel">
-          <div class="qr-grid">
-            <div id="qrCode"></div>
-            <div>
-              <h3 style="margin-bottom: 8px; color: var(--text);">모바일 접수 QR</h3>
-              <div id="joinLink" class="join-link"></div>
-              <div id="mobileCount" style="margin-top: 10px; color: var(--text-soft); font-weight: 600;">참가자 0명 접수</div>
+          <div class="form-group">
+            <label>예상 도보</label>
+            <select id="walkingMinutes">
+              <option value="0" selected>전체</option>
+              <option value="5">5분 이내</option>
+              <option value="10">10분 이내</option>
+              <option value="15">15분 이내</option>
+              <option value="20">20분 이내</option>
+              <option value="25">25분 이내</option>
+              <option value="30">30분 이내</option>
+            </select>
+            <div class="field-help">좌표 기반 예상치입니다.</div>
+          </div>
+
+          <div class="form-group">
+            <label>리뷰 인기순</label>
+            <select id="reviewTopN">
+              <option value="0" selected>전체</option>
+              <option value="1">검색어별 상위 1개</option>
+              <option value="3">검색어별 상위 3개</option>
+              <option value="5">검색어별 상위 5개</option>
+            </select>
+            <div class="field-help">리뷰 수 정렬 결과를 사용합니다.</div>
+          </div>
+
+          <div class="form-group wide">
+            <label>‘안갈래요’ 목록</label>
+            <div class="radio-options">
+              <label>
+                <input type="radio" name="useExclusions" value="true" checked> 사용
+              </label>
+              <label>
+                <input type="radio" name="useExclusions" value="false"> 미사용
+              </label>
             </div>
           </div>
+
+          <div id="mobileBaseUrlGroup" class="form-group wide">
+            <label>모바일 접속 주소</label>
+            <input type="text" id="mobileBaseUrl" placeholder="예: http://192.168.0.10:5000">
+            <button type="button" class="secondary-btn" style="margin-top: 8px;" onclick="loadNetworkInfo()">자동 감지</button>
+          </div>
         </div>
 
-        <div style="margin-top: 12px;">
+        <div class="session-actions">
+          <button onclick="createSession()">✨ 접수 시작</button>
           <button class="danger-btn" onclick="closeAndGenerate()">마감 및 실행</button>
+        </div>
+
+        <div class="session-meta">
+          <div id="sessionStatus" style="display: none;" class="status"></div>
+          <div id="sessionId" style="color: var(--text-soft); font-size: 0.9em; display: none;"></div>
+          <div id="qrPanel" class="qr-panel">
+            <div class="qr-grid">
+              <div id="qrCode"></div>
+              <div>
+                <h3 style="margin-bottom: 8px; color: var(--text);">모바일 접수 QR</h3>
+                <div id="joinLink" class="join-link"></div>
+                <div id="mobileCount" style="margin-top: 10px; color: var(--text-soft); font-weight: 600;">참가자 0명 접수</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -675,7 +1471,7 @@
         <h2>📊 참가자 및 결과</h2>
 
         <div id="userFoldersContainer">
-          <h3 style="margin: 8px 0 5px;">📁 이번 세션 참여자 선택</h3>
+          <h3 class="section-heading">📁 이번 세션 참여자 선택</h3>
           <div class="selection-status" id="selectionStatus">폴더를 눌러 함께 추천받을 사용자를 선택하세요.</div>
           <div class="user-folders" id="userFolders">
             <div style="color: var(--text-soft);">사용자 폴더를 불러오는 중...</div>
@@ -683,12 +1479,12 @@
         </div>
 
         <div id="participantsContainer" style="display: none;">
-          <h3 style="margin-top: 15px; margin-bottom: 10px;">참가자 목록</h3>
+          <h3 class="section-heading">참가자 목록</h3>
           <div class="participants-list" id="participantsList"></div>
         </div>
 
         <div id="resultsContainer" style="display: none; margin-top: 20px;">
-          <h3 style="margin-bottom: 15px;">🎯 추천 결과</h3>
+          <h3 class="section-heading">🎯 추천 결과</h3>
           <div class="results" id="results"></div>
         </div>
 
@@ -704,6 +1500,18 @@
             <div class="terminal-line terminal-output">서버 CLI 로그에 연결하는 중...</div>
           </div>
         </div>
+        <section class="insight-panel" aria-labelledby="insightTitle">
+          <div class="insight-header">
+            <div class="insight-title" id="insightTitle">🧭 그룹 취향과 추천 근거</div>
+            <div class="insight-subtitle">왼쪽은 그룹 내 선호 분포, 초록색 선은 실제 추천 점수에 사용된 항목입니다. 선호 인원수가 곧 추천 순위는 아닙니다.</div>
+            <div class="insight-tabs" id="insightTabs" style="display: none;"></div>
+          </div>
+          <div class="insight-content" id="insightContent">
+            <div class="insight-empty">
+              추천 실행 후 참가자 → 공통 취향 → 식당의 연결 관계가 여기에 나타납니다.
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </div>
@@ -719,6 +1527,8 @@
     let userFolderPoll = null;
     let selectedParticipantIds = new Set();
     let activeParticipantIds = new Set();
+    let recommendationGroups = [];
+    let activeInsightGroupId = null;
 
     async function loadNetworkInfo() {
       try {
@@ -776,6 +1586,7 @@
         document.getElementById('noData').style.display = 'none';
         document.getElementById('participantsContainer').style.display = 'block';
         document.getElementById('resultsContainer').style.display = 'none';
+        resetRecommendationInsights();
         renderQrPanel(data.join_url || '');
         updateParticipantsList();
         loadUserFolders();
@@ -968,7 +1779,7 @@
         ? `<span class="terminal-prompt">$ </span>${escapeHtml(event.text)}`
         : escapeHtml(event.text);
       screen.appendChild(line);
-      while (screen.children.length > 8) {
+      while (screen.children.length > 4) {
         const removable = screen.children[0].classList.contains('terminal-command')
           ? screen.children[1]
           : screen.children[0];
@@ -1031,6 +1842,8 @@
         clearInterval(participantPoll);
         participantPoll = null;
       }
+      recommendationGroups = groups || [];
+      resultsDiv.className = `results groups-${Math.min(5, Math.max(1, recommendationGroups.length))}`;
       resultsDiv.innerHTML = groups.map(group => `
         <div class="group-card">
           <h3>그룹 ${group.group_id}</h3>
@@ -1044,13 +1857,325 @@
                 <div>🚶 ${r.walking_minutes ? `약 ${r.walking_minutes}분` : '-'}</div>
                 <div>💬 ${r.review_rank ? `리뷰 인기순 ${r.review_rank}위` : '-'}</div>
               </div>
-              <div style="font-size: 0.9em; opacity: 0.88; margin-top: 5px;">📍 ${r.distance_m ? `${r.distance_m}m` : (r.address || r.location || '-')}</div>
+              <div class="restaurant-address" style="font-size: 0.9em; opacity: 0.88; margin-top: 5px;">📍 ${r.distance_m ? `${r.distance_m}m` : (r.address || r.location || '-')}</div>
               <div class="score">점수: ${r.score}</div>
-              <div style="font-size: 0.88em; opacity: 0.9; margin-top: 6px;">${r.reason || ''}</div>
+              <div class="restaurant-reason" style="font-size: 0.88em; opacity: 0.9; margin-top: 6px;">${r.reason || ''}</div>
             </div>
           `).join('')}
         </div>
       `).join('');
+      renderInsightTabs();
+    }
+
+    function preferenceLeaf(value) {
+      const parts = String(value || '').split('|').map(part => part.trim()).filter(Boolean);
+      return parts[parts.length - 1] || '';
+    }
+
+    function uniqueValues(values) {
+      return Array.from(new Set(values.filter(Boolean)));
+    }
+
+    function preferenceValues(participant) {
+      const preferences = participant?.preferences || {};
+      const like = preferences.like || {};
+      const recent = preferences.recent || {};
+      const high = Array.isArray(like.high) ? like.high.map(preferenceLeaf) : [];
+      const low = Array.isArray(like.low) ? like.low.map(preferenceLeaf) : [];
+      const recentLow = Array.isArray(recent.low) ? recent.low.map(preferenceLeaf) : [];
+      return {
+        high: uniqueValues(high),
+        low: uniqueValues(low),
+        positive: uniqueValues([...high, ...low]),
+        recent: uniqueValues(recentLow)
+      };
+    }
+
+    function participantForMember(memberId) {
+      return participants.find(participant =>
+        participant.user_id === memberId ||
+        participant.participant_id === memberId ||
+        participant.original_user_id === memberId
+      );
+    }
+
+    function truncateLabel(value, length = 11) {
+      const text = String(value || '');
+      return text.length > length ? `${text.slice(0, length - 1)}…` : text;
+    }
+
+    function buildInsightModel(group) {
+      const members = (group.members || []).map((memberId, index) => {
+        const participant = participantForMember(memberId) || {};
+        const preferences = preferenceValues(participant);
+        return {
+          id: memberId,
+          name: group.member_names?.[index]
+            || participant.display_name
+            || participant.original_user_id
+            || participant.user_id
+            || memberId,
+          ...preferences
+        };
+      });
+
+      const termMembers = new Map();
+      members.forEach(member => {
+        member.positive.forEach(term => {
+          if (!termMembers.has(term)) termMembers.set(term, []);
+          termMembers.get(term).push(member.id);
+        });
+      });
+
+      const restaurant = group.recommendations?.[0] || null;
+      const restaurantTerms = uniqueValues([
+        restaurant?.food,
+        restaurant?.category,
+        ...(restaurant?.matched_terms || [])
+      ].map(preferenceLeaf));
+      const rankedTerms = Array.from(termMembers.entries())
+        .map(([term, memberIds]) => ({
+          term,
+          memberIds,
+          count: memberIds.length,
+          recommended: restaurantTerms.includes(term)
+        }))
+        .sort((a, b) =>
+          b.count - a.count ||
+          Number(b.recommended) - Number(a.recommended) ||
+          a.term.localeCompare(b.term, 'ko')
+        );
+
+      const visibleTerms = rankedTerms.slice(0, Math.min(6, Math.max(4, rankedTerms.length)));
+      restaurantTerms.forEach(term => {
+        if (term && !visibleTerms.some(item => item.term === term)) {
+          visibleTerms.push({
+            term,
+            memberIds: termMembers.get(term) || [],
+            count: termMembers.get(term)?.length || 0,
+            recommended: true
+          });
+        }
+      });
+
+      return {members, rankedTerms, visibleTerms, restaurant, restaurantTerms};
+    }
+
+    function svgCurve(x1, y1, x2, y2) {
+      const bend = Math.max(35, (x2 - x1) * 0.48);
+      return `M ${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2} ${y2}`;
+    }
+
+    function renderPreferenceMap(model) {
+      const width = 600;
+      const memberStep = 46;
+      const termStep = 38;
+      const innerHeight = Math.max(
+        210,
+        model.members.length * memberStep + 40,
+        model.visibleTerms.length * termStep + 40
+      );
+      const memberX = 28;
+      const memberWidth = 130;
+      const termX = 245;
+      const termWidth = 125;
+      const restaurantX = 438;
+      const restaurantWidth = 138;
+      const memberStart = (innerHeight - model.members.length * memberStep) / 2 + 19;
+      const termStart = (innerHeight - model.visibleTerms.length * termStep) / 2 + 19;
+      const restaurantY = innerHeight / 2 - 31;
+      const memberPositions = new Map();
+      const termPositions = new Map();
+
+      model.members.forEach((member, index) => {
+        memberPositions.set(member.id, memberStart + index * memberStep);
+      });
+      model.visibleTerms.forEach((term, index) => {
+        termPositions.set(term.term, termStart + index * termStep);
+      });
+
+      const memberLinks = model.visibleTerms.flatMap(term =>
+        term.memberIds.map(memberId => `
+          <path class="map-link ${term.count > 1 ? 'shared' : ''}"
+                d="${svgCurve(memberX + memberWidth, memberPositions.get(memberId) + 16, termX, termPositions.get(term.term) + 14)}" />
+        `)
+      ).join('');
+      const restaurantLinks = model.restaurant
+        ? model.visibleTerms.filter(term => term.recommended).map(term => `
+            <path class="map-link recommended"
+                  d="${svgCurve(termX + termWidth, termPositions.get(term.term) + 14, restaurantX, restaurantY + 31)}" />
+          `).join('')
+        : '';
+
+      const memberNodes = model.members.map(member => {
+        const y = memberPositions.get(member.id);
+        return `
+          <g>
+            <rect class="map-member-node" x="${memberX}" y="${y}" width="${memberWidth}" height="32" rx="9" />
+            <text class="map-node-text" x="${memberX + 12}" y="${y + 16}">${escapeHtml(truncateLabel(member.name, 13))}</text>
+          </g>
+        `;
+      }).join('');
+      const termNodes = model.visibleTerms.map(term => {
+        const y = termPositions.get(term.term);
+        return `
+          <g>
+            <rect class="map-term-node ${term.count > 1 ? 'shared' : ''}" x="${termX}" y="${y}" width="${termWidth}" height="28" rx="14" />
+            <text class="map-node-text" text-anchor="middle" x="${termX + termWidth / 2}" y="${y + 11}">${escapeHtml(truncateLabel(term.term, 12))}</text>
+            <text class="map-node-subtext" text-anchor="middle" x="${termX + termWidth / 2}" y="${y + 21}">${term.count}명${term.recommended ? ' · 추천 연결' : ''}</text>
+          </g>
+        `;
+      }).join('');
+      const restaurantNode = model.restaurant ? `
+        <g>
+          <rect class="map-restaurant-node" x="${restaurantX}" y="${restaurantY}" width="${restaurantWidth}" height="62" rx="12" />
+          <text class="map-node-subtext" x="${restaurantX + 12}" y="${restaurantY + 14}">최종 추천</text>
+          <text class="map-node-text" x="${restaurantX + 12}" y="${restaurantY + 30}">${escapeHtml(truncateLabel(model.restaurant.name, 12))}</text>
+          <text class="map-node-subtext" x="${restaurantX + 12}" y="${restaurantY + 46}">${escapeHtml(truncateLabel(model.restaurant.food || model.restaurant.category, 15))}</text>
+          <text class="map-node-subtext" x="${restaurantX + 12}" y="${restaurantY + 57}">점수 ${escapeHtml(model.restaurant.score ?? '-')}</text>
+        </g>
+      ` : `
+        <g>
+          <rect class="map-restaurant-node" x="${restaurantX}" y="${restaurantY}" width="${restaurantWidth}" height="62" rx="12" opacity="0.45" />
+          <text class="map-node-text" text-anchor="middle" x="${restaurantX + restaurantWidth / 2}" y="${restaurantY + 31}">추천 결과 없음</text>
+        </g>
+      `;
+
+      return `
+        <svg class="preference-map" viewBox="0 0 ${width} ${innerHeight}" role="img" aria-label="참가자와 공통 취향, 추천 식당 연결 지도">
+          <text class="map-column-label" x="${memberX}" y="17">PARTICIPANTS</text>
+          <text class="map-column-label" x="${termX}" y="17">GROUP TASTE SIGNALS</text>
+          <text class="map-column-label" x="${restaurantX}" y="17">RECOMMENDATION</text>
+          ${memberLinks}
+          ${restaurantLinks}
+          ${memberNodes}
+          ${termNodes}
+          ${restaurantNode}
+        </svg>
+      `;
+    }
+
+    function recommendationScoreBreakdown(model) {
+      const restaurant = model.restaurant;
+      if (!restaurant) {
+        return '<div class="score-chip">추천된 식당이 없습니다.</div>';
+      }
+      const highMatches = model.members.filter(member =>
+        member.high.includes(restaurant.category)
+      ).length;
+      const foodMatches = model.members.filter(member =>
+        member.low.includes(restaurant.food)
+      ).length;
+      const recentConflicts = model.members.filter(member =>
+        member.recent.includes(restaurant.food)
+      ).length;
+      return `
+        <div class="score-chip ${highMatches ? 'on' : ''}">대분류 조건<br><strong>${highMatches ? `그룹 프로필에 존재 · +0.5` : '불일치 · +0.0'}</strong><br>선호자 ${highMatches}명</div>
+        <div class="score-chip ${foodMatches ? 'on' : ''}">음식 조건<br><strong>${foodMatches ? `그룹 프로필에 존재 · +0.3` : '불일치 · +0.0'}</strong><br>선호자 ${foodMatches}명</div>
+        <div class="score-chip ${restaurant.walking_minutes ? 'on' : ''}">예상 도보<br><strong>${restaurant.walking_minutes ? `${escapeHtml(restaurant.walking_minutes)}분` : '정보 없음'}</strong></div>
+        <div class="score-chip ${recentConflicts === 0 ? 'on' : ''}">최근 음식 충돌<br><strong>${recentConflicts ? `${recentConflicts}명` : '없음'}</strong></div>
+      `;
+    }
+
+    function renderInsightTabs() {
+      const tabs = document.getElementById('insightTabs');
+      if (!recommendationGroups.length) {
+        tabs.style.display = 'none';
+        return;
+      }
+      if (!recommendationGroups.some(group => String(group.group_id) === String(activeInsightGroupId))) {
+        activeInsightGroupId = recommendationGroups[0].group_id;
+      }
+      tabs.style.display = 'flex';
+      tabs.innerHTML = recommendationGroups.map(group => `
+        <button type="button"
+                class="insight-tab ${String(group.group_id) === String(activeInsightGroupId) ? 'active' : ''}"
+                onclick="selectInsightGroup('${escapeHtml(group.group_id)}')">
+          그룹 ${escapeHtml(group.group_id)}
+        </button>
+      `).join('');
+      renderActiveInsight();
+    }
+
+    function resetRecommendationInsights() {
+      recommendationGroups = [];
+      activeInsightGroupId = null;
+      const tabs = document.getElementById('insightTabs');
+      const content = document.getElementById('insightContent');
+      tabs.style.display = 'none';
+      tabs.innerHTML = '';
+      content.innerHTML = `
+        <div class="insight-empty">
+          추천 실행 후 참가자 → 공통 취향 → 식당의 연결 관계가 여기에 나타납니다.
+        </div>
+      `;
+    }
+
+    function selectInsightGroup(groupId) {
+      activeInsightGroupId = groupId;
+      renderInsightTabs();
+    }
+
+    function renderActiveInsight() {
+      const group = recommendationGroups.find(item =>
+        String(item.group_id) === String(activeInsightGroupId)
+      );
+      if (!group) return;
+      const model = buildInsightModel(group);
+      const sharedCount = model.rankedTerms.filter(term => term.count > 1).length;
+      const topTerms = model.rankedTerms.slice(0, 5);
+      const recommendationRanks = model.restaurantTerms
+        .map(term => {
+          const index = model.rankedTerms.findIndex(item => item.term === term);
+          return index >= 0 ? `${term} ${index + 1}위` : `${term} 그룹 선호 외`;
+        })
+        .join(' · ');
+      const content = document.getElementById('insightContent');
+      content.innerHTML = `
+        <div class="insight-dashboard">
+          <div class="insight-map-zone">
+            ${renderPreferenceMap(model)}
+            <div class="insight-legend">
+              <span class="legend-item"><span class="legend-line"></span> 참가자의 선호 분포</span>
+              <span class="legend-item"><span class="legend-line recommendation"></span> 추천 점수 조건과 일치</span>
+            </div>
+            <div class="insight-metrics">
+              <div class="insight-metric">
+                <div class="metric-label">그룹원</div>
+                <div class="metric-value">${model.members.length}명</div>
+              </div>
+              <div class="insight-metric">
+                <div class="metric-label">공통 취향</div>
+                <div class="metric-value">${sharedCount}개</div>
+              </div>
+              <div class="insight-metric">
+                <div class="metric-label">추천 점수</div>
+                <div class="metric-value">${escapeHtml(model.restaurant?.score ?? '-')}</div>
+              </div>
+            </div>
+          </div>
+          <div class="insight-summary-grid">
+            <div class="insight-section">
+              <div class="insight-section-title">그룹 선호 빈도 TOP ${topTerms.length}</div>
+              ${topTerms.length ? topTerms.map(term => `
+                <div class="term-rank">
+                  <span>${escapeHtml(term.term)}</span>
+                  <div class="term-bar"><span style="width: ${Math.max(8, term.count / Math.max(1, model.members.length) * 100)}%;"></span></div>
+                  <strong>${term.count}명</strong>
+                </div>
+              `).join('') : '<div style="color: var(--text-soft); font-size: 0.78em;">집계할 선호 정보가 없습니다.</div>'}
+            </div>
+            <div class="insight-section">
+              <div class="insight-section-title">현재 알고리즘의 추천 근거</div>
+              <div class="score-breakdown">${recommendationScoreBreakdown(model)}</div>
+              <div class="insight-explanation">
+                인원수는 점수 가중치가 아닙니다. ${escapeHtml(recommendationRanks || '연결된 선호 없음')} 조건과
+                최근 음식·제외 식당·거리·리뷰 필터를 함께 적용한 결과입니다.
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     function displayNamesForMembers(memberIds) {
