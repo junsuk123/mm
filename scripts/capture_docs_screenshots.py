@@ -7,6 +7,7 @@ import json
 import shutil
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 
 
@@ -18,27 +19,38 @@ CHROME = shutil.which("google-chrome") or shutil.which("chromium")
 def chrome_screenshot(html_path: Path, output_path: Path, width: int, height: int) -> None:
     if not CHROME:
         raise RuntimeError("Google Chrome or Chromium is required")
-    with tempfile.TemporaryDirectory(prefix="mm-chrome-profile.") as profile_dir:
-        subprocess.run(
-            [
-                CHROME,
-                "--headless",
-                "--no-sandbox",
-                "--disable-gpu",
-                "--disable-dev-shm-usage",
-                "--disable-background-networking",
-                "--no-first-run",
-                f"--user-data-dir={profile_dir}",
-                "--hide-scrollbars",
-                f"--window-size={width},{height}",
-                f"--screenshot={output_path}",
-                html_path.as_uri(),
-            ],
-            check=True,
-            timeout=30,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
+    last_error: Exception | None = None
+    for attempt in range(3):
+        with tempfile.TemporaryDirectory(prefix="mm-chrome-profile.") as profile_dir:
+            try:
+                subprocess.run(
+                    [
+                        CHROME,
+                        "--headless",
+                        "--no-sandbox",
+                        "--disable-gpu",
+                        "--disable-dev-shm-usage",
+                        "--disable-background-networking",
+                        "--disable-extensions",
+                        "--no-first-run",
+                        f"--user-data-dir={profile_dir}",
+                        "--hide-scrollbars",
+                        f"--window-size={width},{height}",
+                        f"--screenshot={output_path}",
+                        html_path.as_uri(),
+                    ],
+                    check=True,
+                    timeout=20,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+                return
+            except (subprocess.SubprocessError, OSError) as error:
+                last_error = error
+                if output_path.exists() and output_path.stat().st_size > 0:
+                    return
+                time.sleep(0.5 * (attempt + 1))
+    raise RuntimeError(f"Failed to capture {output_path.name}") from last_error
 
 
 def replace_dom_ready(html: str, injection: str) -> str:
@@ -48,6 +60,47 @@ def replace_dom_ready(html: str, injection: str) -> str:
     return html.replace(
         needle,
         "      loadUserFolders();\n" + injection + "\n    });",
+    )
+
+
+def qr_preview_svg() -> str:
+    """Build a deterministic QR-like preview without external packages."""
+    size = 29
+    cells = [[False for _ in range(size)] for _ in range(size)]
+
+    def finder(left: int, top: int) -> None:
+        for y in range(7):
+            for x in range(7):
+                cells[top + y][left + x] = (
+                    x in (0, 6)
+                    or y in (0, 6)
+                    or (2 <= x <= 4 and 2 <= y <= 4)
+                )
+
+    finder(0, 0)
+    finder(size - 7, 0)
+    finder(0, size - 7)
+    for y in range(size):
+        for x in range(size):
+            in_finder_zone = (
+                (x < 8 and y < 8)
+                or (x >= size - 8 and y < 8)
+                or (x < 8 and y >= size - 8)
+            )
+            if not in_finder_zone and ((x * 11 + y * 7 + x * y) % 5 in (0, 1)):
+                cells[y][x] = True
+
+    rects = "".join(
+        f'<rect x="{x}" y="{y}" width="1" height="1"/>'
+        for y, row in enumerate(cells)
+        for x, filled in enumerate(row)
+        if filled
+    )
+    return (
+        f'<svg viewBox="-2 -2 {size + 4} {size + 4}" '
+        'xmlns="http://www.w3.org/2000/svg" aria-label="문서용 QR 미리보기">'
+        f'<rect x="-2" y="-2" width="{size + 4}" height="{size + 4}" fill="white"/>'
+        f'<g fill="#173958">{rects}</g></svg>'
     )
 
 
@@ -115,7 +168,7 @@ def build_admin_preview() -> str:
       document.getElementById('sessionId').style.display = 'block';
       document.getElementById('sessionId').textContent = '세션 ID: demo-docs';
       document.getElementById('qrPanel').style.display = 'block';
-      document.getElementById('qrCode').innerHTML = '<div style="font-size:2rem">▦</div>';
+      document.getElementById('qrCode').innerHTML = {json.dumps(qr_preview_svg(), ensure_ascii=False)};
       document.getElementById('joinLink').textContent = 'https://example.trycloudflare.com/join/demo-docs';
       document.getElementById('userFolders').innerHTML = {json.dumps(folders, ensure_ascii=False)};
       updateParticipantsList();
@@ -400,8 +453,6 @@ def build_architecture_preview() -> str:
 
 def main() -> None:
     SCREENSHOT_DIR.mkdir(parents=True, exist_ok=True)
-    for old_mobile_screenshot in SCREENSHOT_DIR.glob("mobile-*.png"):
-        old_mobile_screenshot.unlink()
     with tempfile.TemporaryDirectory(prefix="mm-doc-capture.") as temp_dir_name:
         temp_dir = Path(temp_dir_name)
         admin_html = temp_dir / "admin.html"
