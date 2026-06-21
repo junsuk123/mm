@@ -1,0 +1,15 @@
+{
+  "participant_id": "U0013",
+  "sessions": [
+    {
+      "session_id": "bff6c595",
+      "first_accessed_at": "2026-06-21T21:34:48.911945",
+      "last_accessed_at": "2026-06-21T21:34:48.913671",
+      "access_count": 2,
+      "source": "survey_submission"
+    }
+  ],
+  "device_identifier": "c27da490-7dce-43e1-bf93-dd662f6102b0",
+  "last_session_id": "bff6c595",
+  "updated_at": "2026-06-21T21:34:48.913671"
+}
