@@ -1,0 +1,36 @@
+{
+  "participant_id": "U0012",
+  "user_id": "활기찬 도롱뇽",
+  "auto_generated_name": true,
+  "source": "mobile",
+  "created_at": "2026-06-21T17:31:03.122787",
+  "updated_at": "2026-06-21T17:31:03.122787",
+  "preferences": {
+    "like": {
+      "high": [
+        "베트남식",
+        "멕시칸"
+      ],
+      "low": [
+        "베트남식|롤류",
+        "베트남식|면/국물류",
+        "멕시칸|고기류",
+        "멕시칸|타코/부리또류"
+      ]
+    },
+    "recent": {
+      "high": [
+        "태국식"
+      ],
+      "low": [
+        "태국식|고기류"
+      ]
+    }
+  },
+  "session_id": "98dab8cc",
+  "submitted_at": "2026-06-21T17:31:03.122787",
+  "meal_data": {
+    "date": "2026-06-21",
+    "meal_type": "lunch"
+  }
+}

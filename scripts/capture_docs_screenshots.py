@@ -451,6 +451,205 @@ def build_architecture_preview() -> str:
 </html>"""
 
 
+def build_naver_route_preview() -> str:
+    """Render a documentation-only approximation of the opened Naver route screen."""
+    return """<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    width: 480px;
+    height: 1000px;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #222;
+    background: #eef1f4;
+  }
+  header {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 0 18px;
+    background: #fff;
+    border-bottom: 1px solid #dce1e6;
+  }
+  .back { color: #555; font-size: 27px; }
+  .naver { color: #03c75a; font-weight: 900; font-size: 21px; }
+  .title { font-weight: 800; font-size: 18px; }
+  .search {
+    position: relative;
+    z-index: 2;
+    margin: 12px;
+    padding: 14px 15px;
+    border-radius: 13px;
+    background: white;
+    box-shadow: 0 5px 18px rgba(40,55,70,.16);
+  }
+  .place {
+    display: grid;
+    grid-template-columns: 25px 1fr;
+    gap: 8px;
+    align-items: center;
+    min-height: 44px;
+  }
+  .place + .place { border-top: 1px solid #edf0f2; }
+  .dot {
+    width: 11px;
+    height: 11px;
+    margin: auto;
+    border: 3px solid #03c75a;
+    border-radius: 50%;
+  }
+  .dot.end { border-color: #ef4c4c; }
+  .place strong { display: block; font-size: 15px; }
+  .place span { color: #77818a; font-size: 12px; }
+  .map {
+    position: absolute;
+    inset: 64px 0 212px;
+    overflow: hidden;
+    background:
+      linear-gradient(30deg, transparent 48%, rgba(255,255,255,.72) 49%, rgba(255,255,255,.72) 52%, transparent 53%) 0 0/120px 95px,
+      linear-gradient(120deg, transparent 47%, rgba(255,255,255,.76) 48%, rgba(255,255,255,.76) 52%, transparent 53%) 0 0/145px 120px,
+      #e8eee5;
+  }
+  .water {
+    position: absolute;
+    width: 580px;
+    height: 145px;
+    left: -55px;
+    top: 370px;
+    transform: rotate(-7deg);
+    background: #cfe9f4;
+  }
+  .route {
+    position: absolute;
+    left: 145px;
+    top: 245px;
+    width: 190px;
+    height: 235px;
+    border: 11px solid #03c75a;
+    border-left-color: transparent;
+    border-bottom-color: transparent;
+    border-radius: 42% 58% 40% 60%;
+    transform: rotate(22deg);
+  }
+  .route::after {
+    content: "";
+    position: absolute;
+    width: 120px;
+    height: 110px;
+    right: 30px;
+    bottom: -61px;
+    border: 11px solid #03c75a;
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-radius: 50%;
+  }
+  .pin {
+    position: absolute;
+    z-index: 1;
+    width: 33px;
+    height: 33px;
+    display: grid;
+    place-items: center;
+    border-radius: 50% 50% 50% 8px;
+    transform: rotate(-45deg);
+    color: #fff;
+    font-weight: 900;
+    box-shadow: 0 3px 8px rgba(0,0,0,.22);
+  }
+  .pin span { transform: rotate(45deg); }
+  .start { left: 112px; top: 235px; background: #03c75a; }
+  .end { right: 90px; top: 470px; background: #ef4c4c; }
+  .label {
+    position: absolute;
+    z-index: 1;
+    padding: 6px 9px;
+    border-radius: 7px;
+    background: rgba(255,255,255,.94);
+    font-size: 12px;
+    font-weight: 750;
+    box-shadow: 0 2px 7px rgba(0,0,0,.14);
+  }
+  .start-label { left: 45px; top: 285px; }
+  .end-label { right: 28px; top: 518px; }
+  .summary {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 224px;
+    padding: 18px;
+    border-radius: 21px 21px 0 0;
+    background: white;
+    box-shadow: 0 -5px 20px rgba(33,47,61,.15);
+  }
+  .mode { color: #03a950; font-weight: 850; font-size: 14px; }
+  .time { margin-top: 5px; font-size: 30px; font-weight: 900; }
+  .meta { margin-left: 8px; color: #69747e; font-size: 14px; font-weight: 500; }
+  .route-info {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 10px;
+    background: #f4f7f8;
+    color: #4e5963;
+    font-size: 13px;
+  }
+  .start-button {
+    margin-top: 14px;
+    width: 100%;
+    height: 48px;
+    border: 0;
+    border-radius: 9px;
+    background: #03c75a;
+    color: #fff;
+    font-size: 17px;
+    font-weight: 850;
+  }
+  .docs {
+    position: absolute;
+    right: 12px;
+    top: 72px;
+    z-index: 3;
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: rgba(36,77,120,.9);
+    color: white;
+    font-size: 10px;
+  }
+</style>
+</head>
+<body>
+  <header><span class="back">‹</span><span class="naver">NAVER</span><span class="title">길찾기</span></header>
+  <div class="docs">문서용 미리보기</div>
+  <div class="map">
+    <div class="water"></div>
+    <div class="route"></div>
+    <div class="pin start"><span>A</span></div>
+    <div class="pin end"><span>B</span></div>
+    <div class="label start-label">세종대학교</div>
+    <div class="label end-label">마루토모</div>
+  </div>
+  <section class="search">
+    <div class="place"><span class="dot"></span><div><strong>세종대학교</strong><span>서울 광진구 능동로 209</span></div></div>
+    <div class="place"><span class="dot end"></span><div><strong>마루토모</strong><span>서울 광진구 군자로</span></div></div>
+  </section>
+  <section class="summary">
+    <div class="mode">자동차 추천 경로</div>
+    <div class="time">약 4분 <span class="meta">1.2km</span></div>
+    <div class="route-info"><strong>출발</strong> 세종대학교 임시 좌표 37.550260, 127.073139</div>
+    <button class="start-button">안내 시작</button>
+  </section>
+</body>
+</html>"""
+
+
 def main() -> None:
     SCREENSHOT_DIR.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="mm-doc-capture.") as temp_dir_name:
@@ -462,6 +661,15 @@ def main() -> None:
         architecture_html = temp_dir / "architecture.html"
         architecture_html.write_text(build_architecture_preview(), encoding="utf-8")
         chrome_screenshot(architecture_html, ROOT / "docs" / "SystemDiagram.png", 1600, 1000)
+
+        naver_route_html = temp_dir / "naver-route.html"
+        naver_route_html.write_text(build_naver_route_preview(), encoding="utf-8")
+        chrome_screenshot(
+            naver_route_html,
+            SCREENSHOT_DIR / "mobile-11-naver-route.png",
+            480,
+            1000,
+        )
 
         stages = [
             "01-entry",
