@@ -293,10 +293,10 @@ def mobile_stage_script(stage: str) -> str:
           lastRecommendation = {
             recommendation_id: 'previous-demo',
             recommendations: [{
-              name: '세종 한상',
-              food: '김치찌개',
-              category: '한식',
-              address: '서울 광진구 능동로'
+              name: '마루토모',
+              food: '우동',
+              category: '일식',
+              address: '서울 광진구 군자로'
             }]
           };
           showPreviousRecommendation();
