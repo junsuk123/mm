@@ -485,6 +485,8 @@ run_demo_session() {
   add_tmp_file "$report_file"
   recommend_for_groups "$provider_name" "$location" "$SESSION_JSON_FILE" "$GROUP_COUNT" > "$report_file"
 
+  analytics_session_id=$(jq -r '.id // .session_id // empty' "$SESSION_JSON_FILE")
+  export_enterprise_analytics "$report_file" "$analytics_session_id"
   print_group_summary "$report_file"
   open_visualization_report "$report_file"
 }
@@ -868,6 +870,7 @@ recommend_for_groups() {
     --argjson group_count "$effective_group_count" \
     '{
       session: {
+        session_id: ($session[0].id // $session[0].session_id // ""),
         participant_count: $participant_count,
         group_count: $group_count,
         location: $location,
@@ -928,6 +931,30 @@ open_visualization_report() {
   else
     printf '%s\n' "GUI environment not detected. Open manually: $output_html" >&2
   fi
+}
+
+export_enterprise_analytics() {
+  result_file=$1
+  session_id=${2:-}
+  enterprise_cli="$PROJECT_ROOT/scripts/enterprise_data.sh"
+
+  if [ ! -f "$enterprise_cli" ]; then
+    printf '%s\n' "Enterprise analytics CLI not found: $enterprise_cli" >&2
+    return 0
+  fi
+
+  if [ -n "$session_id" ]; then
+    analytics_dir=$(sh "$enterprise_cli" export --input "$result_file" --session-id "$session_id") || {
+      printf '%s\n' "Failed to generate enterprise analytics files." >&2
+      return 0
+    }
+  else
+    analytics_dir=$(sh "$enterprise_cli" export --input "$result_file") || {
+      printf '%s\n' "Failed to generate enterprise analytics files." >&2
+      return 0
+    }
+  fi
+  printf '%s\n' "Enterprise analytics exported: $analytics_dir" >&2
 }
 
 main() {
@@ -1003,6 +1030,7 @@ main() {
     output_file=$(mktemp "${TMPDIR:-/tmp}/recommend-final.XXXXXX")
     add_tmp_file "$output_file"
     recommend_for_groups "$provider_name" "$location" "$SESSION_JSON_FILE" "$GROUP_COUNT" > "$output_file"
+    export_enterprise_analytics "$output_file"
     print_group_summary "$output_file"
     open_visualization_report "$output_file"
     return 0
@@ -1025,6 +1053,8 @@ main() {
     output_file=$(mktemp "${TMPDIR:-/tmp}/recommend-session-file-final.XXXXXX")
     add_tmp_file "$output_file"
     recommend_for_groups "$provider_name" "$location" "$SESSION_JSON_FILE" "$GROUP_COUNT" > "$output_file"
+    analytics_session_id=$(jq -r '.id // .session_id // empty' "$SESSION_JSON_FILE")
+    export_enterprise_analytics "$output_file" "$analytics_session_id"
     if [ "$json_output" = true ]; then
       cat "$output_file"
     else

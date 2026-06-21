@@ -137,3 +137,31 @@ dataset/participants/U0011/
 ## 자동 별칭
 
 `dataset/alias_words.json`의 형용사 100개와 동물 이름 100개를 조합합니다. 동일 기기는 같은 별칭을 유지하고 이미 사용 중인 조합은 건너뜁니다.
+
+## 기업 분석 패키지
+
+추천 완료 시 `enterprise_analytics/sessions/<세션ID>/`에 생성됩니다.
+
+| 파일 | 내용 |
+|---|---|
+| `analysis_summary.json` | 세션 설정, 선호 빈도, 그룹별 집계 |
+| `participants_anonymized.csv` | `P001` 형식 참가자별 그룹·선호·최근 음식 |
+| `groups.csv` | 그룹 규모, 공통 선호, 추천 요약 |
+| `recommendations.csv` | 추천 식당의 카테고리, 음식, 점수, 거리·필터 필드 |
+| `release_manifest.json` | 기본 외부 제공 후보와 제한 자료 분류 |
+| `SUBMISSION_README.md` | 제출 패키지 설명과 개인정보 제거 범위 |
+
+제외되는 필드:
+
+- 이름과 자동 별명
+- `U0001` 형식 운영 참가자 ID
+- 기기 UUID
+- QR 접속 URL
+- 제출·접속 시각
+- 참가자 위치 좌표
+
+익명 ID와 운영 ID의 매핑 파일은 생성하지 않습니다.
+
+`participants_anonymized.csv`는 기본 외부 전달 압축에서 제외됩니다.
+`sh scripts/enterprise_data.sh archive SESSION_ID`는 집계·추천 파일만
+압축하며, 제한 자료는 법률 검토 확인 옵션 없이는 압축할 수 없습니다.

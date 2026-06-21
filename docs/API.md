@@ -117,3 +117,5 @@
 - `failed`: CLI 실행 실패
 
 추천 job은 별도 daemon thread에서 실행됩니다. `/api/job/<job_id>`를 폴링해 `running`, `completed`, `failed`를 확인합니다.
+
+완료된 웹 세션에는 서버 내부 결과 경로인 `result_file`과 기업 분석 패키지 경로인 `analytics_directory`가 추가됩니다.

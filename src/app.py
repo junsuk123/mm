@@ -1075,6 +1075,12 @@ def persist_mobile_session(session_data):
         'sample_participant_ids': session_data.get('sample_participant_ids', []),
         'participants': session_data.get('participants', [])
     }
+    if session_data.get('result_file'):
+        data['sessions'][session_id]['result_file'] = session_data['result_file']
+    if session_data.get('analytics_directory'):
+        data['sessions'][session_id]['analytics_directory'] = session_data[
+            'analytics_directory'
+        ]
     save_mobile_sessions(data)
 
 def ensure_session_loaded(session_id):
@@ -1103,7 +1109,9 @@ def ensure_session_loaded(session_id):
         'mobile_enabled': bool(persisted.get('mobile_enabled')),
         'join_url': persisted.get('join_url', ''),
         'selected_participant_ids': persisted.get('selected_participant_ids', []),
-        'sample_participant_ids': persisted.get('sample_participant_ids', [])
+        'sample_participant_ids': persisted.get('sample_participant_ids', []),
+        'result_file': persisted.get('result_file', ''),
+        'analytics_directory': persisted.get('analytics_directory', '')
     }
     if ensure_demo_participants_in_session(sessions_store[session_id]):
         persist_mobile_session(sessions_store[session_id])
@@ -1878,6 +1886,7 @@ def close_session(session_id):
 def build_cli_session_file(session_data):
     fd, path = tempfile.mkstemp(prefix='mm-web-session.', suffix='.json')
     payload = {
+        'id': session_data.get('id'),
         'participant_count': len(session_data['participants']),
         'group_count': int(session_data['groups']),
         'recommendation_filters': session_data.get('recommendation_filters', {}),
@@ -1980,9 +1989,21 @@ def run_cli_recommendations_job(job_id, session_id, session_data):
             save_recommendation_histories(session_id, output)
         session_data['status'] = 'completed'
         session_data['result_file'] = output_file
+        analytics_directory = os.path.join(
+            BASE_DIR,
+            'enterprise_analytics',
+            'sessions',
+            session_id
+        )
+        if os.path.isdir(analytics_directory):
+            session_data['analytics_directory'] = analytics_directory
         if session_id in sessions_store:
             sessions_store[session_id]['status'] = 'completed'
             sessions_store[session_id]['result_file'] = output_file
+            if os.path.isdir(analytics_directory):
+                sessions_store[session_id][
+                    'analytics_directory'
+                ] = analytics_directory
         persist_mobile_session(session_data)
         append_cli_job_event(job_id, {'type': 'output', 'text': '완료: 추천 결과 JSON을 웹 화면으로 전달했습니다.'})
         update_cli_job(job_id, status='completed', result=output)
