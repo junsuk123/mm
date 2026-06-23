@@ -85,8 +85,10 @@ def crop_screenshot(
         source.crop(box).save(output_path, optimize=True)
 
 
-def create_feature_crops() -> None:
-    pc_source = SCREENSHOT_DIR / "pc-dashboard.png"
+def create_feature_crops(
+    pc_source: Path,
+    mobile_final_source: Path,
+) -> None:
     pc_crops = {
         "pc-session-settings.png": (8, 53, 432, 524),
         "pc-mobile-qr-link.png": (8, 523, 432, 905),
@@ -123,7 +125,7 @@ def create_feature_crops() -> None:
             (25, 370, 475, 542),
         ),
         "mobile-final-recommendation.png": (
-            "mobile-10-result.png",
+            mobile_final_source,
             (25, 315, 475, 600),
         ),
         "mobile-naver-route.png": (
@@ -132,8 +134,13 @@ def create_feature_crops() -> None:
         ),
     }
     for filename, (source_name, box) in mobile_crops.items():
+        source_path = (
+            source_name
+            if isinstance(source_name, Path)
+            else SCREENSHOT_DIR / source_name
+        )
         crop_screenshot(
-            SCREENSHOT_DIR / source_name,
+            source_path,
             CROPPED_SCREENSHOT_DIR / filename,
             box,
         )
@@ -180,7 +187,7 @@ def qr_preview_svg() -> str:
     )
 
 
-def build_admin_preview() -> str:
+def build_admin_preview(active_insight_group_id: int = 1) -> str:
     html = (ROOT / "templates" / "index.html").read_text(encoding="utf-8")
     html = html.replace(
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>',
@@ -247,6 +254,7 @@ def build_admin_preview() -> str:
       document.getElementById('qrCode').innerHTML = {json.dumps(qr_preview_svg(), ensure_ascii=False)};
       document.getElementById('userFolders').innerHTML = {json.dumps(folders, ensure_ascii=False)};
       updateParticipantsList();
+      activeInsightGroupId = {active_insight_group_id};
       renderRecommendationGroups({json.dumps(groups, ensure_ascii=False)});
       const screen = document.querySelector('.terminal-screen');
       screen.innerHTML = '<div class="terminal-line terminal-command"><span class="terminal-prompt">$ </span>jq 그룹 프로필 생성 | provider 검색 | 점수 계산</div><div class="terminal-line terminal-output">완료: 추천 결과 JSON을 웹 화면으로 전달했습니다.</div>';
@@ -294,12 +302,31 @@ def mobile_mock_script(menu: dict[str, list[str]]) -> str:
 """
 
 
-def mobile_stage_script(stage: str) -> str:
+def mobile_stage_script(stage: str, feature_group_2: bool = False) -> str:
     shared = """
       categories = Object.keys(docsMenu);
       document.getElementById('userId').value = '반짝이는 수달';
       selectMealType('lunch');
     """
+    current_recommendation = (
+        {
+            "name": "마루토모",
+            "food": "면류",
+            "category": "일식",
+            "address": "서울 광진구 군자로",
+            "mapx": "1270720000",
+            "mapy": "375470000",
+        }
+        if feature_group_2
+        else {
+            "name": "숙성부심 군자본점",
+            "food": "구이/고기류",
+            "category": "한식",
+            "address": "서울 광진구 능동로 267",
+            "mapx": "1270774430",
+            "mapy": "375539087",
+        }
+    )
     states = {
         "01-entry": """
           currentStep = 0;
@@ -387,14 +414,7 @@ def mobile_stage_script(stage: str) -> str:
           render();
           currentSessionRecommendation = {
             recommendation_id: 'current-demo',
-            recommendations: [{
-              name: '숙성부심 군자본점',
-              food: '구이/고기류',
-              category: '한식',
-              address: '서울 광진구 능동로 267',
-              mapx: '1270774430',
-              mapy: '375539087'
-            }]
+            recommendations: [__CURRENT_RECOMMENDATION__]
           };
           navigationSettings = {
             global_enabled: true,
@@ -404,17 +424,21 @@ def mobile_stage_script(stage: str) -> str:
           showCurrentRecommendation();
         """,
     }
+    stage_script = states[stage].replace(
+        "__CURRENT_RECOMMENDATION__",
+        json.dumps(current_recommendation, ensure_ascii=False),
+    )
     return f"""
   <script>
     document.addEventListener('DOMContentLoaded', () => {{
       {shared}
-      {states[stage]}
+      {stage_script}
     }});
   </script>
 """
 
 
-def build_mobile_preview(stage: str) -> str:
+def build_mobile_preview(stage: str, feature_group_2: bool = False) -> str:
     html = (ROOT / "templates" / "mobile.html").read_text(encoding="utf-8")
     html = html.replace("{{ session_id }}", "demo-docs")
     html = html.replace(
@@ -423,7 +447,10 @@ def build_mobile_preview(stage: str) -> str:
     )
     menu = json.loads((ROOT / "dataset" / "menu_categories.json").read_text(encoding="utf-8"))
     html = html.replace("</head>", f"{mobile_mock_script(menu)}</head>")
-    html = html.replace("</body>", f"{mobile_stage_script(stage)}</body>")
+    html = html.replace(
+        "</body>",
+        f"{mobile_stage_script(stage, feature_group_2=feature_group_2)}</body>",
+    )
     return html
 
 
@@ -768,7 +795,36 @@ def main() -> None:
                 1000,
             )
 
-    create_feature_crops()
+        feature_admin_html = temp_dir / "feature-admin-group-2.html"
+        feature_admin_html.write_text(
+            build_admin_preview(active_insight_group_id=2),
+            encoding="utf-8",
+        )
+        feature_admin_image = temp_dir / "feature-admin-group-2.png"
+        chrome_screenshot(
+            feature_admin_html,
+            feature_admin_image,
+            1600,
+            1000,
+        )
+
+        feature_mobile_html = temp_dir / "feature-mobile-group-2.html"
+        feature_mobile_html.write_text(
+            build_mobile_preview("10-result", feature_group_2=True),
+            encoding="utf-8",
+        )
+        feature_mobile_image = temp_dir / "feature-mobile-group-2.png"
+        chrome_screenshot(
+            feature_mobile_html,
+            feature_mobile_image,
+            480,
+            1000,
+        )
+
+        create_feature_crops(
+            pc_source=feature_admin_image,
+            mobile_final_source=feature_mobile_image,
+        )
     print(f"Captured documentation screenshots in {SCREENSHOT_DIR}")
     print(f"Captured feature crops in {CROPPED_SCREENSHOT_DIR}")
 
