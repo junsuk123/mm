@@ -20,9 +20,11 @@
 
 ![PC CLI 처리 과정](screenshots/crops/pc-cli-process.png)
 
-### 그룹 취향과 추천 근거
+### 그룹 2 취향과 추천 근거 — 마루토모
 
-![PC 그룹 취향과 추천 근거](screenshots/crops/pc-group-insight.png)
+그룹 2 탭을 선택한 상태이며 최종 추천 식당은 `마루토모`입니다.
+
+![PC 그룹 2 취향과 마루토모 추천 근거](screenshots/crops/pc-group-insight.png)
 
 ## 모바일 화면
 
@@ -46,9 +48,11 @@
 
 ![모바일 이전 추천 평가](screenshots/crops/mobile-previous-feedback.png)
 
-### 최종 추천
+### 그룹 2 최종 추천 — 마루토모
 
-![모바일 최종 추천](screenshots/crops/mobile-final-recommendation.png)
+PC의 그룹 2 추천과 동일한 `마루토모` 결과입니다.
+
+![모바일 그룹 2 마루토모 최종 추천](screenshots/crops/mobile-final-recommendation.png)
 
 ### 네이버 길찾기
 
