@@ -17,7 +17,6 @@ import shutil
 import sys
 import tempfile
 import threading
-import time
 import webbrowser
 import socket
 from datetime import datetime
@@ -638,6 +637,16 @@ def load_recommendation_for_session(participant_id, session_id):
             continue
         if record.get('feedback', {}).get('status', 'pending') != 'pending':
             continue
+        if record.get('provider') != 'naver':
+            continue
+        recommendations = record.get('recommendations', [])
+        if not all(
+            isinstance(restaurant, dict)
+            and restaurant.get('source') == 'naver_api'
+            and restaurant.get('provider') == 'naver'
+            for restaurant in recommendations
+        ):
+            continue
         return record
     return None
 
@@ -1042,6 +1051,7 @@ def save_recommendation_histories(session_id, result):
                 'session_id': session_id,
                 'group_id': group.get('group_id'),
                 'recommended_at': saved_at,
+                'provider': result.get('provider'),
                 'recommendations': recommendations,
                 'feedback': {'status': 'pending'}
             }
@@ -1749,7 +1759,7 @@ def create_session():
         'sample_participant_ids': sorted(demo_ids),
         'groups': group_count,
         'location': data.get('location', '세종대학교'),
-        'provider': data.get('provider', 'naver'),
+        'provider': 'naver',
         'recommendation_filters': {
             'walking_minutes': walking_minutes,
             'review_top_n': review_top_n
@@ -1908,6 +1918,25 @@ def make_cli_payload(command, completed_stdout, completed_stderr, returncode):
     }
     return result
 
+def validate_naver_recommendation_output(result):
+    if result.get('provider') != 'naver':
+        raise ValueError('Only Naver API recommendation results are allowed')
+
+    for group in result.get('groups', []):
+        for restaurant in group.get('recommendations', []):
+            if restaurant.get('source') != 'naver_api':
+                raise ValueError(
+                    'Recommendation rejected: restaurant was not returned by the Naver API'
+                )
+            if restaurant.get('provider') != 'naver':
+                raise ValueError(
+                    'Recommendation rejected: invalid restaurant provider'
+                )
+            if not restaurant.get('restaurant_id') or not restaurant.get('name'):
+                raise ValueError(
+                    'Recommendation rejected: incomplete Naver API restaurant data'
+                )
+
 def append_cli_job_event(job_id, event):
     safe_event = {
         **event,
@@ -1931,7 +1960,7 @@ def update_cli_job(job_id, **updates):
         job.update(updates)
 
 def run_cli_recommendations_job(job_id, session_id, session_data):
-    provider = session_data.get('provider', 'naver')
+    provider = 'naver'
     location = session_data.get('location', '세종대학교')
     session_file = build_cli_session_file(session_data)
     command = [
@@ -1946,7 +1975,7 @@ def run_cli_recommendations_job(job_id, session_id, session_data):
         '--json-output'
     ]
     env = os.environ.copy()
-    env['MM_STEP_DELAY_SEC'] = '0.65'
+    env['MM_STEP_TRACE'] = '1'
     try:
         process = subprocess.Popen(
             command,
@@ -1967,7 +1996,6 @@ def run_cli_recommendations_job(job_id, session_id, session_data):
             stderr_lines.append(clean_line)
             if clean_line.startswith('[cmd] '):
                 append_cli_job_event(job_id, {'type': 'command', 'text': clean_line[6:]})
-                time.sleep(0.25)
             elif clean_line.startswith('[out] '):
                 append_cli_job_event(job_id, {'type': 'output', 'text': clean_line[6:]})
             else:
@@ -1981,6 +2009,7 @@ def run_cli_recommendations_job(job_id, session_id, session_data):
             raise RuntimeError(stderr or stdout or f'CLI failed with code {returncode}')
 
         output = make_cli_payload(command, stdout, stderr, returncode)
+        validate_naver_recommendation_output(output)
         output_file = f'/tmp/session_{session_id}_result.json'
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(output, f, ensure_ascii=False, indent=2)
@@ -2047,6 +2076,9 @@ def generate_recommendations(session_id):
     session_data = sessions_store[session_id]
     if not session_data['participants']:
         return jsonify({'error': 'No participants'}), 400
+
+    session_data['provider'] = 'naver'
+    persist_mobile_session(session_data)
 
     job_id = start_cli_recommendation_job(session_id, session_data)
     return jsonify({'success': True, 'job_id': job_id})

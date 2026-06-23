@@ -2,28 +2,21 @@
   "participant_id": "U0011",
   "sessions": [
     {
-      "session_id": "072766c1",
-      "first_accessed_at": "2026-06-21T02:54:59.185465",
-      "last_accessed_at": "2026-06-21T02:54:59.186635",
+      "session_id": "9f240ac1",
+      "first_accessed_at": "2026-06-23T17:21:57.748297",
+      "last_accessed_at": "2026-06-23T17:21:57.749533",
       "access_count": 2,
       "source": "survey_submission"
     },
     {
-      "session_id": "e9125de0",
-      "first_accessed_at": "2026-06-21T02:56:16.486055",
-      "last_accessed_at": "2026-06-21T02:56:30.012310",
-      "access_count": 2,
-      "source": "survey_submission"
-    },
-    {
-      "session_id": "aab2c5ed",
-      "first_accessed_at": "2026-06-21T03:01:47.745922",
-      "last_accessed_at": "2026-06-21T03:01:59.837034",
-      "access_count": 2,
-      "source": "survey_submission"
+      "session_id": "dd8d7007",
+      "first_accessed_at": "2026-06-23T17:23:02.966092",
+      "last_accessed_at": "2026-06-23T17:23:02.966092",
+      "access_count": 1,
+      "source": "qr_access"
     }
   ],
-  "device_identifier": "cdc698a1-d4d3-4f5f-bbb9-4ae5db8f3f54",
-  "last_session_id": "aab2c5ed",
-  "updated_at": "2026-06-21T03:01:59.837034"
+  "device_identifier": "69c98202-865b-45f9-a212-5249222931ed",
+  "last_session_id": "dd8d7007",
+  "updated_at": "2026-06-23T17:23:02.966092"
 }

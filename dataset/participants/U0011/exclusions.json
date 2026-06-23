@@ -2,14 +2,14 @@
   "participant_id": "U0011",
   "restaurants": [
     {
-      "restaurant_id": "a8150b8e6a851b2c",
-      "name": "위아더퓨쳐",
-      "address": "서울특별시 성동구 송정동 66-42 1층",
+      "restaurant_id": "94a6dbe890f8e501",
+      "name": "후문 카페",
+      "address": "서울특별시 광진구 능동 256-13",
       "category": "양식",
-      "food": "크림파스타",
-      "excluded_at": "2026-06-21T02:56:22.326498",
-      "recommendation_id": "20260621T025529274494_072766c1"
+      "food": "김치볶음밥",
+      "excluded_at": "2026-06-23T17:23:08.137918",
+      "recommendation_id": "20260623T172226673692_9f240ac1"
     }
   ],
-  "updated_at": "2026-06-21T02:56:22.326498"
+  "updated_at": "2026-06-23T17:23:08.137918"
 }

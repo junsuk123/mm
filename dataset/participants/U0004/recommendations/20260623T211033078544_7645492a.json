@@ -1,0 +1,71 @@
+{
+  "recommendation_id": "20260623T211033078544_7645492a",
+  "participant_id": "U0004",
+  "session_id": "7645492a",
+  "group_id": 2,
+  "recommended_at": "2026-06-23T21:10:33.078540",
+  "provider": "naver",
+  "recommendations": [
+    {
+      "restaurant_id": "d1a8e3518f761a25",
+      "source": "naver_api",
+      "provider": "naver",
+      "name": "역대급피자 군자점",
+      "food": "양식/이탈리안",
+      "matched_terms": [
+        "양식/이탈리안"
+      ],
+      "category": "피자",
+      "category_group": "음식점",
+      "sub_category": "피자",
+      "raw_category": "음식점>피자",
+      "location": "세종대학교",
+      "address": "서울특별시 광진구 군자동 345 1층",
+      "roadAddress": "서울특별시 광진구 군자로 85-1 1층",
+      "link": "",
+      "mapx": "1270710095",
+      "mapy": "375509083",
+      "distance_m": 261,
+      "walking_minutes": 5,
+      "review_rank": 4,
+      "subcategory": "",
+      "score": 0,
+      "support_count": 0,
+      "member_count": 4,
+      "member_scores": [
+        {
+          "user_id": "U0003",
+          "score": 0,
+          "category_match": false,
+          "food_match": false,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0004",
+          "score": 0,
+          "category_match": false,
+          "food_match": false,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0007",
+          "score": 0,
+          "category_match": false,
+          "food_match": false,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0008",
+          "score": 0,
+          "category_match": false,
+          "food_match": false,
+          "recent_match": false
+        }
+      ],
+      "reason": "그룹 구성원의 개인 선호와 일치하는 항목이 없어 검색 후보 중 선택"
+    }
+  ],
+  "feedback": {
+    "status": "pending"
+  }
+}

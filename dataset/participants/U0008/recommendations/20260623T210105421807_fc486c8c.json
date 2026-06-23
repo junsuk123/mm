@@ -1,0 +1,71 @@
+{
+  "recommendation_id": "20260623T210105421807_fc486c8c",
+  "participant_id": "U0008",
+  "session_id": "fc486c8c",
+  "group_id": 2,
+  "recommended_at": "2026-06-23T21:01:05.421803",
+  "provider": "naver",
+  "recommendations": [
+    {
+      "restaurant_id": "a8150b8e6a851b2c",
+      "source": "naver_api",
+      "provider": "naver",
+      "name": "위아더퓨쳐",
+      "food": "크림파스타",
+      "matched_terms": [
+        "크림파스타"
+      ],
+      "category": "양식",
+      "category_group": "음식점",
+      "sub_category": "양식",
+      "raw_category": "음식점>양식",
+      "location": "세종대학교",
+      "address": "서울특별시 성동구 송정동 66-42 1층",
+      "roadAddress": "서울특별시 성동구 광나루로11길 14 1층",
+      "link": "https://www.instagram.com/w.a.f_seoul",
+      "mapx": "1270661792",
+      "mapy": "375491966",
+      "distance_m": 725,
+      "walking_minutes": 12,
+      "review_rank": 2,
+      "subcategory": "",
+      "score": 0.325,
+      "support_count": 2,
+      "member_count": 4,
+      "member_scores": [
+        {
+          "user_id": "U0003",
+          "score": 0,
+          "category_match": false,
+          "food_match": false,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0004",
+          "score": 0,
+          "category_match": false,
+          "food_match": false,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0007",
+          "score": 0.8,
+          "category_match": true,
+          "food_match": true,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0008",
+          "score": 0.5,
+          "category_match": true,
+          "food_match": false,
+          "recent_match": false
+        }
+      ],
+      "reason": "4명 중 2명의 개인 선호를 반영한 평균 만족도"
+    }
+  ],
+  "feedback": {
+    "status": "pending"
+  }
+}

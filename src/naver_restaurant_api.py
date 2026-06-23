@@ -11,10 +11,11 @@ import math
 import os
 import re
 import sys
+import threading
 import time
 from pathlib import Path
 from typing import Any
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 from urllib.request import Request, urlopen
 
@@ -24,7 +25,17 @@ DEFAULT_CLIENT_ID = os.environ.get("NAVER_CLIENT_ID", "lGUa_EkwRbpimNJxGp5i")
 DEFAULT_CLIENT_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "i_JWpEJez1")
 WALKING_ROUTE_FACTOR = 1.25
 WALKING_METERS_PER_MINUTE = 80
-RATE_LIMIT_RETRY_DELAYS = (0.5, 1.0, 2.0, 4.0)
+RATE_LIMIT_RETRY_DELAYS = (1.0, 2.0, 4.0, 8.0, 12.0)
+DEFAULT_REQUEST_INTERVAL_SECONDS = 0.35
+DEFAULT_CACHE_TTL_SECONDS = 300
+DEFAULT_STALE_CACHE_TTL_SECONDS = 3600
+CACHE_DIRECTORY = Path(
+    os.environ.get("MM_NAVER_CACHE_DIR", "/tmp/mm_naver_local_cache")
+)
+
+_request_lock = threading.Lock()
+_last_request_started_at = 0.0
+_rate_limit_blocked_until = 0.0
 
 RESTAURANT_TOP_CATEGORIES = {
     "음식점",
@@ -121,6 +132,58 @@ def restaurant_id(item: dict[str, Any]) -> str:
     return hashlib.sha1(seed.encode("utf-8")).hexdigest()[:16]
 
 
+def cache_file_for(query: str, display: int, sort: str) -> Path:
+    key = hashlib.sha256(
+        json.dumps(
+            [query, display, sort],
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()
+    return CACHE_DIRECTORY / f"{key}.json"
+
+
+def load_cached_items(
+    query: str,
+    display: int,
+    sort: str,
+    max_age_seconds: float,
+) -> list[dict[str, Any]] | None:
+    if max_age_seconds <= 0:
+        return None
+    cache_file = cache_file_for(query, display, sort)
+    try:
+        if time.time() - cache_file.stat().st_mtime > max_age_seconds:
+            return None
+        payload = json.loads(cache_file.read_text(encoding="utf-8"))
+        items = payload.get("items")
+        return items if isinstance(items, list) else None
+    except (FileNotFoundError, OSError, ValueError, TypeError):
+        return None
+
+
+def save_cached_items(
+    query: str,
+    display: int,
+    sort: str,
+    items: list[dict[str, Any]],
+) -> None:
+    cache_file = cache_file_for(query, display, sort)
+    temporary_file = cache_file.with_suffix(".tmp")
+    try:
+        cache_file.parent.mkdir(parents=True, exist_ok=True)
+        temporary_file.write_text(
+            json.dumps({"items": items}, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        temporary_file.replace(cache_file)
+    except OSError:
+        try:
+            temporary_file.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
 def fetch_local_results(
     query: str,
     display: int = DEFAULT_DISPLAY,
@@ -131,6 +194,19 @@ def fetch_local_results(
     if not query.strip():
         return []
 
+    cache_ttl = float(
+        os.environ.get("MM_NAVER_CACHE_TTL_SEC", DEFAULT_CACHE_TTL_SECONDS)
+    )
+    stale_cache_ttl = float(
+        os.environ.get(
+            "MM_NAVER_STALE_CACHE_TTL_SEC",
+            DEFAULT_STALE_CACHE_TTL_SECONDS,
+        )
+    )
+    cached_items = load_cached_items(query, display, sort, cache_ttl)
+    if cached_items is not None:
+        return cached_items
+
     client_id = client_id or DEFAULT_CLIENT_ID
     client_secret = client_secret or DEFAULT_CLIENT_SECRET
     request_url = f"{NAVER_LOCAL_API_URL}?{urlencode({'query': query, 'display': display, 'start': 1, 'sort': sort})}"
@@ -140,20 +216,87 @@ def fetch_local_results(
 
     for attempt, retry_delay in enumerate((*RATE_LIMIT_RETRY_DELAYS, None)):
         try:
+            throttle_naver_request()
             with urlopen(request, timeout=10) as response:
                 payload = json.loads(response.read().decode("utf-8"))
+            items = payload.get("items", [])
+            save_cached_items(query, display, sort, items)
             break
         except HTTPError as error:
             if error.code != 429 or retry_delay is None:
+                stale_items = load_cached_items(
+                    query,
+                    display,
+                    sort,
+                    stale_cache_ttl,
+                )
+                if stale_items is not None:
+                    print(
+                        f"Naver API unavailable; using cached results for {query!r}",
+                        file=sys.stderr,
+                    )
+                    return stale_items
                 raise
+            retry_after = error.headers.get("Retry-After")
+            try:
+                server_delay = float(retry_after)
+            except (TypeError, ValueError):
+                server_delay = 0.0
+            effective_delay = max(retry_delay, server_delay)
+            block_naver_requests(effective_delay)
             print(
-                f"Naver API rate limit reached; retrying in {retry_delay:g}s "
+                f"Naver API rate limit reached; retrying in {effective_delay:g}s "
                 f"({attempt + 1}/{len(RATE_LIMIT_RETRY_DELAYS)})",
                 file=sys.stderr,
             )
-            time.sleep(retry_delay)
+        except (URLError, TimeoutError, json.JSONDecodeError) as error:
+            stale_items = load_cached_items(
+                query,
+                display,
+                sort,
+                stale_cache_ttl,
+            )
+            if stale_items is not None:
+                print(
+                    f"Naver API unavailable; using cached results for {query!r}",
+                    file=sys.stderr,
+                )
+                return stale_items
+            raise error
 
-    return payload.get("items", [])
+    return items
+
+
+def throttle_naver_request() -> None:
+    """Serialize requests and honor a shared cooldown after a 429 response."""
+    global _last_request_started_at
+    interval = max(
+        0.0,
+        float(
+            os.environ.get(
+                "MM_NAVER_REQUEST_INTERVAL_SEC",
+                DEFAULT_REQUEST_INTERVAL_SECONDS,
+            )
+        ),
+    )
+    with _request_lock:
+        now = time.monotonic()
+        wait_until = max(
+            _rate_limit_blocked_until,
+            _last_request_started_at + interval,
+        )
+        if wait_until > now:
+            time.sleep(wait_until - now)
+        _last_request_started_at = time.monotonic()
+
+
+def block_naver_requests(delay_seconds: float) -> None:
+    global _rate_limit_blocked_until
+    with _request_lock:
+        _rate_limit_blocked_until = max(
+            _rate_limit_blocked_until,
+            time.monotonic() + max(0.0, delay_seconds),
+        )
 
 
 def coordinate(value: Any) -> float | None:
@@ -228,6 +371,8 @@ def normalize_item(
     distance_m = haversine_distance_m(origin, item_coordinate(item))
     normalized = {
         "restaurant_id": restaurant_id(item),
+        "source": "naver_api",
+        "provider": "naver",
         "name": title,
         "food": matched_term,
         "matched_terms": [matched_term],
@@ -256,21 +401,38 @@ def search_restaurants(
     client_secret: str | None = None,
 ) -> list[dict[str, Any]]:
     seen: dict[str, dict[str, Any]] = {}
-    origin = resolve_location_coordinate(location, client_id, client_secret)
-
-    for term in terms:
-        clean_term = str(term).strip()
-        if not clean_term:
-            continue
-
-        query = f"{clean_term} {location}".strip()
-        results = fetch_local_results(
-            query,
-            display=display,
-            client_id=client_id,
-            client_secret=client_secret,
-            sort="comment",
+    try:
+        origin = resolve_location_coordinate(location, client_id, client_secret)
+    except Exception as error:
+        print(
+            f"Naver location lookup skipped for {location!r}: {error}",
+            file=sys.stderr,
         )
+        origin = None
+    clean_terms = list(dict.fromkeys(str(term).strip() for term in terms if str(term).strip()))
+
+    def fetch_term(clean_term: str) -> tuple[str, list[dict[str, Any]]]:
+        query = f"{clean_term} {location}".strip()
+        try:
+            results = fetch_local_results(
+                query,
+                display=display,
+                client_id=client_id,
+                client_secret=client_secret,
+                sort="comment",
+            )
+        except Exception as error:
+            print(
+                f"Naver search skipped for {clean_term!r}: {error}",
+                file=sys.stderr,
+            )
+            results = []
+        return clean_term, results
+
+    # Preference terms are ordered by group support. Keeping this sequential
+    # prevents a burst of simultaneous requests and preserves partial results.
+    for clean_term in clean_terms:
+        matched_term, results = fetch_term(clean_term)
         for index, item in enumerate(results):
             raw_category = str(item.get("category", "")).strip()
             if not is_restaurant_category(raw_category):
@@ -278,7 +440,7 @@ def search_restaurants(
 
             normalized = normalize_item(
                 item,
-                clean_term,
+                matched_term,
                 location,
                 origin=origin,
                 review_rank=index + 1,
@@ -286,8 +448,8 @@ def search_restaurants(
             restaurant_key = normalized["restaurant_id"]
             if restaurant_key in seen:
                 matched_terms = seen[restaurant_key].setdefault("matched_terms", [])
-                if clean_term not in matched_terms:
-                    matched_terms.append(clean_term)
+                if matched_term not in matched_terms:
+                    matched_terms.append(matched_term)
                 previous_rank = seen[restaurant_key].get("review_rank")
                 if previous_rank is None or index + 1 < previous_rank:
                     seen[restaurant_key]["review_rank"] = index + 1
@@ -299,7 +461,12 @@ def search_restaurants(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Fetch Naver local restaurant results")
-    parser.add_argument("--query", required=True, help="Search term or food category")
+    parser.add_argument(
+        "--query",
+        required=True,
+        action="append",
+        help="Search term or food category (repeat for multiple terms)",
+    )
     parser.add_argument("--location", required=True, help="Location keyword")
     parser.add_argument("--display", type=int, default=DEFAULT_DISPLAY, help="Number of results to fetch per query")
     parser.add_argument("--client-id", default=DEFAULT_CLIENT_ID, help="Naver client ID")
@@ -309,7 +476,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = build_parser().parse_args()
-    results = search_restaurants([args.query], args.location, display=args.display, client_id=args.client_id, client_secret=args.client_secret)
+    results = search_restaurants(args.query, args.location, display=args.display, client_id=args.client_id, client_secret=args.client_secret)
     json.dump(results, sys.stdout, ensure_ascii=False)
     return 0
 

@@ -208,6 +208,35 @@
       line-height: 1.45;
     }
 
+    .join-link-url {
+      margin-bottom: 8px;
+      word-break: break-all;
+    }
+
+    .join-link-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 14px;
+      border-radius: 6px;
+      color: white;
+      background: var(--secondary);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .join-link-button:hover {
+      color: white;
+      background: var(--primary-dark);
+    }
+
+    .copy-feedback {
+      min-height: 1.4em;
+      margin-top: 6px;
+      color: var(--text-soft);
+      font-size: 0.85em;
+    }
+
     .danger-btn {
       background: var(--danger);
     }
@@ -1044,10 +1073,17 @@
       }
 
       .join-link {
-        max-height: 2.5em;
-        overflow: hidden;
         font-size: 0.62em;
         line-height: 1.2;
+      }
+
+      .join-link-url {
+        max-height: 2.5em;
+        overflow: hidden;
+      }
+
+      .join-link-button {
+        padding: 6px 9px;
       }
 
       #mobileCount {
@@ -1407,10 +1443,8 @@
 
           <div class="form-group">
             <label>식당 검색</label>
-            <select id="provider">
-              <option value="naver" selected>naver 지역 검색</option>
-              <option value="mock">mock 테스트</option>
-            </select>
+            <input type="hidden" id="provider" value="naver">
+            <div class="field-help">네이버 지역검색 API 결과만 사용합니다.</div>
           </div>
 
           <div class="form-group">
@@ -1534,8 +1568,6 @@
     let participantPoll = null;
     let terminalPoll = null;
     let cliEventCursor = -1;
-    let cliEventQueue = [];
-    let cliQueueRunning = false;
     let userFolderPoll = null;
     let selectedParticipantIds = new Set();
     let activeParticipantIds = new Set();
@@ -1613,6 +1645,7 @@
       const qrCode = document.getElementById('qrCode');
       const joinLink = document.getElementById('joinLink');
       qrCode.innerHTML = '';
+      joinLink.innerHTML = '';
 
       if (!joinUrl) {
         panel.style.display = 'none';
@@ -1620,11 +1653,62 @@
       }
 
       panel.style.display = 'block';
-      joinLink.innerHTML = `<a href="${joinUrl}" target="_blank" rel="noopener">${joinUrl}</a>`;
+      const urlText = document.createElement('div');
+      urlText.className = 'join-link-url';
+      urlText.textContent = joinUrl;
+
+      const linkButton = document.createElement('a');
+      linkButton.className = 'join-link-button';
+      linkButton.href = joinUrl;
+      linkButton.target = '_blank';
+      linkButton.rel = 'noopener';
+      linkButton.textContent = '📋 모바일 접속 링크 열기';
+
+      const copyFeedback = document.createElement('div');
+      copyFeedback.className = 'copy-feedback';
+      copyFeedback.setAttribute('aria-live', 'polite');
+
+      linkButton.addEventListener('click', () => {
+        copyTextToClipboard(joinUrl).then(copied => {
+          copyFeedback.textContent = copied
+            ? '링크가 클립보드에 복사되었습니다.'
+            : '링크를 열었습니다. 클립보드 복사는 브라우저에서 허용되지 않았습니다.';
+        });
+      });
+
+      joinLink.append(urlText, linkButton, copyFeedback);
       if (window.QRCode) {
         new QRCode(qrCode, {text: joinUrl, width: 180, height: 180});
       } else {
         qrCode.textContent = 'QR 라이브러리를 불러오지 못했습니다';
+      }
+    }
+
+    async function copyTextToClipboard(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(text);
+          return true;
+        } catch (e) {
+          console.warn('Clipboard API 복사 실패:', e);
+        }
+      }
+
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.select();
+      textarea.setSelectionRange(0, textarea.value.length);
+      try {
+        return document.execCommand('copy');
+      } catch (e) {
+        console.warn('Fallback 클립보드 복사 실패:', e);
+        return false;
+      } finally {
+        textarea.remove();
       }
     }
 
@@ -1803,22 +1887,7 @@
     }
 
     function queueTerminalEvents(events) {
-      cliEventQueue.push(...events);
-      if (!cliQueueRunning) {
-        drainTerminalQueue();
-      }
-    }
-
-    function drainTerminalQueue() {
-      const event = cliEventQueue.shift();
-      if (!event) {
-        cliQueueRunning = false;
-        return;
-      }
-      cliQueueRunning = true;
-      appendTerminalEvent(event);
-      const delay = event.type === 'command' ? 250 : 20;
-      setTimeout(drainTerminalQueue, delay);
+      events.forEach(appendTerminalEvent);
     }
 
     async function pollCliEvents() {

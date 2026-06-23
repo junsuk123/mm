@@ -1,0 +1,79 @@
+{
+  "recommendation_id": "20260623T211917474221_db4ba1a2",
+  "participant_id": "U0004",
+  "session_id": "db4ba1a2",
+  "group_id": 2,
+  "recommended_at": "2026-06-23T21:19:17.474213",
+  "provider": "naver",
+  "recommendations": [
+    {
+      "restaurant_id": "4dbffb095fcd6887",
+      "source": "naver_api",
+      "provider": "naver",
+      "name": "멘츠루 어린이대공원점",
+      "food": "일식",
+      "matched_terms": [
+        "일식"
+      ],
+      "category": "일식",
+      "category_group": "음식점",
+      "sub_category": "일본식라면",
+      "raw_category": "음식점>일식>일본식라면",
+      "location": "세종대학교",
+      "address": "서울특별시 광진구 화양동 220 1층",
+      "roadAddress": "서울특별시 광진구 광나루로 394 1층",
+      "link": "https://www.instagram.com/menchuru_grandpark",
+      "mapx": "1270734369",
+      "mapy": "375472750",
+      "distance_m": 468,
+      "walking_minutes": 8,
+      "review_rank": 3,
+      "subcategory": "",
+      "score": 0.5,
+      "support_count": 5,
+      "required_support_count": 3,
+      "member_count": 5,
+      "member_scores": [
+        {
+          "user_id": "U0003",
+          "score": 0.5,
+          "category_match": true,
+          "food_match": false,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0004",
+          "score": 0.5,
+          "category_match": true,
+          "food_match": false,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0007",
+          "score": 0.5,
+          "category_match": true,
+          "food_match": false,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0008",
+          "score": 0.5,
+          "category_match": true,
+          "food_match": false,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0011",
+          "score": 0.5,
+          "category_match": true,
+          "food_match": false,
+          "recent_match": false
+        }
+      ],
+      "reason": "5명 중 5명의 개인 선호를 반영한 평균 만족도"
+    }
+  ],
+  "feedback": {
+    "status": "pending"
+  }
+}

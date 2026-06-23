@@ -10,9 +10,12 @@ import tempfile
 import time
 from pathlib import Path
 
+from PIL import Image
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SCREENSHOT_DIR = ROOT / "docs" / "screenshots"
+CROPPED_SCREENSHOT_DIR = SCREENSHOT_DIR / "crops"
 CHROME = shutil.which("google-chrome") or shutil.which("chromium")
 
 
@@ -61,6 +64,79 @@ def replace_dom_ready(html: str, injection: str) -> str:
         needle,
         "      loadUserFolders();\n" + injection + "\n    });",
     )
+
+
+def crop_screenshot(
+    source_path: Path,
+    output_path: Path,
+    box: tuple[int, int, int, int],
+) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with Image.open(source_path) as source:
+        left, top, right, bottom = box
+        if not (
+            0 <= left < right <= source.width
+            and 0 <= top < bottom <= source.height
+        ):
+            raise ValueError(
+                f"Invalid crop {box} for {source_path.name} "
+                f"({source.width}x{source.height})"
+            )
+        source.crop(box).save(output_path, optimize=True)
+
+
+def create_feature_crops() -> None:
+    pc_source = SCREENSHOT_DIR / "pc-dashboard.png"
+    pc_crops = {
+        "pc-session-settings.png": (8, 53, 432, 524),
+        "pc-mobile-qr-link.png": (8, 523, 432, 905),
+        "pc-participants-results.png": (440, 53, 934, 905),
+        "pc-cli-process.png": (942, 53, 1592, 185),
+        "pc-group-insight.png": (942, 185, 1592, 905),
+    }
+    for filename, box in pc_crops.items():
+        crop_screenshot(
+            pc_source,
+            CROPPED_SCREENSHOT_DIR / filename,
+            box,
+        )
+
+    mobile_crops = {
+        "mobile-user-meal.png": (
+            "mobile-01-entry.png",
+            (8, 61, 480, 143),
+        ),
+        "mobile-category-selection.png": (
+            "mobile-01-entry.png",
+            (8, 151, 480, 542),
+        ),
+        "mobile-food-selection.png": (
+            "mobile-02-recent-food.png",
+            (8, 151, 480, 486),
+        ),
+        "mobile-preference-and-submit.png": (
+            "mobile-07-ready.png",
+            (8, 151, 480, 899),
+        ),
+        "mobile-previous-feedback.png": (
+            "mobile-09-previous-feedback.png",
+            (25, 370, 475, 542),
+        ),
+        "mobile-final-recommendation.png": (
+            "mobile-10-result.png",
+            (25, 315, 475, 600),
+        ),
+        "mobile-naver-route.png": (
+            "mobile-11-naver-route.png",
+            (0, 0, 480, 820),
+        ),
+    }
+    for filename, (source_name, box) in mobile_crops.items():
+        crop_screenshot(
+            SCREENSHOT_DIR / source_name,
+            CROPPED_SCREENSHOT_DIR / filename,
+            box,
+        )
 
 
 def qr_preview_svg() -> str:
@@ -115,26 +191,26 @@ def build_admin_preview() -> str:
     members = [[0, 1, 4, 5, 8, 9], [2, 3, 6, 7]]
     restaurants = [
         {
-            "name": "후문 카페",
-            "food": "김치볶음밥",
-            "category": "양식",
-            "score": 0.8,
-            "distance_m": 1301,
-            "walking_minutes": 21,
+            "name": "숙성부심 군자본점",
+            "food": "구이/고기류",
+            "category": "한식",
+            "score": 0.667,
+            "distance_m": 415,
+            "walking_minutes": 7,
             "review_rank": 1,
-            "matched_terms": ["김치볶음밥"],
-            "reason": "matched preferred category 양식; matched preferred food 김치볶음밥",
+            "matched_terms": ["한식", "구이/고기류"],
+            "reason": "6명 중 5명의 개인 선호를 반영한 평균 만족도",
         },
         {
-            "name": "위아더퓨쳐",
-            "food": "크림파스타",
-            "category": "양식",
-            "score": 0.8,
-            "distance_m": 725,
-            "walking_minutes": 12,
-            "review_rank": 2,
-            "matched_terms": ["크림파스타"],
-            "reason": "matched preferred category 양식; matched preferred food 크림파스타",
+            "name": "마루토모",
+            "food": "면류",
+            "category": "일식",
+            "score": 0.68,
+            "distance_m": 520,
+            "walking_minutes": 9,
+            "review_rank": 1,
+            "matched_terms": ["일식", "면류"],
+            "reason": "4명 중 4명의 개인 선호를 반영한 평균 만족도",
         },
     ]
     groups = []
@@ -167,9 +243,8 @@ def build_admin_preview() -> str:
       document.getElementById('sessionStatus').textContent = '✅ 세션 생성됨 · 2개 그룹 · 전체 10명';
       document.getElementById('sessionId').style.display = 'block';
       document.getElementById('sessionId').textContent = '세션 ID: demo-docs';
-      document.getElementById('qrPanel').style.display = 'block';
+      renderQrPanel('https://example.trycloudflare.com/join/demo-docs');
       document.getElementById('qrCode').innerHTML = {json.dumps(qr_preview_svg(), ensure_ascii=False)};
-      document.getElementById('joinLink').textContent = 'https://example.trycloudflare.com/join/demo-docs';
       document.getElementById('userFolders').innerHTML = {json.dumps(folders, ensure_ascii=False)};
       updateParticipantsList();
       renderRecommendationGroups({json.dumps(groups, ensure_ascii=False)});
@@ -269,7 +344,7 @@ def mobile_stage_script(stage: str) -> str:
           state.likeHigh = ['일식', '중식'];
           state.likeFoods = {
             '일식': ['초밥/회류', '면류'],
-            '중식': ['면류', '밥류']
+            '중식': ['면/밥류', '볶음류']
           };
           currentStep = 5;
           render();
@@ -279,7 +354,7 @@ def mobile_stage_script(stage: str) -> str:
           state.likeHigh = ['일식', '중식'];
           state.likeFoods = {
             '일식': ['초밥/회류', '면류'],
-            '중식': ['면류', '밥류']
+            '중식': ['면/밥류', '볶음류']
           };
           currentStep = 5;
           render();
@@ -294,7 +369,7 @@ def mobile_stage_script(stage: str) -> str:
             recommendation_id: 'previous-demo',
             recommendations: [{
               name: '마루토모',
-              food: '우동',
+              food: '면류',
               category: '일식',
               address: '서울 광진구 군자로'
             }]
@@ -306,7 +381,7 @@ def mobile_stage_script(stage: str) -> str:
           state.likeHigh = ['일식', '중식'];
           state.likeFoods = {
             '일식': ['초밥/회류', '면류'],
-            '중식': ['면류', '밥류']
+            '중식': ['면/밥류', '볶음류']
           };
           currentStep = 5;
           render();
@@ -314,7 +389,7 @@ def mobile_stage_script(stage: str) -> str:
             recommendation_id: 'current-demo',
             recommendations: [{
               name: '마루토모',
-              food: '우동',
+              food: '면류',
               category: '일식',
               address: '서울 광진구 군자로',
               mapx: '1270720000',
@@ -693,7 +768,9 @@ def main() -> None:
                 1000,
             )
 
+    create_feature_crops()
     print(f"Captured documentation screenshots in {SCREENSHOT_DIR}")
+    print(f"Captured feature crops in {CROPPED_SCREENSHOT_DIR}")
 
 
 if __name__ == "__main__":

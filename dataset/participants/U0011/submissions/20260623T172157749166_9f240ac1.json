@@ -1,0 +1,36 @@
+{
+  "participant_id": "U0011",
+  "user_id": "황가연",
+  "auto_generated_name": false,
+  "source": "mobile",
+  "created_at": "2026-06-23T17:21:57.748297",
+  "updated_at": "2026-06-23T17:21:57.748297",
+  "preferences": {
+    "like": {
+      "high": [
+        "한식",
+        "일식"
+      ],
+      "low": [
+        "한식|밥/정식류",
+        "한식|국물/탕류",
+        "일식|밥/덮밥류",
+        "일식|초밥/회류"
+      ]
+    },
+    "recent": {
+      "high": [
+        "분식"
+      ],
+      "low": [
+        "분식|떡볶이류"
+      ]
+    }
+  },
+  "session_id": "9f240ac1",
+  "submitted_at": "2026-06-23T17:21:57.748297",
+  "meal_data": {
+    "date": "2026-06-23",
+    "meal_type": "dinner"
+  }
+}

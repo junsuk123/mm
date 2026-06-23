@@ -29,11 +29,9 @@ add_tmp_file() {
 web_step() {
   command_text=$1
   output_text=$2
-  if [ -n "${MM_STEP_DELAY_SEC:-}" ]; then
+  if [ -n "${MM_STEP_TRACE:-}" ]; then
     printf '[cmd] %s\n' "$command_text" >&2
-    sleep "$MM_STEP_DELAY_SEC"
     printf '[out] %s\n' "$output_text" >&2
-    sleep "$MM_STEP_DELAY_SEC"
   fi
 }
 
@@ -401,14 +399,7 @@ emit_demo_prompt_line() {
   prompt_message=$1
   value_text=$2
   if [ -n "$value_text" ]; then
-    printf '%s ' "$prompt_message" >&2
-    # Simulate human typing for the value text if awk is available, else print with short pause
-    if command -v awk >/dev/null 2>&1; then
-      printf '%s' "$value_text" | awk '{ for(i=1;i<=length;i++){printf "%s",substr($0,i,1); fflush(); system("sleep 0.05") } print "" }' >&2
-    else
-      sleep 0.2
-      printf '%s\n' "$value_text" >&2
-    fi
+    printf '%s %s\n' "$prompt_message" "$value_text" >&2
   else
     printf '%s\n' "$prompt_message" >&2
   fi
@@ -421,8 +412,6 @@ emit_demo_selection_trace() {
 
   printf '%s\n' "Select menu categories by number:" >&2
   show_numbered_options_file "$options_file"
-  # small pause so the option list can be scanned
-  sleep 0.35
   choice_numbers=$(resolve_choice_numbers_from_options_file "$options_file" "$selected_json")
   emit_demo_prompt_line "$prompt_message" "$choice_numbers"
 }
@@ -474,8 +463,6 @@ run_demo_session() {
     printf '%s\n' "Collecting preferences for $user_id" >&2
     emit_demo_category_group_trace like "$participant_json"
     emit_demo_category_group_trace recent "$participant_json"
-    # small pause between participants to mimic human pacing
-    sleep 0.65
   done
 
   PARTICIPANT_COUNT=$participant_count
@@ -509,12 +496,23 @@ build_group_profile_file() {
       .participants
       | to_entries
       | map(select((.key % $group_count) + 1 == $group_index))
-      | map(.value.preferences | {like: (.like | normalize_levels), recent: (.recent | normalize_levels)})
-      | reduce .[] as $p (
-          {like_high: [], like_low: [], recent: []};
-          .like_high += ($p.like.high | map(leaf))
-          | .like_low += ($p.like.low | map(leaf))
-          | .recent += ($p.recent.low | map(leaf))
+      | map({
+          user_id: .value.user_id,
+          preferences: (
+            .value.preferences
+            | {like: (.like | normalize_levels), recent: (.recent | normalize_levels)}
+          )
+        })
+      | map(. + {
+          like_high: (.preferences.like.high | map(leaf) | unique),
+          like_low: (.preferences.like.low | map(leaf) | unique),
+          recent: (.preferences.recent.low | map(leaf) | unique)
+        }) as $members
+      | reduce $members[] as $p (
+          {like_high: [], like_low: [], recent: [], member_preferences: $members};
+          .like_high += $p.like_high
+          | .like_low += $p.like_low
+          | .recent += $p.recent
         )
       | .positive = ((.like_high + .like_low) | unique)
       | .like_high |= unique
@@ -547,12 +545,28 @@ build_group_profile_file_from_members() {
         };
       .participants
       | map(select(.user_id as $user_id | ($members | index($user_id))))
-      | map(.preferences | {like: (.like | normalize_levels), recent: (.recent | normalize_levels)})
-      | reduce .[] as $p (
-          {like_high: [], like_low: [], recent: []};
-          .like_high += ($p.like.high | map(leaf))
-          | .like_low += ($p.like.low | map(leaf))
-          | .recent += ($p.recent.low | map(leaf))
+      | map({
+          user_id,
+          preferences: (
+            .preferences
+            | {like: (.like | normalize_levels), recent: (.recent | normalize_levels)}
+          )
+        })
+      | map(. + {
+          like_high: (.preferences.like.high | map(leaf) | unique),
+          like_low: (.preferences.like.low | map(leaf) | unique),
+          recent: (.preferences.recent.low | map(leaf) | unique)
+        }) as $member_preferences
+      | reduce $member_preferences[] as $p (
+          {
+            like_high: [],
+            like_low: [],
+            recent: [],
+            member_preferences: $member_preferences
+          };
+          .like_high += $p.like_high
+          | .like_low += $p.like_low
+          | .recent += $p.recent
         )
       | .positive = ((.like_high + .like_low) | unique)
       | .like_high |= unique
@@ -599,34 +613,74 @@ recommend_from_profile_file() {
   add_tmp_file "$terms_file"
   : > "$candidate_file"
 
-  jq -r '.positive | unique | .[]' "$profile_file" > "$terms_file"
+  max_search_terms=${MM_NAVER_MAX_SEARCH_TERMS:-12}
+  jq -r \
+    --argjson max_terms "$max_search_terms" '
+      def members:
+        if ((.member_preferences // []) | length) > 0
+        then .member_preferences
+        else [{
+          like_high: (.like_high // []),
+          like_low: (.like_low // [])
+        }]
+        end;
+      if ((.fallback_search_terms // []) | length) > 0 then
+        .fallback_search_terms[]
+      else
+        [
+          members[] as $member
+          | ($member.like_high[]? | {term: ., priority: 0}),
+            ($member.like_low[]? | {term: ., priority: 1})
+        ]
+        | group_by(.term)
+        | map({
+            term: .[0].term,
+            priority: (map(.priority) | min),
+            support: length
+          })
+        | sort_by(.priority, -.support, .term)
+        | .[:$max_terms]
+        | .[].term
+      end
+    ' "$profile_file" > "$terms_file"
   seen_ids='|'
 
-  while IFS= read -r term; do
-    [ -n "$term" ] || continue
-    term_result_file=$(mktemp "${TMPDIR:-/tmp}/recommend-term.XXXXXX")
+  if [ "$provider_name" = naver ] && [ -s "$terms_file" ]; then
+    term_result_file=$(mktemp "${TMPDIR:-/tmp}/recommend-terms-result.XXXXXX")
     restaurants_file=$(mktemp "${TMPDIR:-/tmp}/recommend-restaurants.XXXXXX")
     add_tmp_file "$term_result_file"
     add_tmp_file "$restaurants_file"
-    if provider_get_restaurants_by_food "$provider_name" "$term" "$location" > "$term_result_file"; then
+    if provider_get_restaurants_by_terms_file "$provider_name" "$terms_file" "$location" > "$term_result_file"; then
       jq -c '.[]' "$term_result_file" > "$restaurants_file"
       while IFS= read -r restaurant; do
         [ -n "$restaurant" ] || continue
-        restaurant_id=$(printf '%s' "$restaurant" | jq -r '.restaurant_id')
-        case $seen_ids in
-          *"|$restaurant_id|"*)
-            ;;
-          *)
-            seen_ids="$seen_ids$restaurant_id|"
-            printf '%s\n' "$restaurant" >> "$candidate_file"
-            ;;
-        esac
+        printf '%s\n' "$restaurant" >> "$candidate_file"
       done < "$restaurants_file"
     fi
-    if [ "$provider_name" = naver ]; then
-      sleep "${MM_NAVER_REQUEST_DELAY_SEC:-0.25}"
-    fi
-  done < "$terms_file"
+  else
+    while IFS= read -r term; do
+      [ -n "$term" ] || continue
+      term_result_file=$(mktemp "${TMPDIR:-/tmp}/recommend-term.XXXXXX")
+      restaurants_file=$(mktemp "${TMPDIR:-/tmp}/recommend-restaurants.XXXXXX")
+      add_tmp_file "$term_result_file"
+      add_tmp_file "$restaurants_file"
+      if provider_get_restaurants_by_food "$provider_name" "$term" "$location" > "$term_result_file"; then
+        jq -c '.[]' "$term_result_file" > "$restaurants_file"
+        while IFS= read -r restaurant; do
+          [ -n "$restaurant" ] || continue
+          restaurant_id=$(printf '%s' "$restaurant" | jq -r '.restaurant_id')
+          case $seen_ids in
+            *"|$restaurant_id|"*)
+              ;;
+            *)
+              seen_ids="$seen_ids$restaurant_id|"
+              printf '%s\n' "$restaurant" >> "$candidate_file"
+              ;;
+          esac
+        done < "$restaurants_file"
+      fi
+    done < "$terms_file"
+  fi
 
   jq -s \
     --slurpfile profile "$profile_file" \
@@ -647,7 +701,29 @@ recommend_from_profile_file() {
           and ((.address // "") == ($r.roadAddress // $r.address // ""))
         )
       );
-    def is_recent($r; $p):
+    def food_matches($r; $p):
+      (
+        (($r.food // "") != "")
+        and has($p.like_low; $r.food)
+      )
+      or (
+        (($r.subcategory // "") != "")
+        and has($p.like_low; $r.subcategory)
+      )
+      or any(
+        $r.matched_terms[]?;
+        . as $term
+        | (($term // "") != "") and has($p.like_low; $term)
+      );
+    def category_matches($r; $p):
+      has($p.like_high; ($r.category // ""))
+      or has($p.like_high; ($r.category_group // ""))
+      or any(
+        $r.matched_terms[]?;
+        . as $term
+        | (($term // "") != "") and has($p.like_high; $term)
+      );
+    def recently_ate($r; $p):
       (
         (($r.food // "") != "")
         and has($p.recent; $r.food)
@@ -661,19 +737,66 @@ recommend_from_profile_file() {
         . as $term
         | (($term // "") != "") and has($p.recent; $term)
       );
-    def score($r; $p):
-      (if has($p.like_high; $r.category) then 0.5 else 0 end)
-      + (if has($p.like_low; $r.food) then 0.3 else 0 end);
-    def reason($r; $p):
+    def members($p):
+      if (($p.member_preferences // []) | length) > 0
+      then $p.member_preferences
+      else [{
+        user_id: "",
+        like_high: ($p.like_high // []),
+        like_low: ($p.like_low // []),
+        recent: ($p.recent // [])
+      }]
+      end;
+    def member_score($r; $member):
+      (category_matches($r; $member)) as $category_match
+      | (
+          (if $category_match then 0.5 else 0 end)
+          + (
+              if $category_match and food_matches($r; $member)
+              then 0.3
+              else 0
+              end
+            )
+          - (if recently_ate($r; $member) then 0.4 else 0 end)
+        )
+      | if . < 0 then 0 else . end;
+    def score_details($r; $p):
       [
-        (if has($p.like_high; $r.category) then "matched preferred category \($r.category)" else empty end),
-        (if has($p.like_low; $r.food) then "matched preferred food \($r.food)" else empty end)
-      ] as $parts
-      | if ($parts | length) > 0 then ($parts | join("; ")) else "selected as the best available candidate from the search results" end;
+        members($p)[] as $member
+        | {
+            user_id: $member.user_id,
+            score: member_score($r; $member),
+            category_match: category_matches($r; $member),
+            food_match: food_matches($r; $member),
+            recent_match: recently_ate($r; $member)
+          }
+      ] as $scores
+      | {
+          member_scores: $scores,
+          member_count: ($scores | length),
+          support_count: ([$scores[] | select(.score > 0)] | length),
+          required_support_count: (
+            if ($scores | length) <= 1
+            then 1
+            else (($scores | length) / 2 | ceil)
+            end
+          ),
+          score: (
+            if ($scores | length) == 0
+            then 0
+            else ($scores | map(.score) | add) / ($scores | length)
+            end
+          )
+        };
+    def reason($details):
+      if $details.support_count == 0 then
+        "그룹 구성원의 개인 선호와 일치하는 항목이 없어 검색 후보 중 선택"
+      else
+        "\($details.member_count)명 중 \($details.support_count)명의 개인 선호를 반영한 평균 만족도"
+      end;
 
     map(
       select(is_excluded(.) | not)
-      | select(is_recent(.; $profile[0]) | not)
     ) as $eligible
     | (
         $eligible
@@ -695,11 +818,25 @@ recommend_from_profile_file() {
           )
       ) as $strict
     | (if ($strict | length) > 0 then $strict else $eligible end)
-    | map(. + {
-      score: ((score(.; $profile[0]) * 1000 | round) / 1000),
-      reason: reason(.; $profile[0])
-    })
-    | sort_by(-.score)
+    | map(
+        . as $restaurant
+        | score_details($restaurant; $profile[0]) as $details
+        | . + {
+            score: (($details.score * 1000 | round) / 1000),
+            support_count: $details.support_count,
+            required_support_count: $details.required_support_count,
+            member_count: $details.member_count,
+            member_scores: $details.member_scores,
+            reason: reason($details)
+          }
+      )
+    | map(select(.support_count >= .required_support_count))
+    | sort_by(
+        -.score,
+        -.support_count,
+        (.walking_minutes // 999999),
+        (.review_rank // 999999)
+      )
     | .[:1]
   ' "$candidate_file" > "$result_file"
 
@@ -707,7 +844,7 @@ recommend_from_profile_file() {
     fallback_profile_file=$(mktemp "${TMPDIR:-/tmp}/recommend-fallback-profile.XXXXXX")
     add_tmp_file "$fallback_profile_file"
     if [ "$provider_name" = naver ]; then
-      jq '.positive = ["음식점", "맛집"]' "$profile_file" > "$fallback_profile_file"
+      jq '.fallback_search_terms = ["음식점", "맛집"]' "$profile_file" > "$fallback_profile_file"
     else
       jq '.positive = (.like_high | unique)' "$profile_file" > "$fallback_profile_file"
     fi

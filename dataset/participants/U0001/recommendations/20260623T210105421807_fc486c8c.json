@@ -1,0 +1,89 @@
+{
+  "recommendation_id": "20260623T210105421807_fc486c8c",
+  "participant_id": "U0001",
+  "session_id": "fc486c8c",
+  "group_id": 1,
+  "recommended_at": "2026-06-23T21:01:05.421803",
+  "provider": "naver",
+  "recommendations": [
+    {
+      "restaurant_id": "7c31f8c1fc025f22",
+      "source": "naver_api",
+      "provider": "naver",
+      "name": "숙성부심 군자본점",
+      "food": "김치찌개",
+      "matched_terms": [
+        "김치찌개",
+        "된장찌개",
+        "비빔밥",
+        "삼겹살",
+        "한식"
+      ],
+      "category": "한식",
+      "category_group": "한식",
+      "sub_category": "돼지고기구이",
+      "raw_category": "한식>돼지고기구이",
+      "location": "세종대학교",
+      "address": "서울특별시 광진구 군자동 2-51 1층",
+      "roadAddress": "서울특별시 광진구 능동로 267 1층",
+      "link": "https://www.instagram.com/sooksungboosim?igsh=MWU1aGZyeTJscjVhOQ==",
+      "mapx": "1270774430",
+      "mapy": "375539087",
+      "distance_m": 415,
+      "walking_minutes": 7,
+      "review_rank": 1,
+      "subcategory": "",
+      "score": 0.533,
+      "support_count": 4,
+      "member_count": 6,
+      "member_scores": [
+        {
+          "user_id": "U0001",
+          "score": 0.8,
+          "category_match": true,
+          "food_match": true,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0002",
+          "score": 0.8,
+          "category_match": true,
+          "food_match": true,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0005",
+          "score": 0,
+          "category_match": false,
+          "food_match": false,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0006",
+          "score": 0,
+          "category_match": false,
+          "food_match": false,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0009",
+          "score": 0.8,
+          "category_match": true,
+          "food_match": true,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0010",
+          "score": 0.8,
+          "category_match": true,
+          "food_match": true,
+          "recent_match": false
+        }
+      ],
+      "reason": "6명 중 4명의 개인 선호를 반영한 평균 만족도"
+    }
+  ],
+  "feedback": {
+    "status": "pending"
+  }
+}

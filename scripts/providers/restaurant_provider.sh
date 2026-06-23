@@ -39,6 +39,8 @@ provider_get_restaurants_by_food() {
             or ((.name // "") | contains($term))
           )
           | . + {
+              source: "mock_dataset",
+              provider: "mock",
               matched_terms: ([.matched_terms[]?] + [$term] | unique),
               address: (.address // .location // $location),
               roadAddress: (.roadAddress // .address // .location // $location),
@@ -63,12 +65,15 @@ provider_get_restaurants_by_food() {
       naver_get_restaurants_by_food "$food_name" "$location" |
         jq --slurpfile menu "$PROJECT_ROOT/dataset/menu_categories.json" --arg term "$food_name" '
           def selected_main:
-            [
-              $menu[0]
-              | to_entries[]
-              | select(.value | index($term))
-              | .key
-            ][0] // "";
+            if ($menu[0] | has($term)) then $term
+            else
+              [
+                $menu[0]
+                | to_entries[]
+                | select(.value | index($term))
+                | .key
+              ][0] // ""
+            end;
           map(
             . + {
               subcategory: (
@@ -83,6 +88,51 @@ provider_get_restaurants_by_food() {
       ;;
     *)
       printf '%s\n' "Unknown provider: $provider_name (use naver)" >&2
+      return 1
+      ;;
+  esac
+}
+
+provider_get_restaurants_by_terms_file() {
+  provider_name=$1
+  terms_file=$2
+  location=$3
+
+  case $provider_name in
+    naver)
+      naver_get_restaurants_by_terms_file "$terms_file" "$location" |
+        jq --slurpfile menu "$PROJECT_ROOT/dataset/menu_categories.json" '
+          map(
+            (
+              .matched_terms // [.food]
+              | map(. as $term | select($menu[0] | has($term)))
+              | first // ""
+            ) as $matched_main
+            | .food as $term
+            | (
+                [
+                  $menu[0]
+                  | to_entries[]
+                  | select(.value | index($term))
+                  | .key
+                ][0] // ""
+              ) as $selected_main
+            | . + {
+                subcategory: (
+                  if $selected_main != "" then $term else (.subcategory // "") end
+                ),
+                category: (
+                  if $matched_main != "" then $matched_main
+                  elif $selected_main != "" then $selected_main
+                  else .category
+                  end
+                )
+              }
+          )
+        '
+      ;;
+    *)
+      printf '%s\n' "Batch restaurant lookup is only supported by the naver provider." >&2
       return 1
       ;;
   esac

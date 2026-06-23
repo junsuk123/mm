@@ -1,0 +1,85 @@
+{
+  "recommendation_id": "20260623T211050276088_684dadca",
+  "participant_id": "U0006",
+  "session_id": "684dadca",
+  "group_id": 1,
+  "recommended_at": "2026-06-23T21:10:50.276079",
+  "provider": "naver",
+  "recommendations": [
+    {
+      "restaurant_id": "d56bb90f68117e7b",
+      "source": "naver_api",
+      "provider": "naver",
+      "name": "박가객주상회",
+      "food": "볶음류",
+      "matched_terms": [
+        "볶음류"
+      ],
+      "category": "중식",
+      "category_group": "술집",
+      "sub_category": "맥주,호프",
+      "raw_category": "술집>맥주,호프",
+      "location": "세종대학교",
+      "address": "서울특별시 성동구 성수동2가 300-39 지하1층",
+      "roadAddress": "서울특별시 성동구 성수일로8길 60 지하1층",
+      "link": "",
+      "mapx": "1270569040",
+      "mapy": "375448859",
+      "distance_m": 1666,
+      "walking_minutes": 27,
+      "review_rank": 1,
+      "subcategory": "볶음류",
+      "score": 0.433,
+      "support_count": 4,
+      "member_count": 6,
+      "member_scores": [
+        {
+          "user_id": "U0001",
+          "score": 0.5,
+          "category_match": true,
+          "food_match": false,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0002",
+          "score": 0.8,
+          "category_match": true,
+          "food_match": true,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0005",
+          "score": 0.5,
+          "category_match": true,
+          "food_match": false,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0006",
+          "score": 0.8,
+          "category_match": true,
+          "food_match": true,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0009",
+          "score": 0,
+          "category_match": false,
+          "food_match": false,
+          "recent_match": false
+        },
+        {
+          "user_id": "U0010",
+          "score": 0,
+          "category_match": false,
+          "food_match": false,
+          "recent_match": false
+        }
+      ],
+      "reason": "6명 중 4명의 개인 선호를 반영한 평균 만족도"
+    }
+  ],
+  "feedback": {
+    "status": "pending"
+  }
+}
