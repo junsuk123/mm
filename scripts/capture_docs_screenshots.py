@@ -388,12 +388,12 @@ def mobile_stage_script(stage: str) -> str:
           currentSessionRecommendation = {
             recommendation_id: 'current-demo',
             recommendations: [{
-              name: '마루토모',
-              food: '면류',
-              category: '일식',
-              address: '서울 광진구 군자로',
-              mapx: '1270720000',
-              mapy: '375470000'
+              name: '숙성부심 군자본점',
+              food: '구이/고기류',
+              category: '한식',
+              address: '서울 광진구 능동로 267',
+              mapx: '1270774430',
+              mapy: '375539087'
             }]
           };
           navigationSettings = {
